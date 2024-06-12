@@ -1,0 +1,280 @@
+{
+  "projects": [
+    {
+      "id": "1",
+      "title": "Digital Transformation Initiative",
+      "type": "SAP0001",
+      "location": "Mbabane",
+      "description": "A comprehensive overhaul of the client's digital infrastructure, including cloud migration, software development, and process automation to enhance efficiency and innovation.",
+      "salary": "Over R200K",
+      "company": {
+        "name": "NewTek Solutions",
+        "description": "NewTek Solutions is a leading technology company specializing in web development and digital solutions. We pride ourselves on delivering high-quality products and services to our clients while fostering a collaborative and innovative work environment.",
+        "contactEmail": "contact@teksolutions.com",
+        "contactPhone": "555-555-5555 "
+      },
+      "resources": [
+        {
+          "role": "Partner/Director",
+          "name": "Tadiwa Mukuvudza",
+          "hours": 40
+        },
+        {
+          "role": "Senior Manager",
+          "name": "Hlubi Mavinjelwa",
+          "hours": 35
+        },
+        {
+          "role": "Assistant Manager",
+          "name": "Athraa Reynard",
+          "hours": 30
+        },
+        {
+          "role": "Associate Director",
+          "name": "Sakhile Nkambule",
+          "hours": 25
+        },
+        {
+          "role": "Senior Assistant",
+          "name": "Mega Gama",
+          "hours": 20
+        },
+        {
+          "role": "Junior Consultant",
+          "name": "Saneliso Surtee",
+          "hours": 15
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Financial Systems Integration",
+      "type": "SAP0002",
+      "location": "Miami, FL",
+      "description": "Integration of the client's disparate financial systems into a unified platform using SAP and Microsoft Dynamics 365, improving data accuracy and financial reporting capabilities.",
+      "salary": "R70K - R80K",
+      "company": {
+        "name": "Veneer Solutions",
+        "description": "Veneer Solutions is a creative agency specializing in digital design and development. Our team is dedicated to pushing the boundaries of creativity and innovation to deliver exceptional results for our clients.",
+        "contactEmail": "contact@loremipsum.com",
+        "contactPhone": "555-555-5555"
+      },
+      "resources": [
+        {
+          "role": "Partner/Director",
+          "name": "Mike Dave",
+          "hours": 40
+        },
+        {
+          "role": "Senior Manager",
+          "name": "Janna Smith",
+          "hours": 35
+        },
+        {
+          "role": "Assistant Manager",
+          "name": "Mariam John",
+          "hours": 30
+        },
+        {
+          "role": "Associate Director",
+          "name": "Annie Bown",
+          "hours": 25
+        },
+        {
+          "role": "Senior Assistant",
+          "name": "Peter Green",
+          "hours": 20
+        },
+        {
+          "role": "Junior Consultant",
+          "name": "Sizo White",
+          "hours": 15
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Cybersecurity Enhancement Program",
+      "type": "SAP0003",
+      "location": "Brooklyn, NY",
+      "description": "Development and implementation of advanced cybersecurity measures to protect the client's digital assets from threats, including penetration testing, vulnerability assessments, and security training.",
+      "salary": "R70K - R80K",
+      "company": {
+        "name": "Dolor Cloud",
+        "description": "Dolor Cloud is a leading technology company specializing in digital solutions for businesses of all sizes. With a focus on innovation and customer satisfaction, we are committed to delivering cutting-edge products and services.",
+        "contactEmail": "contact@dolorsitamet.com",
+        "contactPhone": "555-555-5555"
+      },
+      "resources": [
+        {
+          "role": "Partner/Director",
+          "name": "Andy Dave",
+          "hours": 40
+        },
+        {
+          "role": "Senior Manager",
+          "name": "Trent Smith",
+          "hours": 35
+        },
+        {
+          "role": "Assistant Manager",
+          "name": "Luiz Nunez",
+          "hours": 30
+        },
+        {
+          "role": "Associate Director",
+          "name": "Harvey Bown",
+          "hours": 25
+        },
+        {
+          "role": "Senior Assistant",
+          "name": "Peter white",
+          "hours": 20
+        },
+        {
+          "role": "Junior Consultant",
+          "name": "Ray Phiri",
+          "hours": 15
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Supply Chain Management (SCM) Modernization",
+      "type": "SAP0004",
+      "description": "Modernization of the client's supply chain operations through the implementation of advanced SCM software, enhancing inventory management, logistics, and supplier collaboration.",
+      "location": "Pheonix, AZ",
+      "salary": "R60K - R70K",
+      "company": {
+        "name": "Alpha Elite",
+        "description": "Alpha Elite is a dynamic startup specializing in digital marketing and web development. We are committed to fostering a diverse and inclusive workplace where creativity and innovation thrive.",
+        "contactEmail": "contact@adipisicingelit.com",
+        "contactPhone": "555-555-5555"
+      },
+      "resources": [
+        {
+          "role": "Partner/Director",
+          "name": "Jordan Amadee",
+          "hours": 40
+        },
+        {
+          "role": "Senior Manager",
+          "name": "Alex Arnold",
+          "hours": 35
+        },
+        {
+          "role": "Assistant Manager",
+          "name": "Sipho Shongwe",
+          "hours": 30
+        },
+        {
+          "role": "Associate Director",
+          "name": "Steven Seagal",
+          "hours": 25
+        },
+        {
+          "role": "Senior Assistant",
+          "name": "Rob Rooney",
+          "hours": 20
+        },
+        {
+          "role": "Junior Consultant",
+          "name": "Wayne Parkey",
+          "hours": 15
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Customer Relationship Management (CRM) Optimization",
+      "type": "SAP0005",
+      "location": "Atlanta, GA",
+      "description": "Optimization of the client's CRM processes using Microsoft Dynamics 365, focusing on improving customer engagement, sales tracking, and data analytics capabilities.",
+      "salary": "R70K - R80K",
+      "company": {
+        "name": "Browning Technologies",
+        "description": "Browning Technologies is a rapidly growing technology company specializing in e-commerce solutions. We offer a dynamic and collaborative work environment where employees are encouraged to think creatively and innovate.",
+        "contactEmail": "contact@consecteturadipisicing.com",
+        "contactPhone": "555-555-5555"
+      },
+      "resources": [
+        {
+          "role": "Partner/Director",
+          "name": "Jeremy Cooper",
+          "hours": 40
+        },
+        {
+          "role": "Senior Manager",
+          "name": "Elena Prinston",
+          "hours": 35
+        },
+        {
+          "role": "Assistant Manager",
+          "name": "Frank Casino",
+          "hours": 30
+        },
+        {
+          "role": "Associate Director",
+          "name": "Ian Morgan",
+          "hours": 25
+        },
+        {
+          "role": "Senior Assistant",
+          "name": "Thomas Henderson",
+          "hours": 20
+        },
+        {
+          "role": "Junior Consultant",
+          "name": "George Clooney",
+          "hours": 15
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Data Analytics and Business Intelligence",
+      "type": "SAP0006",
+      "description": "Development of a robust data analytics and business i ntelligence platform to help the client leverage data for strategic decision-making, including dashboard creation and predictive analytics.",
+      "location": "Portland, OR",
+      "salary": "R100K - R110K",
+      "company": {
+        "name": "Port Solutions INC",
+        "description": "Port Solutions is a leading technology company specializing in software development and digital marketing. We are committed to providing our clients with cutting-edge solutions and our employees with a supportive and rewarding work environment.",
+        "contactEmail": "contact@ipsumlorem.com",
+        "contactPhone": "555-555-5555"
+      },
+      "resources": [
+        {
+          "role": "Partner/Director",
+          "name": "Mike Cooper",
+          "hours": 40
+        },
+        {
+          "role": "Senior Manager",
+          "name": "Pette Cech",
+          "hours": 35
+        },
+        {
+          "role": "Assistant Manager",
+          "name": "Michael Hlamini",
+          "hours": 30
+        },
+        {
+          "role": "Associate Director",
+          "name": "Sakhile Nkambule",
+          "hours": 25
+        },
+        {
+          "role": "Senior Assistant",
+          "name": "Brian Meered",
+          "hours": 20
+        },
+        {
+          "role": "Junior Consultant",
+          "name": "Sheldon Dlamini",
+          "hours": 15
+        }
+      ]
+    }
+  ]
+}
