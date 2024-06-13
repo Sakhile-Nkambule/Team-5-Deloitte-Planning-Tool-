@@ -16,15 +16,6 @@ const ProposedResourcespage = ({addProjectSubmit}) => {
         { role: 'Junior Consultant', name: 'Diana White', hours: 15 },
     ];
 
-    const regeneratedResources = [
-        { role: 'Partner/Director', name: 'Sakhile Nkambule', hours: 30 },
-        { role: 'Junior Manager', name: 'Hlubi Mavinjelwa', hours: 40 },
-        { role: 'Senior Manager', name: 'Athraa Reynard', hours: 25 },
-        { role: 'Associate Director', name: 'Tadiwa Mukudzavu', hours: 30 },
-        { role: 'Senior Assistant', name: 'Tana ', hours: 25 },
-        { role: 'Senior Consultant', name: 'Alande', hours: 20 },
-    ];
-
     const [resources, setResources] = useState(initialResources);
 
     const handleResourceChange = (index, field, value) => {
@@ -44,8 +35,9 @@ const ProposedResourcespage = ({addProjectSubmit}) => {
     };
 
     const regenerateResources = () => {
-        
-        setResources(regeneratedResources);
+        // Here you could add logic to regenerate the list of resources
+        // For simplicity, we just reset to the initial list
+        setResources(initialResources);
     };
   return (
     <section className="bg-indigo-50">
