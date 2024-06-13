@@ -275,6 +275,52 @@
           "hours": 15
         }
       ]
+    },
+    {
+      "id": "1da4",
+      "title": "Planning Tool",
+      "type": "SAP0007",
+      "location": "America",
+      "description": "sbfdbsfd",
+      "salary": "Under R50K",
+      "company": {
+        "name": "demo",
+        "description": "bbsjc",
+        "contactEmail": "mk@gmail.com",
+        "contactPhone": "0619008455"
+      },
+      "resources": [
+        {
+          "role": "Partner/Director",
+          "name": "Sakhile Nkambule",
+          "hours": 30
+        },
+        {
+          "role": "Junior Manager",
+          "name": "Hlubi Mavinjelwa",
+          "hours": 40
+        },
+        {
+          "role": "Senior Manager",
+          "name": "Athraa Reynard",
+          "hours": 25
+        },
+        {
+          "role": "Associate Director",
+          "name": "Tadiwa Mukudzavu",
+          "hours": 30
+        },
+        {
+          "role": "Senior Assistant",
+          "name": "Tana ",
+          "hours": 25
+        },
+        {
+          "role": "Senior Consultant",
+          "name": "Alande",
+          "hours": 20
+        }
+      ]
     }
   ]
 }
