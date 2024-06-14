@@ -1,7 +1,7 @@
 import { useParams, useLoaderData, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { FaArrowLeft} from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const EditProjectPage = ({ updateProjectSubmit }) => {
@@ -31,12 +31,33 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     setResources(newResources);
   };
 
+  const handleTaskChange = (resourceIndex, taskIndex, value) => {
+    const newResources = [...resources];
+    newResources[resourceIndex].tasks[taskIndex] = value;
+    setResources(newResources);
+  };
+
   const addResource = () => {
-    setResources([...resources, { role: "", name: "", hours: "" }]);
+    setResources([
+      ...resources,
+      { role: "", name: "", hours: "", tasks: [""] },
+    ]);
   };
 
   const removeResource = (index) => {
     setResources(resources.filter((_, i) => i !== index));
+  };
+
+  const addTask = (resourceIndex) => {
+    const newResources = [...resources];
+    newResources[resourceIndex].tasks.push("");
+    setResources(newResources);
+  };
+
+  const removeTask = (resourceIndex, taskIndex) => {
+    const newResources = [...resources];
+    newResources[resourceIndex].tasks.splice(taskIndex, 1);
+    setResources(newResources);
   };
 
   const submitForm = (e) => {
@@ -59,26 +80,26 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     updateProjectSubmit(updatedProject);
 
     toast.success("Project updated successfully");
-    return navigate(`/projects/${id}`);
+    return navigate(`/projects`);
   };
 
   return (
     <>
-     <section>
+      <section>
         <div className="container m-auto py-6 px-6">
           <Link
             to="/projects"
-            className="text-green-400 hover:text-green-700 flex items-center"
+            className="text-lime-500 hover:text-lime-700 flex items-center"
           >
             <FaArrowLeft className=" mr-1" /> Back to projects
           </Link>
         </div>
       </section>
-      <section className="bg-green-100">
+      <section className="bg-lime-100">
         <div className="container m-auto max-w-2xl py-24">
           <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
             <form onSubmit={submitForm}>
-              <h2 className=" text-green-500 text-3xl text-center font-semibold mb-6">
+              <h2 className=" text-black text-3xl text-center font-semibold mb-6">
                 Edit Project
               </h2>
 
@@ -162,9 +183,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                 </select>
               </div>
 
-              
-
-              <h3 className="text-green-400 text-2xl mb-5">Company Info</h3>
+              <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
 
               <div className="mb-4">
                 <label
@@ -254,92 +273,186 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                 />
               </div>
 
-              <h3 className="text-green-400 text-2xl mb-5">Allocated Resources</h3>
-              {resources.length > 0 ? (
-                <ul>
-                  {resources.map((resource, index) => (
-                    <li key={index} className="mb-4">
-                      <div className="mb-2">
-                        <label
-                          htmlFor={`role-R{index}`}
-                          className="block text-gray-700 font-bold mb-1"
-                        >
-                          Role
-                        </label>
+              <h3 className="text-lime-500 text-2xl mb-5">
+                Allocated Resources
+              </h3>
+              {resources.map((resource, resourceIndex) => (
+                <div key={resourceIndex} className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-lime-500 font-bold">
+                      Resource #{resourceIndex + 1}
+                    </h4>
+                    <button
+                      type="button"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => removeResource(resourceIndex)}
+                    >
+                      Remove Resource
+                    </button>
+                  </div>
+                  <div className="mb-2">
+                    <label
+                      htmlFor={`role-${resourceIndex}`}
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Role
+                    </label>
+                    <input
+                      type="text"
+                      id={`role-${resourceIndex}`}
+                      name={`role-${resourceIndex}`}
+                      className="border rounded w-full py-2 px-3"
+                      placeholder="Role"
+                      value={resource.role}
+                      onChange={(e) =>
+                        handleResourceChange(
+                          resourceIndex,
+                          "role",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label
+                      htmlFor={`name-${resourceIndex}`}
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      id={`name-${resourceIndex}`}
+                      name={`name-${resourceIndex}`}
+                      className="border rounded w-full py-2 px-3"
+                      placeholder="Name"
+                      value={resource.name}
+                      onChange={(e) =>
+                        handleResourceChange(
+                          resourceIndex,
+                          "name",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label
+                      htmlFor={`hours-${resourceIndex}`}
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Hours
+                    </label>
+                    <input
+                      type="text"
+                      id={`hours-${resourceIndex}`}
+                      name={`hours-${resourceIndex}`}
+                      className="border rounded w-full py-2 px-3"
+                      placeholder="Hours"
+                      value={resource.hours}
+                      onChange={(e) =>
+                        handleResourceChange(
+                          resourceIndex,
+                          "hours",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  {/* Tasks */}
+                  <div className="mb-4">
+                    <h5 className="text-gray-700 font-bold mb-2">Tasks</h5>
+                    {resource.tasks.slice(0, 1).map((task, taskIndex) => (
+                      <div key={taskIndex} className="mb-2 flex items-center">
                         <input
                           type="text"
-                          id={`role-R{index}`}
-                          name={`role-R{index}`}
                           className="border rounded w-full py-2 px-3"
-                          value={resource.role}
+                          placeholder="Task"
+                          value={task}
                           onChange={(e) =>
-                            handleResourceChange(index, "role", e.target.value)
+                            handleTaskChange(
+                              resourceIndex,
+                              taskIndex,
+                              e.target.value
+                            )
                           }
                         />
-                      </div>
-                      <div className="mb-2">
-                        <label
-                          htmlFor={`name-R{index}`}
-                          className="block text-gray-700 font-bold mb-1"
+                        <button
+                          type="button"
+                          className="ml-2 bg-red-500 text-white rounded px-2 py-1  hover:text-red-700"
+                          onClick={() => removeTask(resourceIndex, taskIndex)}
                         >
-                          Name
-                        </label>
-                        <input
-                          type="text"
-                          id={`name-R{index}`}
-                          name={`name-R{index}`}
-                          className="border rounded w-full py-2 px-3"
-                          value={resource.name}
-                          onChange={(e) =>
-                            handleResourceChange(index, "name", e.target.value)
-                          }
-                        />
+                          Remove
+                        </button>
                       </div>
-                      <div className="mb-2">
-                        <label
-                          htmlFor={`hours-R{index}`}
-                          className="block text-gray-700 font-bold mb-1"
-                        >
-                          Hours
-                        </label>
-                        <input
-                          type="number"
-                          id={`hours-R{index}`}
-                          name={`hours-R{index}`}
-                          className="border rounded w-full py-2 px-3"
-                          value={resource.hours}
-                          onChange={(e) =>
-                            handleResourceChange(index, "hours", e.target.value)
-                          }
-                        />
-                      </div>
+                    ))}
+                    {resource.tasks.length > 1 && (
                       <button
                         type="button"
-                        className="text-red-500"
-                        onClick={() => removeResource(index)}
+                        className="text-lime-600 hover:text-lime-700"
+                        onClick={() =>
+                          setResources(
+                            resources.map((res, idx) =>
+                              idx === resourceIndex
+                                ? { ...res, showMore: !res.showMore }
+                                : res
+                            )
+                          )
+                        }
                       >
-                        Remove Resource
+                        {resource.showMore ? "Show Less" : "Show More"}
                       </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No proposed resources found.</p>
-              )}
-              <button
-                type="button"
-                className="text-green-400"
-                onClick={addResource}
-              >
-                Add Resource
-              </button>
-
-              <div className="mt-6">
+                    )}
+                    {resource.showMore &&
+                      resource.tasks.slice(1).map((task, taskIndex) => (
+                        <div key={taskIndex} className="mb-2 flex items-center">
+                          <input
+                            type="text"
+                            className="border rounded w-full py-2 px-3"
+                            placeholder="Task"
+                            value={task}
+                            onChange={(e) =>
+                              handleTaskChange(
+                                resourceIndex,
+                                taskIndex + 1,
+                                e.target.value
+                              )
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="bg-red-500 text-white rounded px-2 py-1 hover:text-red-700 ml-2"
+                            onClick={() =>
+                              removeTask(resourceIndex, taskIndex + 1)
+                            }
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="text-blue-600 hover:text-blue-700"
+                    onClick={() => addTask(resourceIndex)}
+                  >
+                    Add Task
+                  </button>
+                </div>
+              ))}
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center mr-2"
+                  onClick={addResource}
+                >
+                  Add Resource
+                </button>
                 <button
                   type="submit"
-                  className="bg-green-500 hover:bg-green-800 text-white font-bold py-2 px-4 rounded"
+                  className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
                 >
-                  Save Changes
+                  Update Project
                 </button>
               </div>
             </form>

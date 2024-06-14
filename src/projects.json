@@ -17,32 +17,62 @@
         {
           "role": "Partner/Director",
           "name": "Tadiwa Mukuvudza",
-          "hours": 40
+          "hours": 40,
+          "tasks": [
+            "Oversee the entire digital transformation project",
+            "Ensure alignment with client's business goals",
+            "Manage high-level client communications"
+          ]
         },
         {
           "role": "Senior Manager",
           "name": "Hlubi Mavinjelwa",
-          "hours": 35
+          "hours": 35,
+          "tasks": [
+            "Lead the software development team",
+            "Coordinate cloud migration activities",
+            "Monitor project milestones and timelines"
+          ]
         },
         {
           "role": "Assistant Manager",
           "name": "Athraa Reynard",
-          "hours": 30
+          "hours": 30,
+          "tasks": [
+            "Assist in process automation efforts",
+            "Manage day-to-day project tasks",
+            "Conduct quality assurance reviews"
+          ]
         },
         {
           "role": "Associate Director",
           "name": "Sakhile Nkambule",
-          "hours": 25
+          "hours": 25,
+          "tasks": [
+            "Support project management and planning",
+            "Engage with stakeholders for feedback",
+            "Report on project progress and outcomes"
+          ]
         },
         {
           "role": "Senior Assistant",
           "name": "Mega Gama",
-          "hours": 20
+          "hours": 20,
+          "tasks": [
+            "Gather and analyze project data",
+            "Prepare project documentation",
+            "Assist in training sessions"
+          ]
         },
         {
           "role": "Junior Consultant",
           "name": "Saneliso Surtee",
-          "hours": 15
+          "hours": 15,
+          "tasks": [
+            "Support software development activities",
+            "Assist in cloud migration tasks",
+            "Perform testing and troubleshooting"
+          ]
         }
       ]
     },
@@ -63,32 +93,62 @@
         {
           "role": "Partner/Director",
           "name": "Mike Dave",
-          "hours": 40
+          "hours": 40,
+          "tasks": [
+            "Oversee financial systems integration project",
+            "Ensure compliance with financial regulations",
+            "Manage high-level client communications"
+          ]
         },
         {
           "role": "Senior Manager",
           "name": "Janna Smith",
-          "hours": 35
+          "hours": 35,
+          "tasks": [
+            "Lead integration team",
+            "Coordinate SAP and Microsoft Dynamics 365 activities",
+            "Monitor project milestones and timelines"
+          ]
         },
         {
           "role": "Assistant Manager",
           "name": "Mariam John",
-          "hours": 30
+          "hours": 30,
+          "tasks": [
+            "Assist in system integration efforts",
+            "Manage day-to-day project tasks",
+            "Conduct quality assurance reviews"
+          ]
         },
         {
           "role": "Associate Director",
           "name": "Annie Bown",
-          "hours": 25
+          "hours": 25,
+          "tasks": [
+            "Support project management and planning",
+            "Engage with stakeholders for feedback",
+            "Report on project progress and outcomes"
+          ]
         },
         {
           "role": "Senior Assistant",
           "name": "Peter Green",
-          "hours": 20
+          "hours": 20,
+          "tasks": [
+            "Gather and analyze project data",
+            "Prepare project documentation",
+            "Assist in training sessions"
+          ]
         },
         {
           "role": "Junior Consultant",
           "name": "Sizo White",
-          "hours": 15
+          "hours": 15,
+          "tasks": [
+            "Support system integration activities",
+            "Assist in testing and troubleshooting",
+            "Perform data entry and validation"
+          ]
         }
       ]
     },
@@ -109,32 +169,62 @@
         {
           "role": "Partner/Director",
           "name": "Andy Dave",
-          "hours": 40
+          "hours": 40,
+          "tasks": [
+            "Oversee cybersecurity enhancement program",
+            "Ensure alignment with client's security goals",
+            "Manage high-level client communications"
+          ]
         },
         {
           "role": "Senior Manager",
           "name": "Trent Smith",
-          "hours": 35
+          "hours": 35,
+          "tasks": [
+            "Lead cybersecurity team",
+            "Coordinate penetration testing and assessments",
+            "Monitor project milestones and timelines"
+          ]
         },
         {
           "role": "Assistant Manager",
           "name": "Luiz Nunez",
-          "hours": 30
+          "hours": 30,
+          "tasks": [
+            "Assist in vulnerability assessments",
+            "Manage day-to-day project tasks",
+            "Conduct quality assurance reviews"
+          ]
         },
         {
           "role": "Associate Director",
           "name": "Harvey Bown",
-          "hours": 25
+          "hours": 25,
+          "tasks": [
+            "Support project management and planning",
+            "Engage with stakeholders for feedback",
+            "Report on project progress and outcomes"
+          ]
         },
         {
           "role": "Senior Assistant",
           "name": "Peter white",
-          "hours": 20
+          "hours": 20,
+          "tasks": [
+            "Gather and analyze security data",
+            "Prepare project documentation",
+            "Assist in training sessions"
+          ]
         },
         {
           "role": "Junior Consultant",
           "name": "Ray Phiri",
-          "hours": 15
+          "hours": 15,
+          "tasks": [
+            "Support cybersecurity activities",
+            "Assist in penetration testing",
+            "Perform security audits"
+          ]
         }
       ]
     },
@@ -155,32 +245,62 @@
         {
           "role": "Partner/Director",
           "name": "Jordan Amadee",
-          "hours": 40
+          "hours": 40,
+          "tasks": [
+            "Oversee SCM modernization project",
+            "Ensure alignment with client's supply chain goals",
+            "Manage high-level client communications"
+          ]
         },
         {
           "role": "Senior Manager",
           "name": "Alex Arnold",
-          "hours": 35
+          "hours": 35,
+          "tasks": [
+            "Lead SCM software implementation team",
+            "Coordinate logistics and inventory management activities",
+            "Monitor project milestones and timelines"
+          ]
         },
         {
           "role": "Assistant Manager",
           "name": "Sipho Shongwe",
-          "hours": 30
+          "hours": 30,
+          "tasks": [
+            "Assist in SCM software implementation",
+            "Manage day-to-day project tasks",
+            "Conduct quality assurance reviews"
+          ]
         },
         {
           "role": "Associate Director",
           "name": "Steven Seagal",
-          "hours": 25
+          "hours": 25,
+          "tasks": [
+            "Support project management and planning",
+            "Engage with stakeholders for feedback",
+            "Report on project progress and outcomes"
+          ]
         },
         {
           "role": "Senior Assistant",
           "name": "Rob Rooney",
-          "hours": 20
+          "hours": 20,
+          "tasks": [
+            "Gather and analyze SCM data",
+            "Prepare project documentation",
+            "Assist in training sessions"
+          ]
         },
         {
           "role": "Junior Consultant",
           "name": "Wayne Parkey",
-          "hours": 15
+          "hours": 15,
+          "tasks": [
+            "Support SCM software implementation",
+            "Assist in logistics and inventory tasks",
+            "Perform data entry and validation"
+          ]
         }
       ]
     },
@@ -201,32 +321,62 @@
         {
           "role": "Partner/Director",
           "name": "Jeremy Cooper",
-          "hours": 40
+          "hours": 40,
+          "tasks": [
+            "Oversee CRM optimization project",
+            "Ensure alignment with client's CRM goals",
+            "Manage high-level client communications"
+          ]
         },
         {
           "role": "Senior Manager",
           "name": "Elena Prinston",
-          "hours": 35
+          "hours": 35,
+          "tasks": [
+            "Lead CRM team",
+            "Coordinate Microsoft Dynamics 365 activities",
+            "Monitor project milestones and timelines"
+          ]
         },
         {
           "role": "Assistant Manager",
           "name": "Frank Casino",
-          "hours": 30
+          "hours": 30,
+          "tasks": [
+            "Assist in CRM optimization efforts",
+            "Manage day-to-day project tasks",
+            "Conduct quality assurance reviews"
+          ]
         },
         {
           "role": "Associate Director",
           "name": "Ian Morgan",
-          "hours": 25
+          "hours": 25,
+          "tasks": [
+            "Support project management and planning",
+            "Engage with stakeholders for feedback",
+            "Report on project progress and outcomes"
+          ]
         },
         {
           "role": "Senior Assistant",
           "name": "Thomas Henderson",
-          "hours": 20
+          "hours": 20,
+          "tasks": [
+            "Gather and analyze CRM data",
+            "Prepare project documentation",
+            "Assist in training sessions"
+          ]
         },
         {
           "role": "Junior Consultant",
           "name": "George Clooney",
-          "hours": 15
+          "hours": 15,
+          "tasks": [
+            "Support CRM activities",
+            "Assist in testing and troubleshooting",
+            "Perform data entry and validation"
+          ]
         }
       ]
     },
@@ -234,7 +384,7 @@
       "id": "6",
       "title": "Data Analytics and Business Intelligence",
       "type": "SAP0006",
-      "description": "Development of a robust data analytics and business i ntelligence platform to help the client leverage data for strategic decision-making, including dashboard creation and predictive analytics.",
+      "description": "Development of a robust data analytics and business intelligence platform to help the client leverage data for strategic decision-making, including dashboard creation and predictive analytics.",
       "location": "Portland, OR",
       "salary": "R100K - R110K",
       "company": {
@@ -247,32 +397,62 @@
         {
           "role": "Partner/Director",
           "name": "Mike Cooper",
-          "hours": 40
+          "hours": 40,
+          "tasks": [
+            "Oversee data analytics and business intelligence project",
+            "Ensure alignment with client's strategic goals",
+            "Manage high-level client communications"
+          ]
         },
         {
           "role": "Senior Manager",
           "name": "Pette Cech",
-          "hours": 35
+          "hours": 35,
+          "tasks": [
+            "Lead data analytics team",
+            "Coordinate dashboard creation and predictive analytics",
+            "Monitor project milestones and timelines"
+          ]
         },
         {
           "role": "Assistant Manager",
           "name": "Michael Hlamini",
-          "hours": 30
+          "hours": 30,
+          "tasks": [
+            "Assist in data analytics efforts",
+            "Manage day-to-day project tasks",
+            "Conduct quality assurance reviews"
+          ]
         },
         {
           "role": "Associate Director",
           "name": "Sakhile Nkambule",
-          "hours": 25
+          "hours": 25,
+          "tasks": [
+            "Support project management and planning",
+            "Engage with stakeholders for feedback",
+            "Report on project progress and outcomes"
+          ]
         },
         {
           "role": "Senior Assistant",
           "name": "Brian Meered",
-          "hours": 20
+          "hours": 20,
+          "tasks": [
+            "Gather and analyze project data",
+            "Prepare project documentation",
+            "Assist in training sessions"
+          ]
         },
         {
           "role": "Junior Consultant",
           "name": "Sheldon Dlamini",
-          "hours": 15
+          "hours": 15,
+          "tasks": [
+            "Support data analytics activities",
+            "Assist in dashboard creation",
+            "Perform data entry and validation"
+          ]
         }
       ]
     }
