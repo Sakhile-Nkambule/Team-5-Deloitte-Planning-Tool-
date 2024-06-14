@@ -10,7 +10,7 @@ const ProjectPage = ({ deleteProject }) => {
   const { id } = useParams();
   const project = useLoaderData();
   const onDeleteClick = (projectId) => {
-    const confirm = window.confirm("Are you sure you want to this project?");
+    const confirm = window.confirm("Are you sure you want to Delete this project?");
 
     if (!confirm) return;
 
@@ -27,14 +27,14 @@ const ProjectPage = ({ deleteProject }) => {
         <div className="container m-auto py-6 px-6">
           <Link
             to="/projects"
-            className="text-green-400 hover:text-green-700 flex items-center"
+            className="text-lime-500 hover:text-lime-700 flex items-center"
           >
             <FaArrowLeft className=" mr-1" /> Back to projects
           </Link>
         </div>
       </section>
 
-      <section className="bg-green-100">
+      <section className="bg-lime-100">
         <div className="container m-auto py-10 px-6">
           <div className="grid grid-cols-1 md:grid-cols-70/30 w-full gap-6">
             <main>
@@ -48,13 +48,13 @@ const ProjectPage = ({ deleteProject }) => {
               </div>
               {/* <!-- project Info --> */}
               <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-                <h3 className="text-green-400 text-lg font-bold mb-6">
+                <h3 className="text-lime-500 text-lg font-bold mb-6">
                   Project Description
                 </h3>
 
                 <p className="mb-4">{project.description}</p>
 
-                <h3 className="text-green-400 text-lg font-bold mb-2">
+                <h3 className="text-lime-500 text-lg font-bold mb-2">
                   Project Budget
                 </h3>
 
@@ -62,7 +62,7 @@ const ProjectPage = ({ deleteProject }) => {
               </div>
               {/* <!-- company Info --> */}
               <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left mt-6">
-                <h3 className="text-green-400 text-lg font-bold mb-2">Company Info</h3>
+                <h3 className="text-lime-500 text-lg font-bold mb-2">Company Info</h3>
                 <div className="text-gray-700 mb-4">{project.company.name}</div>
                 <p className="mb-4">{project.company.description}</p>
                 <h3 className="text-gray-700 mb-4">Contact Email:</h3>
@@ -79,7 +79,7 @@ const ProjectPage = ({ deleteProject }) => {
               <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left mt-6">
               <Link
                   to= "/dashboard"
-                  className="bg-black hover:bg-green-400 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                  className="bg-black hover:bg-lime-500 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                 >
                   View Project Dashboard
                 </Link>
@@ -90,7 +90,7 @@ const ProjectPage = ({ deleteProject }) => {
             <aside>
               {/* Project Resources */}
               <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className=" text-green-400 text-xl font-bold mb-6">
+                <h3 className=" text-lime-400 text-xl font-bold mb-6">
                   Project Resources
                 </h3>
                 <ul>
@@ -109,13 +109,13 @@ const ProjectPage = ({ deleteProject }) => {
                 <h3 className="text-xl font-bold mb-6">Manage Project</h3>
                 <Link
                   to={`/edit-project/${project.id}`}
-                  className="bg-green-500 hover:bg-green-600 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                  className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                 >
                   Edit Project
                 </Link>
                 <button
                   onClick={() => onDeleteClick(project.id)}
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                  className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                 >
                   Delete Project
                 </button>

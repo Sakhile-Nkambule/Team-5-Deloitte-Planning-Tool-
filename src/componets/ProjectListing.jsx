@@ -18,11 +18,11 @@ const ProjectListing = ({project}) => {
               <div className="mb-5">
                 {description}
               </div>
-              <button onClick={()=>setShowFullDescription((prevState)=>(!prevState))} className="text-green-400 mb-5 hover:text-green-600">
+              <button onClick={()=>setShowFullDescription((prevState)=>(!prevState))} className="text-lime-500 mb-5 hover:text-lime-700">
                 {showFullDescription? 'Less': 'More'}
               </button>
 
-              <h3 className="text-green-500 mb-2">{project.salary}</h3>
+              <h3 className="text-lime-500 mb-2">{project.salary}</h3>
 
               <div className="border border-gray-100 mb-5"></div>
 
@@ -33,7 +33,7 @@ const ProjectListing = ({project}) => {
                 </div>
                 <Link
                   to={`/projects/${project.id}`}
-                  className="h-[36px] bg-green-400 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-center text-sm"
+                  className="h-[36px] bg-lime-500 hover:bg-lime-600 text-white px-4 py-2 rounded-lg text-center text-sm"
                 >
                   Read More
                 </Link>
