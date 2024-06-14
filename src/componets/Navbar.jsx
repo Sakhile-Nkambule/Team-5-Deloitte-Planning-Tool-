@@ -15,7 +15,7 @@ const Navbar = () => {
           
               <NavLink 
                 className="flex flex-shrink-0 items-center mr-4"
-                to="/"
+                to="/homepage"
               >
                 <img
                   className="h-10 w-auto"
@@ -29,7 +29,7 @@ const Navbar = () => {
               <div className="md:ml-auto">
                 <div className="flex space-x-2">
                   <NavLink
-                    to="/"
+                    to="/homepage"
                     className={linkClass}
                   >
                     Home
