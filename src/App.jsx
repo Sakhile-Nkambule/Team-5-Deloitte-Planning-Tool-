@@ -10,6 +10,7 @@ import EditProjectPage from './pages/EditProjectPage';
 import ProposedResourcespage from './pages/ProposedResourcespage';
 import DashboardPage from './pages/DashboardPage';
 import { useState } from 'react';
+import LoginPage from './pages/LoginPage';
 const App = () => {
    const [projects, setProjects] = useState([]);
 //   const addProjectSubmit = (newProject) => {
@@ -52,16 +53,20 @@ const App = () => {
   };
 
   const router = createBrowserRouter(createRoutesFromElements(
-  <Route path = '/' element= {<MainLayout/>}>
-  <Route index element= {<Homepage/>}/>
-  <Route path= '/projects' element= {<Projectspage/>}/>
-  <Route path= '/add-project' element= {<AddProjectPage/> }/>
-  <Route path="/proposed-resources" element={<ProposedResourcespage addProjectSubmit={addProjectSubmit} />} />
-  <Route path= '/edit-project/:id' element= {<EditProjectPage updateProjectSubmit={updateProject}/>} loader ={projectLoader}/>
-  <Route path= '/projects/:id' element= {<ProjectPage deleteProject = {deleteProject}/>} loader ={projectLoader}/>
-  <Route path= '/dashboard' element= {<DashboardPage/>}/>
-  <Route path= '*' element= {<NotFoundPage/>}/>
-  </Route>
+    <>
+      <Route path="/" element={<LoginPage />} />
+      <Route element={<MainLayout />}>
+        <Route path="/homepage" element={<Homepage />} />
+        <Route path="/projects" element={<Projectspage />} />
+        <Route path="/add-project" element={<AddProjectPage />} />
+        <Route path="/proposed-resources" element={<ProposedResourcespage addProjectSubmit={addProjectSubmit} />} />
+        <Route path="/edit-project/:id" element={<EditProjectPage updateProjectSubmit={updateProject} />} loader={projectLoader} />
+        <Route path="/projects/:id" element={<ProjectPage deleteProject={deleteProject} />} loader={projectLoader} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </>
+
   ));
   return <RouterProvider router ={router}/>;
 };
