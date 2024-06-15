@@ -18,9 +18,22 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
     },
     { role: "Associate Director", name: "Bob Brown", hours: 25, tasks: [""] },
     { role: "Senior Assistant", name: "Charlie Green", hours: 20, tasks: [""] },
-    { role: "Junior Consultant", name: "Diana White", hours: 15, tasks: [""] },
+    { role: "Senior Consultant", name: "Diana White", hours: 15, tasks: [""] },
   ];
 
+  const regenerateResource = [
+    { role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 35, tasks: [""] },
+    { role: "Senior Manager", name: "Sakhile Nkambule", hours: 30, tasks: [""] },
+    {
+      role: "Assistant Manager",
+      name: "Hlubi Mavinjelwa",
+      hours: 35,
+      tasks: [""],
+    },
+    { role: "Associate Director", name: "Athraa Reynard", hours: 30, tasks: [""] },
+    { role: "Junior Assistant", name: "Allen Harper", hours: 15, tasks: [""] },
+    { role: " Consultant", name: "Jake Harper", hours: 15, tasks: [""] },
+  ];
   const [resources, setResources] = useState(initialResources);
   const [budget, setBudget] = useState(0);
   const [exhaustedBudget, setExhaustedBudget] = useState(0);
@@ -79,7 +92,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
   };
 
   const regenerateResources = () => {
-    setResources(initialResources);
+    setResources(regenerateResource);
   };
 
   return (

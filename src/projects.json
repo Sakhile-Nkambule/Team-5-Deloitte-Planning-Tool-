@@ -6,7 +6,7 @@
       "type": "SAP0001",
       "location": "Mbabane",
       "description": "A comprehensive overhaul of the client's digital infrastructure, including cloud migration, software development, and process automation to enhance efficiency and innovation.",
-      "salary": "Over R200K",
+      "salary": "R200000",
       "company": {
         "name": "NewTek Solutions",
         "description": "NewTek Solutions is a leading technology company specializing in web development and digital solutions. We pride ourselves on delivering high-quality products and services to our clients while fostering a collaborative and innovative work environment.",
@@ -82,7 +82,7 @@
       "type": "SAP0002",
       "location": "Miami, FL",
       "description": "Integration of the client's disparate financial systems into a unified platform using SAP and Microsoft Dynamics 365, improving data accuracy and financial reporting capabilities.",
-      "salary": "R70K - R80K",
+      "salary": "R70000",
       "company": {
         "name": "Veneer Solutions",
         "description": "Veneer Solutions is a creative agency specializing in digital design and development. Our team is dedicated to pushing the boundaries of creativity and innovation to deliver exceptional results for our clients.",
@@ -158,7 +158,7 @@
       "type": "SAP0003",
       "location": "Brooklyn, NY",
       "description": "Development and implementation of advanced cybersecurity measures to protect the client's digital assets from threats, including penetration testing, vulnerability assessments, and security training.",
-      "salary": "R70K - R80K",
+      "salary": "R80000",
       "company": {
         "name": "Dolor Cloud",
         "description": "Dolor Cloud is a leading technology company specializing in digital solutions for businesses of all sizes. With a focus on innovation and customer satisfaction, we are committed to delivering cutting-edge products and services.",
@@ -234,7 +234,7 @@
       "type": "SAP0004",
       "description": "Modernization of the client's supply chain operations through the implementation of advanced SCM software, enhancing inventory management, logistics, and supplier collaboration.",
       "location": "Pheonix, AZ",
-      "salary": "R60K - R70K",
+      "salary": "R60000",
       "company": {
         "name": "Alpha Elite",
         "description": "Alpha Elite is a dynamic startup specializing in digital marketing and web development. We are committed to fostering a diverse and inclusive workplace where creativity and innovation thrive.",
@@ -310,7 +310,7 @@
       "type": "SAP0005",
       "location": "Atlanta, GA",
       "description": "Optimization of the client's CRM processes using Microsoft Dynamics 365, focusing on improving customer engagement, sales tracking, and data analytics capabilities.",
-      "salary": "R70K - R80K",
+      "salary": "R70000",
       "company": {
         "name": "Browning Technologies",
         "description": "Browning Technologies is a rapidly growing technology company specializing in e-commerce solutions. We offer a dynamic and collaborative work environment where employees are encouraged to think creatively and innovate.",
@@ -386,7 +386,7 @@
       "type": "SAP0006",
       "description": "Development of a robust data analytics and business intelligence platform to help the client leverage data for strategic decision-making, including dashboard creation and predictive analytics.",
       "location": "Portland, OR",
-      "salary": "R100K - R110K",
+      "salary": "R100000",
       "company": {
         "name": "Port Solutions INC",
         "description": "Port Solutions is a leading technology company specializing in software development and digital marketing. We are committed to providing our clients with cutting-edge solutions and our employees with a supportive and rewarding work environment.",
