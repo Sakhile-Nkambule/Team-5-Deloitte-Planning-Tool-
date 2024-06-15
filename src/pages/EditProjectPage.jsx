@@ -161,26 +161,16 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                 >
                   Budget
                 </label>
-                <select
+                <textarea
                   id="salary"
                   name="salary"
                   className="border rounded w-full py-2 px-3"
                   required
                   value={salary}
                   onChange={(e) => setSalary(e.target.value)}
-                >
-                  <option value="Under R50K">Under R50K</option>
-                  <option value="R50K - 60K">R50K - R60K</option>
-                  <option value="R60K - 70K">R60K - R70K</option>
-                  <option value="R70K - 80K">R70K - R80K</option>
-                  <option value="R80K - 90K">R80K - R90K</option>
-                  <option value="R90K - R100K">R90K - R100K</option>
-                  <option value="R100K - 125K">R100K - R125K</option>
-                  <option value="R125K - R150K">R125K - R150K</option>
-                  <option value="R150K - 175K">R150K - R175K</option>
-                  <option value="R175K - R200K">R175K - R200K</option>
-                  <option value="Over R200K">Over R200K</option>
-                </select>
+                
+                  ></textarea>
+                
               </div>
 
               <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
