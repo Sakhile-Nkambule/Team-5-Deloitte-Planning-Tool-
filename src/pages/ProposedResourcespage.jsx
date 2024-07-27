@@ -8,40 +8,31 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
   const { newProject } = location.state;
 
   const initialResources = [
-    { role: "Partner/Director", name: "John Doe", hours: 40, tasks: [""] },
-    { role: "Senior Manager", name: "Jane Smith", hours: 35, tasks: [""] },
-    {
-      role: "Assistant Manager",
-      name: "Alice Johnson",
-      hours: 30,
-      tasks: [""],
-    },
-    { role: "Associate Director", name: "Bob Brown", hours: 25, tasks: [""] },
-    { role: "Senior Assistant", name: "Charlie Green", hours: 20, tasks: [""] },
-    { role: "Senior Consultant", name: "Diana White", hours: 15, tasks: [""] },
+    { UserID: 1, role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 40 },
+    { UserID: 2, role: "Senior Manager", name: "Hlubi Mavinjelwa", hours: 30 },
+    { UserID: 3, role: "Assistant Manager", name: "Athraa Reynard", hours: 30 },
+    { UserID: 4, role: "Associate Director", name: "Sakhile Nkambule", hours: 25 },
+    { UserID: 5, role: "Senior Assistant", name: "Mega Gama", hours: 20 },
+    { UserID: 6, role: "Junior Consultant", name: "Saneliso Surtee", hours: 15 },
   ];
 
   const regenerateResource = [
-    { role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 35, tasks: [""] },
-    { role: "Senior Manager", name: "Sakhile Nkambule", hours: 30, tasks: [""] },
-    {
-      role: "Assistant Manager",
-      name: "Hlubi Mavinjelwa",
-      hours: 35,
-      tasks: [""],
-    },
-    { role: "Associate Director", name: "Athraa Reynard", hours: 30, tasks: [""] },
-    { role: "Junior Assistant", name: "Allen Harper", hours: 15, tasks: [""] },
-    { role: " Consultant", name: "Jake Harper", hours: 15, tasks: [""] },
+    { role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 35 },
+    { role: "Senior Manager", name: "Sakhile Nkambule", hours: 30 },
+    { role: "Assistant Manager", name: "Hlubi Mavinjelwa", hours: 35 },
+    { role: "Associate Director", name: "Athraa Reynard", hours: 30 },
+    { role: "Junior Assistant", name: "Allen Harper", hours: 15 },
+    { role: "Consultant", name: "Jake Harper", hours: 15 },
   ];
+
   const [resources, setResources] = useState(initialResources);
-  const [budget, setBudget] = useState(0);
+  //const [budget, setBudget] = useState(0);
   const [exhaustedBudget, setExhaustedBudget] = useState(0);
 
   useEffect(() => {
     // Calculate initial budget from newProject's budget
-    const parsedSalary = parseFloat(newProject.salary.replace(/[^\d.-]/g, ""));
-    setBudget(parsedSalary);
+    // const parsedBudget = parseFloat(newProject.Budget.replace(/[^\d.-]/g, ""));
+    // setBudget(parsedBudget);
 
     // Calculate initial exhausted budget
     let totalHours = 0;
@@ -58,24 +49,11 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
     setResources(newResources);
   };
 
-  const handleTaskChange = (resourceIndex, taskIndex, value) => {
-    const newResources = [...resources];
-    newResources[resourceIndex].tasks[taskIndex] = value;
-    setResources(newResources);
-  };
-
-  const addTaskField = (resourceIndex) => {
-    const newResources = [...resources];
-    newResources[resourceIndex].tasks.push("");
-    setResources(newResources);
-  };
-
   const addNewResource = () => {
     const newResource = {
       role: "Partner/Director",
       name: "",
       hours: 0,
-      tasks: [""],
     };
     setResources([...resources, newResource]);
   };
@@ -139,30 +117,6 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
                 }
                 className="border rounded w-full py-2 px-3 mb-2"
               />
-              <label className="block text-gray-700 font-bold mb-2">
-                Tasks
-              </label>
-              {resource.tasks.map((task, taskIndex) => (
-                <div key={taskIndex} className="flex mb-2">
-                  <input
-                    type="text"
-                    value={task}
-                    onChange={(e) =>
-                      handleTaskChange(index, taskIndex, e.target.value)
-                    }
-                    className="border rounded w-full py-2 px-3 mr-2"
-                  />
-                  {taskIndex === resource.tasks.length - 1 && (
-                    <button
-                      type="button"
-                      onClick={() => addTaskField(index)}
-                      className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-                    >
-                      +
-                    </button>
-                  )}
-                </div>
-              ))}
             </div>
           ))}
           <div className="flex justify-between mt-6">
@@ -190,12 +144,12 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
             </button>
           </div>
         </div>
-        {/* budget summary */}
+        {/* Budget summary */}
         <div className="bg-white p-6 mb-4 shadow-md rounded-md border m-4 md:m-0 w-64">
           <h2 className="text-2xl font-semibold mb-4">Budget Summary</h2>
           <div className="mb-2">
             <p className="text-gray-700 font-semibold">Total Budget:</p>
-            <p className="text-green-500 font-semibold">{newProject.salary}</p>
+            <p className="text-green-500 font-semibold">{newProject.Budget}</p>
           </div>
           <div className="mb-2">
             <p className="text-gray-700 font-semibold">Exhausted Budget:</p>
@@ -204,8 +158,8 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
           <div className="mt-4">
             <p className="text-gray-700 font-semibold">Profit Margin:</p>
             <p className="font-semibold">
-              {budget - exhaustedBudget > 0
-                ? `+R${budget - exhaustedBudget}`
+              {newProject.Budget - exhaustedBudget > 0
+                ? `R${newProject.Budget - exhaustedBudget}`
                 : "-"}
             </p>
           </div>
