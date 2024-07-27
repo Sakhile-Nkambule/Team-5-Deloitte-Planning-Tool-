@@ -1,34 +1,38 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AddProjectPage = () => {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("");
-  const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
-  const [salary, setSalary] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [companyDescription, setCompanyDescription] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
+  const [Title, setTitle] = useState("");
+  const [ProjectCode, setProjectCode] = useState("");
+  const [CompanyLocation, setCompanyLocation] = useState("");
+  const [Description, setDescription] = useState("");
+  const [Budget, setBudget] = useState("");
+  const [CompanyName, setCompanyName] = useState("");
+  const [CompanyDescription, setCompanyDescription] = useState("");
+  const [ContactPhone, setContactPhone] = useState("");
+  const [ContactEmail, setContactEmail] = useState("");
+  const Status = 'pending';
   const navigate = useNavigate();
 
   const submitForm = (e) => {
     e.preventDefault();
     const newProject = {
-      title,
-      type,
-      location,
-      description,
-      salary,
-      company: {
-        name: companyName,
-        description: companyDescription,
-        contactEmail,
-        contactPhone,
-      },
-    };
-    navigate("/proposed-resources", { state: { newProject } });
+      Title,
+      ProjectCode,
+      Status,
+      Description,
+      Budget,
+    
+  Client: {
+        CompanyName,
+        CompanyDescription,
+        ContactEmail,
+        ContactPhone,
+        CompanyLocation,},
+      };
+ console.log(newProject);
+navigate("/proposed-resources", { state: { newProject } });
   };
 
   return (
@@ -48,12 +52,12 @@ const AddProjectPage = () => {
                 Project Code
               </label>
               <input
-                id="type"
-                name="type"
+                id="ProjectCode"
+                name="ProjectCode"
                 className="border rounded w-full py-2 px-3"
                 required
-                value={type}
-                onChange={(e) => setType(e.target.value)}
+                value={ProjectCode}
+                onChange={(e) => setProjectCode(e.target.value)}
               />
             </div>
 
@@ -63,12 +67,12 @@ const AddProjectPage = () => {
               </label>
               <input
                 type="text"
-                id="title"
-                name="title"
+                id="Title"
+                name="Title"
                 className="border rounded w-full py-2 px-3 mb-2"
                 placeholder="eg. Planning Tool"
                 required
-                value={title}
+                value={Title}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
@@ -80,32 +84,32 @@ const AddProjectPage = () => {
                 Description
               </label>
               <textarea
-                id="description"
-                name="description"
+                id="Description"
+                name="Description"
                 className="border rounded w-full py-2 px-3"
                 rows="4"
                 placeholder="Add any Project expectations, requirements, etc"
-                value={description}
+                value={Description}
                 onChange={(e) => setDescription(e.target.value)}
               ></textarea>
             </div>
 
             <div className="mb-4">
               <label
-                htmlFor="salary"
+                htmlFor="Budget"
                 className="block text-gray-700 font-bold mb-2"
               >
                 Project Budget
               </label>
               <input
                 type="text"
-                id="salary"
-                name="salary"
+                id="Budget"
+                name="Budget"
                 className="border rounded w-full py-2 px-3 mb-2"
                 placeholder="Enter project budget"
                 required
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
+                value={Budget}
+                onChange={(e) => setBudget(e.target.value)}
               />
             </div>
 
@@ -120,11 +124,11 @@ const AddProjectPage = () => {
               </label>
               <input
                 type="text"
-                id="company"
-                name="company"
+                id="CompanyName"
+                name="CompanyName"
                 className="border rounded w-full py-2 px-3"
                 placeholder="Company Name"
-                value={companyName}
+                value={CompanyName}
                 onChange={(e) => setCompanyName(e.target.value)}
               />
             </div>
@@ -137,12 +141,12 @@ const AddProjectPage = () => {
                 Company Description
               </label>
               <textarea
-                id="company_description"
-                name="company_description"
+                id="Company_description"
+                name="Company_description"
                 className="border rounded w-full py-2 px-3"
                 rows="4"
                 placeholder="What does the company do?"
-                value={companyDescription}
+                value={CompanyDescription}
                 onChange={(e) => setCompanyDescription(e.target.value)}
               ></textarea>
             </div>
@@ -161,8 +165,8 @@ const AddProjectPage = () => {
                 className="border rounded w-full py-2 px-3 mb-2"
                 placeholder="Company Location"
                 required
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={CompanyLocation}
+                onChange={(e) => setCompanyLocation(e.target.value)}
               />
             </div>
 
@@ -180,7 +184,7 @@ const AddProjectPage = () => {
                 className="border rounded w-full py-2 px-3"
                 placeholder="Email address for client"
                 required
-                value={contactEmail}
+                value={ContactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
               />
             </div>
@@ -197,7 +201,7 @@ const AddProjectPage = () => {
                 name="contact_phone"
                 className="border rounded w-full py-2 px-3"
                 placeholder="Optional phone for client"
-                value={contactPhone}
+                value={ContactPhone}
                 onChange={(e) => setContactPhone(e.target.value)}
               />
             </div>

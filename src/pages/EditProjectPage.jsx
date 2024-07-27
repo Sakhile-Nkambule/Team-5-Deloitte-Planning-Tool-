@@ -1,97 +1,124 @@
 import { useParams, useLoaderData, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const EditProjectPage = ({ updateProjectSubmit }) => {
-  const project = useLoaderData();
-  const [title, setTitle] = useState(project.title);
-  const [type, setType] = useState(project.type);
-  const [location, setLocation] = useState(project.location);
-  const [description, setDescription] = useState(project.description);
-  const [salary, setSalary] = useState(project.salary);
-  const [companyName, setCompanyName] = useState(project.company.name);
-  const [companyDescription, setCompanyDescription] = useState(
-    project.company.description
-  );
-  const [contactPhone, setContactPhone] = useState(
-    project.company.contactPhone
-  );
-  const [contactEmail, setContactEmail] = useState(
-    project.company.contactEmail
-  );
-  const [resources, setResources] = useState(project.resources || []);
+  const { project, client, resources } = useLoaderData();
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [Title, setTitle] = useState(project.Title);
+  const [ProjectCode, setProjectCode] = useState(project.ProjectCode);
+  const [CompanyLocation, setCompanyLocation] = useState(client.CompanyLocation);
+  const [Description, setDescription] = useState(project.Description);
+  const [Budget, setBudget] = useState(project.Budget);
+  const [CompanyName, setCompanyName] = useState(client.CompanyName);
+  const [CompanyDescription, setCompanyDescription] = useState(client.CompanyDescription);
+  const [ContactPhone, setContactPhone] = useState(client.ContactPhone);
+  const [ContactEmail, setContactEmail] = useState(client.ContactEmail);
+  const [projectResources, setProjectResources] = useState(resources || []);
+  const [userMap, setUserMap] = useState({});
+//fetching user data to get name of resource using UserID
+  useEffect(() => {
+    // Fetch user data when the component mounts
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('/api/users'); 
+        const users = await response.json();
+        const userMapping = users.reduce((acc, user) => {
+          acc[user.UserID] = user.UserName; 
+         // console.log(acc);
+          return acc;
+        }, {});
+        setUserMap(userMapping);
+      } catch (error) {
+        console.error("Failed to fetch user data", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const handleResourceChange = (index, field, value) => {
-    const newResources = [...resources];
+    const newResources = [...projectResources];
     newResources[index][field] = value;
-    setResources(newResources);
+    setProjectResources(newResources);
   };
 
-  const handleTaskChange = (resourceIndex, taskIndex, value) => {
-    const newResources = [...resources];
-    newResources[resourceIndex].tasks[taskIndex] = value;
-    setResources(newResources);
-  };
+  // const handleTaskChange = (resourceIndex, taskIndex, value) => {
+  //   const newResources = [...projectResources];
+  //   newResources[resourceIndex].tasks[taskIndex] = value;
+  //   setProjectResources(newResources);
+  // };
 
   const addResource = () => {
-    setResources([
-      ...resources,
-      { role: "", name: "", hours: "", tasks: [""] },
+    setProjectResources([
+      ...projectResources,
+      { Role: "", name: "", PlannedHours: "", tasks: [""] },
     ]);
   };
 
   const removeResource = (index) => {
-    setResources(resources.filter((_, i) => i !== index));
+    setProjectResources(projectResources.filter((_, i) => i !== index));
   };
-
+//TASKS
+  const handleManageTasks = (resourceId) => {
+    navigate(`/manage-tasks/${resourceId}`);
+  };
+  
+//Manage Tasks
   const addTask = (resourceIndex) => {
-    const newResources = [...resources];
-    newResources[resourceIndex].tasks.push("");
-    setResources(newResources);
+    // Add a task and redirect to ManageTasksPage
+    const resourceId = projectResources[resourceIndex].ResourceID;
+    handleManageTasks(resourceId);
   };
 
-  const removeTask = (resourceIndex, taskIndex) => {
-    const newResources = [...resources];
-    newResources[resourceIndex].tasks.splice(taskIndex, 1);
-    setResources(newResources);
-  };
+  // const removeTask = (resourceIndex, taskIndex) => {
+  //   const newResources = [...projectResources];
+  //   newResources[resourceIndex].tasks.splice(taskIndex, 1);
+  //   setProjectResources(newResources);
+  // };
 
   const submitForm = (e) => {
     e.preventDefault();
     const updatedProject = {
       id,
-      title,
-      type,
-      location,
-      description,
-      salary,
-      company: {
-        name: companyName,
-        description: companyDescription,
-        contactEmail,
-        contactPhone,
+      Title,
+      ProjectCode,
+      Description,
+      Budget,
+        Client: {
+        CompanyName,
+        CompanyDescription,
+        ContactEmail,
+        ContactPhone,
+        CompanyLocation,
       },
-      resources,
+      resources: projectResources,
     };
     updateProjectSubmit(updatedProject);
 
     toast.success("Project updated successfully");
-    return navigate(`/projects`);
+    return navigate(`/project/${updatedProject.id}`);
   };
+
+  // Map resources to include user names
+  const mappedResources = projectResources.map(resource => ({
+    ...resource,
+    name: userMap[resource.UserID] || "Unknown User", // Map UserID to user name
+  }));
 
   return (
     <>
       <section>
         <div className="container m-auto py-6 px-6">
           <Link
-            to="/projects"
+            to={`/edit-project/${project.ProjectID}`}
             className="text-lime-500 hover:text-lime-700 flex items-center"
           >
-            <FaArrowLeft className=" mr-1" /> Back to projects
+            <FaArrowLeft className="mr-1" /> Back to projects
           </Link>
         </div>
       </section>
@@ -99,7 +126,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
         <div className="container m-auto max-w-2xl py-24">
           <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
             <form onSubmit={submitForm}>
-              <h2 className=" text-black text-3xl text-center font-semibold mb-6">
+              <h2 className="text-black text-3xl text-center font-semibold mb-6">
                 Edit Project
               </h2>
 
@@ -116,7 +143,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   name="type"
                   className="border rounded w-full py-2 px-3"
                   readOnly
-                  value={type}
+                  value={ProjectCode}
                 />
               </div>
 
@@ -131,7 +158,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   className="border rounded w-full py-2 px-3 mb-2"
                   placeholder="eg. Planning Tool"
                   required
-                  value={title}
+                  value={Title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
@@ -144,12 +171,12 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   Description
                 </label>
                 <textarea
-                  id="description"
-                  name="description"
+                  id="Description"
+                  name="Description"
                   className="border rounded w-full py-2 px-3"
                   rows="4"
                   placeholder="Add any Project expectations, requirements, etc"
-                  value={description}
+                  value={Description}
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </div>
@@ -162,15 +189,13 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   Budget
                 </label>
                 <textarea
-                  id="salary"
-                  name="salary"
+                  id="Budget"
+                  name="Budget"
                   className="border rounded w-full py-2 px-3"
                   required
-                  value={salary}
-                  onChange={(e) => setSalary(e.target.value)}
-                
-                  ></textarea>
-                
+                  value={Budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                ></textarea>
               </div>
 
               <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
@@ -188,7 +213,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   name="company"
                   className="border rounded w-full py-2 px-3"
                   placeholder="Company Name"
-                  value={companyName}
+                  value={CompanyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                 />
               </div>
@@ -206,7 +231,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   className="border rounded w-full py-2 px-3"
                   rows="4"
                   placeholder="What does the company do?"
-                  value={companyDescription}
+                  value={CompanyDescription}
                   onChange={(e) => setCompanyDescription(e.target.value)}
                 ></textarea>
               </div>
@@ -221,8 +246,8 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   className="border rounded w-full py-2 px-3 mb-2"
                   placeholder="Company Location"
                   required
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  value={CompanyLocation}
+                  onChange={(e) => setCompanyLocation(e.target.value)}
                 />
               </div>
 
@@ -240,7 +265,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   className="border rounded w-full py-2 px-3"
                   placeholder="Email address for applicants"
                   required
-                  value={contactEmail}
+                  value={ContactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                 />
               </div>
@@ -248,7 +273,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
               <div className="mb-4">
                 <label
                   htmlFor="contact_phone"
-                  className="block  font-bold mb-2"
+                  className="block font-bold mb-2"
                 >
                   Contact Phone
                 </label>
@@ -258,7 +283,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   name="contact_phone"
                   className="border rounded w-full py-2 px-3"
                   placeholder="Optional phone for applicants"
-                  value={contactPhone}
+                  value={ContactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                 />
               </div>
@@ -266,7 +291,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
               <h3 className="text-lime-500 text-2xl mb-5">
                 Allocated Resources
               </h3>
-              {resources.map((resource, resourceIndex) => (
+              {mappedResources.map((resource, resourceIndex) => (
                 <div key={resourceIndex} className="mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="text-lime-500 font-bold">
@@ -280,154 +305,46 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                       Remove Resource
                     </button>
                   </div>
-                  <div className="mb-2">
-                    <label
-                      htmlFor={`role-${resourceIndex}`}
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Role
-                    </label>
+                  <div className="flex mb-2 items-center">
                     <input
                       type="text"
                       id={`role-${resourceIndex}`}
                       name={`role-${resourceIndex}`}
-                      className="border rounded w-full py-2 px-3"
-                      placeholder="Role"
-                      value={resource.role}
-                      onChange={(e) =>
-                        handleResourceChange(
-                          resourceIndex,
-                          "role",
-                          e.target.value
-                        )
-                      }
+                      className="border rounded py-2 px-3 w-1/4 mr-2"
+                      value={resource.Role}
+                      readOnly
                     />
-                  </div>
-                  <div className="mb-2">
-                    <label
-                      htmlFor={`name-${resourceIndex}`}
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Name
-                    </label>
                     <input
                       type="text"
                       id={`name-${resourceIndex}`}
                       name={`name-${resourceIndex}`}
-                      className="border rounded w-full py-2 px-3"
-                      placeholder="Name"
+                      className="border rounded py-2 px-3 w-1/4 mr-2"
                       value={resource.name}
-                      onChange={(e) =>
-                        handleResourceChange(
-                          resourceIndex,
-                          "name",
-                          e.target.value
-                        )
-                      }
+                      readOnly
                     />
-                  </div>
-                  <div className="mb-2">
-                    <label
-                      htmlFor={`hours-${resourceIndex}`}
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Hours
-                    </label>
                     <input
-                      type="text"
+                      type="number"
                       id={`hours-${resourceIndex}`}
                       name={`hours-${resourceIndex}`}
-                      className="border rounded w-full py-2 px-3"
-                      placeholder="Hours"
-                      value={resource.hours}
+                      className="border rounded py-2 px-3 w-1/4 mr-2"
+                      value={resource.PlannedHours}
                       onChange={(e) =>
                         handleResourceChange(
                           resourceIndex,
-                          "hours",
+                          "PlannedHours",
                           e.target.value
                         )
                       }
                     />
+                    <button
+                      type="button"
+                      className="bg-blue-600 text-white rounded px-2 py-1"
+                      onClick={() => addTask(resourceIndex)}
+                    >
+                      Manage Tasks
+                    </button>
                   </div>
-                  {/* Tasks */}
-                  <div className="mb-4">
-                    <h5 className="text-gray-700 font-bold mb-2">Tasks</h5>
-                    {resource.tasks.slice(0, 1).map((task, taskIndex) => (
-                      <div key={taskIndex} className="mb-2 flex items-center">
-                        <input
-                          type="text"
-                          className="border rounded w-full py-2 px-3"
-                          placeholder="Task"
-                          value={task}
-                          onChange={(e) =>
-                            handleTaskChange(
-                              resourceIndex,
-                              taskIndex,
-                              e.target.value
-                            )
-                          }
-                        />
-                        <button
-                          type="button"
-                          className="ml-2 bg-red-500 text-white rounded px-2 py-1  hover:text-red-700"
-                          onClick={() => removeTask(resourceIndex, taskIndex)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                    {resource.tasks.length > 1 && (
-                      <button
-                        type="button"
-                        className="text-lime-600 hover:text-lime-700"
-                        onClick={() =>
-                          setResources(
-                            resources.map((res, idx) =>
-                              idx === resourceIndex
-                                ? { ...res, showMore: !res.showMore }
-                                : res
-                            )
-                          )
-                        }
-                      >
-                        {resource.showMore ? "Show Less" : "Show More"}
-                      </button>
-                    )}
-                    {resource.showMore &&
-                      resource.tasks.slice(1).map((task, taskIndex) => (
-                        <div key={taskIndex} className="mb-2 flex items-center">
-                          <input
-                            type="text"
-                            className="border rounded w-full py-2 px-3"
-                            placeholder="Task"
-                            value={task}
-                            onChange={(e) =>
-                              handleTaskChange(
-                                resourceIndex,
-                                taskIndex + 1,
-                                e.target.value
-                              )
-                            }
-                          />
-                          <button
-                            type="button"
-                            className="bg-red-500 text-white rounded px-2 py-1 hover:text-red-700 ml-2"
-                            onClick={() =>
-                              removeTask(resourceIndex, taskIndex + 1)
-                            }
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                  <button
-                    type="button"
-                    className="text-blue-600 hover:text-blue-700"
-                    onClick={() => addTask(resourceIndex)}
-                  >
-                    Add Task
-                  </button>
+                  {/* {DELETED} */}
                 </div>
               ))}
               <div className="flex justify-center">
