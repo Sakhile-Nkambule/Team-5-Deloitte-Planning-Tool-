@@ -46,6 +46,12 @@ const Navbar = () => {
                   >
                     Add Project
                   </NavLink>
+                  <NavLink
+                    to="/taskboard"
+                    className={linkClass}
+                  >
+                    Task board
+                  </NavLink>
                 </div>
               </div>
             </div>

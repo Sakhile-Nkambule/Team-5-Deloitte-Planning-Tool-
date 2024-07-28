@@ -1,29 +1,52 @@
 import { useParams, useLoaderData, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const EditProjectPage = ({ updateProjectSubmit }) => {
-  const project = useLoaderData();
-  const [title, setTitle] = useState(project.title);
-  const [type, setType] = useState(project.type);
-  const [location, setLocation] = useState(project.location);
-  const [description, setDescription] = useState(project.description);
-  const [salary, setSalary] = useState(project.salary);
-  const [companyName, setCompanyName] = useState(project.company.name);
-  const [companyDescription, setCompanyDescription] = useState(
-    project.company.description
-  );
-  const [contactPhone, setContactPhone] = useState(
-    project.company.contactPhone
-  );
-  const [contactEmail, setContactEmail] = useState(
-    project.company.contactEmail
-  );
-  const [resources, setResources] = useState(project.resources || []);
+  const initialProjectData = useLoaderData();
+  const [project, setProject] = useState(initialProjectData);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const { id } = useParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (project) {
+      setTitle(project.title || '');
+      setType(project.type || '');
+      setLocation(project.location || '');
+      setDescription(project.description || '');
+      setSalary(project.salary || '');
+      setCompanyName(project.company?.name || '');
+      setCompanyDescription(project.company?.description || '');
+      setContactPhone(project.company?.contactPhone || '');
+      setContactEmail(project.company?.contactEmail || '');
+      setResources(project.resources || []);
+      setTasks(project.tasks || []);
+      console.log(project.tasks);
+    }
+  }, [project]);
+
+  const [title, setTitle] = useState('');
+  const [type, setType] = useState('');
+  const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
+  const [salary, setSalary] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [companyDescription, setCompanyDescription] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [resources, setResources] = useState([]);
+  const [tasks, setTasks] = useState([]);
+
+  
+
+  function getResourceTasks(resourceId) {
+    return tasks.filter(task => task.resource_id === resourceId);
+  }
 
   const handleResourceChange = (index, field, value) => {
     const newResources = [...resources];
@@ -48,11 +71,11 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     setResources(resources.filter((_, i) => i !== index));
   };
 
-  const addTask = (resourceIndex) => {
-    const newResources = [...resources];
-    newResources[resourceIndex].tasks.push("");
-    setResources(newResources);
-  };
+  // const addTask = (resourceIndex) => {
+  //   const newResources = [...resources];
+  //   newResources[resourceIndex].tasks.push("");
+  //   setResources(newResources);
+  // };
 
   const removeTask = (resourceIndex, taskIndex) => {
     const newResources = [...resources];
@@ -75,13 +98,28 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
         contactEmail,
         contactPhone,
       },
-      resources,
+      resources: resources.map(resource => ({
+        ...resource,
+        tasks: getResourceTasks(resource.id)
+      }))
     };
     updateProjectSubmit(updatedProject);
 
     toast.success("Project updated successfully");
     return navigate(`/projects`);
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!project) {
+    return <div>No project data found</div>;
+  }
 
   return (
     <>
@@ -168,9 +206,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   required
                   value={salary}
                   onChange={(e) => setSalary(e.target.value)}
-                
-                  ></textarea>
-                
+                ></textarea>
               </div>
 
               <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
@@ -267,7 +303,8 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                 Allocated Resources
               </h3>
               {resources.map((resource, resourceIndex) => (
-                <div key={resourceIndex} className="mb-4">
+                
+                <div key={resource.id} className="mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="text-lime-500 font-bold">
                       Resource #{resourceIndex + 1}
@@ -352,13 +389,14 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   {/* Tasks */}
                   <div className="mb-4">
                     <h5 className="text-gray-700 font-bold mb-2">Tasks</h5>
-                    {resource.tasks.slice(0, 1).map((task, taskIndex) => (
-                      <div key={taskIndex} className="mb-2 flex items-center">
+                    {getResourceTasks(resource.id).map((task, taskIndex) => (
+                      
+                      <div key={resource.id} className="mb-2 flex items-center">
                         <input
                           type="text"
-                          className="border rounded w-full py-2 px-3"
+                         className="border rounded w-full py-2 px-3"
                           placeholder="Task"
-                          value={task}
+                          value={task.task_description}
                           onChange={(e) =>
                             handleTaskChange(
                               resourceIndex,
@@ -376,50 +414,6 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                         </button>
                       </div>
                     ))}
-                    {resource.tasks.length > 1 && (
-                      <button
-                        type="button"
-                        className="text-lime-600 hover:text-lime-700"
-                        onClick={() =>
-                          setResources(
-                            resources.map((res, idx) =>
-                              idx === resourceIndex
-                                ? { ...res, showMore: !res.showMore }
-                                : res
-                            )
-                          )
-                        }
-                      >
-                        {resource.showMore ? "Show Less" : "Show More"}
-                      </button>
-                    )}
-                    {resource.showMore &&
-                      resource.tasks.slice(1).map((task, taskIndex) => (
-                        <div key={taskIndex} className="mb-2 flex items-center">
-                          <input
-                            type="text"
-                            className="border rounded w-full py-2 px-3"
-                            placeholder="Task"
-                            value={task}
-                            onChange={(e) =>
-                              handleTaskChange(
-                                resourceIndex,
-                                taskIndex + 1,
-                                e.target.value
-                              )
-                            }
-                          />
-                          <button
-                            type="button"
-                            className="bg-red-500 text-white rounded px-2 py-1 hover:text-red-700 ml-2"
-                            onClick={() =>
-                              removeTask(resourceIndex, taskIndex + 1)
-                            }
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
                   </div>
                   <button
                     type="button"
@@ -453,4 +447,39 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   );
 };
 
-export default EditProjectPage;
+const projectLoader = async ({ params }) => {
+  const projectId = params.id;
+  const endpoints = [
+    `http://localhost:8081/project/${projectId}`,
+    `http://localhost:8081/tasks/1`,
+    `http://localhost:8081/company/${projectId}`,
+    `http://localhost:8081/resources/${projectId}`,
+  ];
+
+  try {
+    const responses = await Promise.all(endpoints.map(url => fetch(url)));
+    const jsonData = await Promise.all(responses.map(res => {
+      if (!res.ok) throw new Error(`Failed to fetch from ${res.url} with status ${res.status}`);
+      return res.json();
+    }));
+
+    return {
+      project: jsonData[0],
+      tasks: jsonData[1],
+      company: jsonData[2],
+      resources: jsonData[3],
+    };
+  } catch (error) {
+    console.error('Error loading project data:', error);
+    return {
+      error,
+      project: {},
+      company: {},
+      resources: [],
+      tasks: []
+    };
+  }
+};
+
+
+export { EditProjectPage as default, projectLoader };

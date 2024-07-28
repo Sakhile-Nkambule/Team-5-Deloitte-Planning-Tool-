@@ -1,0 +1,10 @@
+/* custom.css */
+.column {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    overflow-y: scroll; /* Enable scrolling */
+}
+
+.column::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+}

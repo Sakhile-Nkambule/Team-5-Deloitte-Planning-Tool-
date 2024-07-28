@@ -10,6 +10,8 @@ import ProposedResourcespage from './pages/ProposedResourcespage';
 import DashboardPage from './pages/DashboardPage';
 import { useState } from 'react';
 import LoginScreen from './pages/LoginScreen';
+import TaskBoard from './pages/TaskBoard';
+
 
 const App = () => {
     const [projects, setProjects] = useState([]);
@@ -56,6 +58,7 @@ const App = () => {
         <Route element={<MainLayout />}>
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/projects" element={<Projectspage />} />
+          <Route path="/taskboard" element={<TaskBoard/>}/>
           <Route path="/add-project" element={<AddProjectPage />} />
           <Route path="/proposed-resources" element={<ProposedResourcespage addProjectSubmit={addProjectSubmit} />} />
           <Route path="/edit-project/:id" element={<EditProjectPage updateProjectSubmit={updateProject} />} loader={projectLoader} />
