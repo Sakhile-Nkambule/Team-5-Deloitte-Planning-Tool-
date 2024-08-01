@@ -16,6 +16,7 @@ import DashboardPage from "./pages/DashboardPage";
 import { useState } from "react";
 import LoginScreen from "./pages/LoginScreen";
 import ManageTasksPage from './pages/ManageTasksPage';
+import TaskBoard from "./pages/TaskBoard";
 
 const App = () => {
   const [projects, setProjects] = useState([]);
@@ -78,6 +79,8 @@ const deleteProject = async (id) => {
         <Route element={<MainLayout />}>
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/projects" element={<Projectspage />} />
+          <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
+
           <Route
             path="/add-project"
             element={<AddProjectPage /*planA={addNew}*/ />}
