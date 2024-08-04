@@ -8,7 +8,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
   const { newProject } = location.state;
 
   const initialResources = [
-    { UserID: 1, role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 40 },
+    { UserID: 1, role: "Director", name: "Tadiwa Mukuvudza", hours: 40 },
     { UserID: 2, role: "Senior Manager", name: "Hlubi Mavinjelwa", hours: 30 },
     { UserID: 3, role: "Assistant Manager", name: "Athraa Reynard", hours: 30 },
     { UserID: 4, role: "Associate Director", name: "Sakhile Nkambule", hours: 25 },
@@ -17,12 +17,12 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
   ];
 
   const regenerateResource = [
-    { role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 35 },
-    { role: "Senior Manager", name: "Sakhile Nkambule", hours: 30 },
-    { role: "Assistant Manager", name: "Hlubi Mavinjelwa", hours: 35 },
-    { role: "Associate Director", name: "Athraa Reynard", hours: 30 },
-    { role: "Junior Assistant", name: "Allen Harper", hours: 15 },
-    { role: "Consultant", name: "Jake Harper", hours: 15 },
+    { UserID:7, role: "Director", name: "Elena Martinez", hours: 35 },
+    {  UserID: 8, role: "Senior Manager", name: "James Connor", hours: 30 },
+    {  UserID: 9, role: "Assistant Manager", name: "Aisha Khan", hours: 35 },
+    { UserID: 10, role: "Associate Director", name: "Ravi Patel", hours: 30 },
+    {  UserID: 11, role: "Junior Assistant", name: "Lila Wong", hours: 15 },
+    {  UserID: 12, role: "Consultant", name: "Lucas Oliveria", hours: 15 },
   ];
 
   const [resources, setResources] = useState(initialResources);
@@ -90,7 +90,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
                 }
                 className="border rounded w-full py-2 px-3 mb-2"
               >
-                <option value="Partner/Director">Partner/Director</option>
+                <option value="Partner/Director">Director</option>
                 <option value="Senior Manager">Senior Manager</option>
                 <option value="Assistant Manager">Assistant Manager</option>
                 <option value="Associate Director">Associate Director</option>

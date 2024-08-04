@@ -16,8 +16,24 @@ import DashboardPage from "./pages/DashboardPage";
 import { useState } from "react";
 import LoginScreen from "./pages/LoginScreen";
 import ManageTasksPage from './pages/ManageTasksPage';
+import UserHomepage from "./pages/UserHomePage";
+import { UserProvider } from './componets/UserContext';
 
 const App = () => {
+
+
+
+  // const { login } = useUser();
+
+  // useEffect(() => {
+  //   // Mock user login
+  //   login({ id: 1, name: 'Tadiwa Mukuvudza' });
+  // }, [login]);
+
+
+
+
+
   const [projects, setProjects] = useState([]);
 //Create A new Project
   const addNewProject = async (projectWithResources) => {
@@ -77,6 +93,7 @@ const deleteProject = async (id) => {
         <Route path="/" element={<LoginScreen />} />
         <Route element={<MainLayout />}>
           <Route path="/homepage" element={<Homepage />} />
+          <Route path="/Userhomepage" element={<UserHomepage />} />
           <Route path="/projects" element={<Projectspage />} />
           <Route
             path="/add-project"
@@ -106,7 +123,11 @@ const deleteProject = async (id) => {
     )
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
+  );
 };
 
 export default App;

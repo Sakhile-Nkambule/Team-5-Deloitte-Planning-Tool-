@@ -8,7 +8,7 @@ const HomeCards = () => {
           <Card>
             <h2 className="text-2xl font-bold">Existing Projects?</h2>
             <p className="mt-2 mb-4">
-              Browse Existing Projects for Monitoring and updating
+              Browse Through Existing Projects for Monitoring and updating
             </p>
             <Link
               to="/projects"
