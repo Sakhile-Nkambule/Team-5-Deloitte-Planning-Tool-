@@ -16,10 +16,16 @@ import DashboardPage from "./pages/DashboardPage";
 import { useState } from "react";
 import LoginScreen from "./pages/LoginScreen";
 import ManageTasksPage from './pages/ManageTasksPage';
+import UserHomepage from "./pages/UserHomePage";
+import { UserProvider } from './componets/UserContext';
 import TaskBoard from "./pages/TaskBoard";
 
+
 const App = () => {
-  const [projects, setProjects] = useState([]);
+
+
+
+    const [projects, setProjects] = useState([]);
 //Create A new Project
   const addNewProject = async (projectWithResources) => {
     const res = await fetch("http://localhost:8081/newprojects", {
@@ -78,9 +84,9 @@ const deleteProject = async (id) => {
         <Route path="/" element={<LoginScreen />} />
         <Route element={<MainLayout />}>
           <Route path="/homepage" element={<Homepage />} />
+          <Route path="/Userhomepage" element={<UserHomepage />} />
           <Route path="/projects" element={<Projectspage />} />
           <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
-
           <Route
             path="/add-project"
             element={<AddProjectPage /*planA={addNew}*/ />}
@@ -102,14 +108,18 @@ const deleteProject = async (id) => {
             element={<ProjectPage deleteProject={deleteProject} />}
             loader={projectLoader}
           />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/:projectId" element={<DashboardPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </>
     )
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
+  );
 };
 
 export default App;

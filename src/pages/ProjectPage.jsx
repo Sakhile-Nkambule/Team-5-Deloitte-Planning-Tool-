@@ -3,11 +3,15 @@ import { FaArrowLeft, FaMapMarker } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useUser } from '../componets/UserContext'; // Import the useUser hook
 
-const ProjectPage = ({ deleteProject }) => {
+const ProjectPage = ({ deleteProject }) => { 
   const navigate = useNavigate();
   const { id } = useParams();
   const { project, client, resources } = useLoaderData(); // Destructure data from loader
+  const { user } = useUser(); // Get user from context
+
+  const userRole = user?.role; // Get the user's role
 
   const onDeleteClick = (projectId) => {
     const confirm = window.confirm(
@@ -70,7 +74,7 @@ const ProjectPage = ({ deleteProject }) => {
                 <p className="mb-4">{client.CompanyDescription}</p>
                 <p className="my-2 bg-indigo-100 p-2 font-bold">
                   {client.CompanyLocation}
-                  </p>
+                </p>
                 <h3 className="text-gray-700 mb-4">Contact Email:</h3>
                 <p className="my-2 bg-indigo-100 p-2 font-bold">
                   {client.ContactEmail}
@@ -79,13 +83,12 @@ const ProjectPage = ({ deleteProject }) => {
                 <p className="my-2 bg-indigo-100 p-2 font-bold">
                   {client.ContactPhone}
                 </p>
-                
               </div>
 
               {/* Dashboard */}
               <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left mt-6">
                 <Link
-                  to="/dashboard"
+                  to={`/dashboard/${project.ProjectID}`}
                   className="bg-black hover:bg-lime-500 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                 >
                   View Project Dashboard
@@ -112,21 +115,23 @@ const ProjectPage = ({ deleteProject }) => {
               </div>
 
               {/* Manage */}
-              <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-                <h3 className="text-xl font-bold mb-6">Manage Project</h3>
-                <Link
-                  to={`/edit-project/${project.ProjectID}`}
-                  className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
-                >
-                  Edit Project
-                </Link>
-                <button
-                  onClick={() => onDeleteClick(project.ProjectID)}
-                  className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
-                >
-                  Delete Project
-                </button>
-              </div>
+              {userRole === 'Planning Team' && (
+                <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+                  <h3 className="text-xl font-bold mb-6">Manage Project</h3>
+                  <Link
+                    to={`/edit-project/${project.ProjectID}`}
+                    className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                  >
+                    Edit Project
+                  </Link>
+                  <button
+                    onClick={() => onDeleteClick(project.ProjectID)}
+                    className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                  >
+                    Delete Project
+                  </button>
+                </div>
+              )}
             </aside>
           </div>
         </div>
