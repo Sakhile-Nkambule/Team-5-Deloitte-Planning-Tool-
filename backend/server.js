@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const sql = require("mssql");
 
-// Configure the database connection
+// Configure the database connectionnpm
 const dbConfig = {
   user: "Sakhile",
   password: "Qwerty@1234567",
@@ -28,7 +28,7 @@ sql.connect(dbConfig).then(pool => {
   console.error("Error connecting to the database:", err);
 });
 
-// Example endpoints
+// Endpoints To get all projects
 app.get("/projects", async (req, res) => {
   try {
     const limit = parseInt(req.query._limit) || 10;
@@ -39,10 +39,35 @@ app.get("/projects", async (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.json({ msg: "message" });
+
+
+//Endpoint to get Projects assigned to user
+app.get("/user-projects/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  console.log('Received request for user projects:', req.params.userId);
+
+  try {
+    const pool = await sql.connect(dbConfig);
+    
+    const query = `
+      SELECT p.ProjectID, p.ProjectCode, p.Title, p.Description, p.Budget, p.ClientID, p.Status
+      FROM projects p
+      JOIN resources r ON p.ProjectID = r.ProjectID
+      WHERE r.UserID = @UserID
+    `;  
+    
+    const result = await pool.request()
+      .input('UserID', sql.Int, userId)
+      .query(query);
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error executing query:", err);
+    res.status(500).json({ error: "Error executing query: " + err });
+  }
 });
 
+//Endpoint to get single project
 app.get("/project/:id", async (req, res) => {
   try {
     const projectId = req.params.id;
@@ -54,6 +79,7 @@ app.get("/project/:id", async (req, res) => {
   }
 });
 
+//Endpoint to get company associated with project
 app.get("/company/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
@@ -67,6 +93,7 @@ app.get("/company/:projectId", async (req, res) => {
   }
 });
 
+//Endpoint to get Project resources
 app.get("/resources/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
@@ -77,6 +104,7 @@ app.get("/resources/:projectId", async (req, res) => {
   }
 });
 
+//Endpoint to get tasks assigned to user on a project
 app.get("/tasks/:resourceId", async (req, res) => {
   try {
     const resourceId = req.params.resourceId;
@@ -104,7 +132,7 @@ app.get("/tasks/:resourceId", async (req, res) => {
     res.status(500).json({ error: "Error executing query" });
   }
 });
-
+//Endpoint to get all Users
 app.get("/users", async (req, res) => {
   try {
     const limit = parseInt(req.query._limit) || 10;
@@ -114,7 +142,7 @@ app.get("/users", async (req, res) => {
     res.status(500).json("Error executing query: " + err);
   }
 });
-
+//Endpoint to get single User
 app.get("/user/:id", async (req, res) => {
   try {
     const userId = req.params.id;
@@ -126,6 +154,41 @@ app.get("/user/:id", async (req, res) => {
   }
 });
 
+// Endpoint to get resourceId
+app.get('/resource-id/:userId/:projectId', async (req, res) => {
+  const  userId = req.params.userId;
+  const projectId =req.params.projectId;
+  
+  try {
+      const pool = await sql.connect(dbConfig);
+      
+      const query = `
+          SELECT r.ResourceID
+          FROM resources r
+          WHERE r.UserID = @UserID AND r.ProjectID = @ProjectID
+      `;
+      
+      const result = await pool.request()
+          .input('UserID', sql.Int, userId)
+          .input('ProjectID', sql.Int, projectId)
+          .query(query);
+      
+      if (result.recordset.length > 0) {
+          const resourceId = result.recordset[0].ResourceID;
+          console.log(`ResourceId is ${resourceId}`);
+          res.json({ resourceId });
+      } else {
+          res.status(404).send('Resource not found');
+      }
+  } catch (err) {
+      console.error("Error executing query:", err);
+      res.status(500).send('Database error');
+  }
+});
+
+
+//POST
+//Endpoint to add a new project
 app.post("/newprojects", async (req, res) => {
   const { ProjectCode, Title, Description, Budget, Status, Client, resources } = req.body;
 console.log(req.body);
@@ -191,6 +254,7 @@ console.log(req.body);
   }
 });
 
+//Endpoint to Update Project
 app.put("/projects/:id", async (req, res) => {
   const projectId = req.params.id;
   const { ProjectCode, Title, Description, Budget, Status, Client, resources } = req.body;
@@ -267,6 +331,7 @@ app.put("/projects/:id", async (req, res) => {
   }
 });
 
+//Endpoint to add tasks
 app.post("/tasks", async (req, res) => {
   const newTasks = req.body; // Assuming body is an array of new tasks
 
@@ -312,7 +377,7 @@ app.post("/tasks", async (req, res) => {
   }
 });
 
-
+//Endpoint to Update Tasks
 app.put("/tasks/:resourceId", async (req, res) => {
   const resourceId = req.params.resourceId;
   const tasks = req.body; // Assuming body is an array of tasks
@@ -371,7 +436,7 @@ app.put("/tasks/:resourceId", async (req, res) => {
   }
 });
 
-
+//Endpoint to delete a task
 app.delete("/task/:taskId", async (req, res) => {
   const taskId = req.params.taskId;
 
@@ -402,7 +467,7 @@ app.delete("/task/:taskId", async (req, res) => {
   }
 });
 
-
+//Endpoint to delete a project
 app.delete("/projects/:id", async (req, res) => {
   const projectId = req.params.id;
 
@@ -438,6 +503,47 @@ app.delete("/projects/:id", async (req, res) => {
     res.status(500).json("Error connecting to the database: " + err);
   }
 });
+
+// Define the login endpoint
+// Endpoint for login
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+    const pool = await sql.connect(dbConfig);
+    
+    const query = `
+      SELECT * FROM users 
+      WHERE email = @Email AND password = @Password
+    `;
+    
+    const result = await pool.request()
+      .input('Email', sql.NVarChar, email)
+      .input('Password', sql.NVarChar, password)
+      .query(query);
+    
+    if (result.recordset.length > 0) {
+      // User found
+      const user = result.recordset[0];
+      res.json({
+        id: user.UserID,
+        name: user.UserName,
+        email: user.Email,
+        role: user.Role,
+        rate: user.HourlyRate,
+        skills: user.SkillSet,
+        cvPath: user.CVPath,
+      });
+    } else {
+      // User not found
+      res.status(401).send('Invalid credentials');
+    }
+  } catch (err) {
+    console.error("Error executing query:", err);
+    res.status(500).send('Database error');
+  }
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 8081;
