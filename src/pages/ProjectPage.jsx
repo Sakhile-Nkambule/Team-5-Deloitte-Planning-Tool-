@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useUser } from '../componets/UserContext'; // Import the useUser hook
 
-const ProjectPage = ({ deleteProject }) => {
+const ProjectPage = ({ deleteProject }) => { 
   const navigate = useNavigate();
   const { id } = useParams();
   const { project, client, resources } = useLoaderData(); // Destructure data from loader
