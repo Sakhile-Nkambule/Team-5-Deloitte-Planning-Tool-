@@ -79,6 +79,32 @@ app.get("/project/:id", async (req, res) => {
   }
 });
 
+
+
+
+// Endpoint to get notifications for a given resourceId
+app.get("/notifications/:userID", async (req, res) => {
+  const UserID = req.params.userID;
+  
+  try {
+      // Query to get notifications for the resource
+      const result = await sql.query` 
+          SELECT n.NotificationID, n.Message, n.CreatedAt,n.Priority
+          FROM notifications n
+          WHERE n.UserID = ${UserID}`;
+
+      if (result.recordset.length === 0) {
+          return res.status(404).send({ message: 'No notifications found for this resource.' });
+      }
+
+      // Respond with the notifications
+      res.status(200).json(result.recordset);
+  } catch (error) {
+      console.error('Error accessing the database:', error);
+      res.status(500).send({ message: 'Server error occurred' });
+  }
+}); 
+
 //Endpoint to get company associated with project
 app.get("/company/:projectId", async (req, res) => {
   try {
@@ -543,6 +569,13 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Database error');
   }
 });
+
+
+
+
+
+
+
 
 
 // Start the server

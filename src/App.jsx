@@ -19,7 +19,7 @@ import ManageTasksPage from './pages/ManageTasksPage';
 import UserHomepage from "./pages/UserHomePage";
 import { UserProvider } from './componets/UserContext';
 import TaskBoard from "./pages/TaskBoard";
-
+import NotificationsPage from "./pages/NotificationsPage";
 
 const App = () => {
 
@@ -87,6 +87,7 @@ const deleteProject = async (id) => {
           <Route path="/Userhomepage" element={<UserHomepage />} />
           <Route path="/projects" element={<Projectspage />} />
           <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
+          <Route path="/notifications" element={<NotificationsPage/>}/>
           <Route
             path="/add-project"
             element={<AddProjectPage /*planA={addNew}*/ />}

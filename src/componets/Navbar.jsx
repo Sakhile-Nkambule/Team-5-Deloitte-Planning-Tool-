@@ -46,6 +46,12 @@ const Navbar = () => {
                                 </span>
                             </NavLink>
                             <div className="md:ml-auto flex items-center space-x-2">
+                            <NavLink
+                                    to="/notifications" // Use the dynamic homeLink here as well
+                                    className={linkClass}
+                                >
+                                   Notifications
+                                </NavLink>
                                 <NavLink
                                     to={homeLink} // Use the dynamic homeLink here as well
                                     className={linkClass}
