@@ -11,28 +11,35 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
 
   const [Title, setTitle] = useState(project.Title);
   const [ProjectCode, setProjectCode] = useState(project.ProjectCode);
-  const [CompanyLocation, setCompanyLocation] = useState(client.CompanyLocation);
+  const [CompanyLocation, setCompanyLocation] = useState(
+    client.CompanyLocation
+  );
   const [Description, setDescription] = useState(project.Description);
   const [Budget, setBudget] = useState(project.Budget);
+  const [Status, setStatus] = useState(project.Status || "Pending");
   const [CompanyName, setCompanyName] = useState(client.CompanyName);
-  const [CompanyDescription, setCompanyDescription] = useState(client.CompanyDescription);
+  const [CompanyDescription, setCompanyDescription] = useState(
+    client.CompanyDescription
+  );
   const [ContactPhone, setContactPhone] = useState(client.ContactPhone);
   const [ContactEmail, setContactEmail] = useState(client.ContactEmail);
   const [projectResources, setProjectResources] = useState(resources || []);
   const [userMap, setUserMap] = useState({});
-//fetching user data to get name of resource using UserID
+  const [users, setUsers] = useState([]);
+
+  // Fetching user data to get name of resource using UserID
   useEffect(() => {
     // Fetch user data when the component mounts
     const fetchUserData = async () => {
       try {
-        const response = await fetch('/api/users'); 
-        const users = await response.json();
-        const userMapping = users.reduce((acc, user) => {
-          acc[user.UserID] = user.UserName; 
-         // console.log(acc);
+        const response = await fetch("/api/users");
+        const usersData = await response.json();
+        const userMapping = usersData.reduce((acc, user) => {
+          acc[user.UserID] = { UserName: user.UserName, Role: user.Role };
           return acc;
         }, {});
         setUserMap(userMapping);
+        setUsers(usersData);
       } catch (error) {
         console.error("Failed to fetch user data", error);
       }
@@ -47,39 +54,26 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     setProjectResources(newResources);
   };
 
-  // const handleTaskChange = (resourceIndex, taskIndex, value) => {
-  //   const newResources = [...projectResources];
-  //   newResources[resourceIndex].tasks[taskIndex] = value;
-  //   setProjectResources(newResources);
-  // };
-
   const addResource = () => {
     setProjectResources([
       ...projectResources,
-      { Role: "", name: "", PlannedHours: "", tasks: [""] },
+      { UserID: "", Role: "", name: "", PlannedHours: " 0", tasks: [""] },
     ]);
   };
 
   const removeResource = (index) => {
     setProjectResources(projectResources.filter((_, i) => i !== index));
   };
-//TASKS
+
+  // Task management
   const handleManageTasks = (resourceId) => {
     navigate(`/manage-tasks/${resourceId}`);
   };
-  
-//Manage Tasks
+
   const addTask = (resourceIndex) => {
-    // Add a task and redirect to ManageTasksPage
     const resourceId = projectResources[resourceIndex].ResourceID;
     handleManageTasks(resourceId);
   };
-
-  // const removeTask = (resourceIndex, taskIndex) => {
-  //   const newResources = [...projectResources];
-  //   newResources[resourceIndex].tasks.splice(taskIndex, 1);
-  //   setProjectResources(newResources);
-  // };
 
   const submitForm = (e) => {
     e.preventDefault();
@@ -89,7 +83,8 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
       ProjectCode,
       Description,
       Budget,
-        Client: {
+      Status, // Include status in the updated project
+      Client: {
         CompanyName,
         CompanyDescription,
         ContactEmail,
@@ -105,11 +100,34 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   };
 
   // Map resources to include user names
-  const mappedResources = projectResources.map(resource => ({
+  // Map resources to include user names
+  const mappedResources = projectResources.map((resource) => ({
     ...resource,
-    name: userMap[resource.UserID] || "Unknown User", // Map UserID to user name
+    name:
+      (userMap[resource.UserID] && userMap[resource.UserID].UserName) ||
+      "Unknown User", // Ensure name is a string
   }));
 
+  // Filter users to exclude those already assigned
+  const unassignedUsers = users.filter(user => 
+    !projectResources.some(resource => resource.UserID === user.UserID)
+  );
+  const handleSelectChange = (e) => {
+    const selectedUserID = e.target.value;
+    if (selectedUserID) {
+      const selectedUser = userMap[selectedUserID];
+      setProjectResources([
+        ...projectResources,
+        {
+          UserID: selectedUserID,
+          Role: selectedUser.Role || "", // Use role from user data
+          name: selectedUser.UserName || "Unknown User", // Use name from user data
+          PlannedHours: "0", // Set initial planned hours to 0
+          tasks: [""],
+        },
+      ]);
+    }
+  };
   return (
     <>
       <section>
@@ -197,6 +215,25 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   onChange={(e) => setBudget(e.target.value)}
                 ></textarea>
               </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="status"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Project Status
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  className="border rounded w-full py-2 px-3"
+                  value={Status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Complete">Complete</option>
+                </select>
+              </div>
 
               <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
 
@@ -271,10 +308,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
               </div>
 
               <div className="mb-4">
-                <label
-                  htmlFor="contact_phone"
-                  className="block font-bold mb-2"
-                >
+                <label htmlFor="contact_phone" className="block font-bold mb-2">
                   Contact Phone
                 </label>
                 <input
@@ -308,24 +342,21 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   <div className="flex mb-2 items-center">
                     <input
                       type="text"
-                      id={`role-${resourceIndex}`}
-                      name={`role-${resourceIndex}`}
+                      name="Role"
                       className="border rounded py-2 px-3 w-1/4 mr-2"
                       value={resource.Role}
                       readOnly
                     />
                     <input
                       type="text"
-                      id={`name-${resourceIndex}`}
-                      name={`name-${resourceIndex}`}
+                      name="name"
                       className="border rounded py-2 px-3 w-1/4 mr-2"
                       value={resource.name}
                       readOnly
                     />
                     <input
                       type="number"
-                      id={`hours-${resourceIndex}`}
-                      name={`hours-${resourceIndex}`}
+                      name="Planned Hours"
                       className="border rounded py-2 px-3 w-1/4 mr-2"
                       value={resource.PlannedHours}
                       onChange={(e) =>
@@ -347,21 +378,32 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   {/* {DELETED} */}
                 </div>
               ))}
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center mr-2"
-                  onClick={addResource}
-                >
+
+              <div className="mb-4">
+                <label htmlFor="UserID" className="block font-bold mb-2">
                   Add Resource
-                </button>
-                <button
-                  type="submit"
-                  className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+                </label>
+                <select
+                  id="UserID"
+                  name="UserID"
+                  className="border rounded w-full py-2 px-3 mb-2"
+                  onChange={handleSelectChange}
                 >
-                  Update Project
-                </button>
+                  <option value="">Select a Resource</option>
+                  {unassignedUsers.map((user) => (
+                    <option key={user.UserID} value={user.UserID}>
+                      {user.UserName} ({user.Role})
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              <button
+                type="submit"
+                className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Update Project
+              </button>
             </form>
           </div>
         </div>

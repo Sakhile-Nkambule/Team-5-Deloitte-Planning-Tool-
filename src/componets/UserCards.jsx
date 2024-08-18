@@ -25,7 +25,7 @@ const UserCards = () => {
             View and update your profile information. You can also upload your CV to keep your information up to date.
             </p>
             <Link
-              to="/add-project"
+              to="/userProfile"
               className="inline-block bg-lime-500 text-white rounded-lg px-4 py-2 hover:bg-gray-700"
             >
               Go To Profile

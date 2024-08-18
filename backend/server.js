@@ -280,7 +280,6 @@ console.log(req.body);
   }
 });
 
-//Endpoint to Update Project
 app.put("/projects/:id", async (req, res) => {
   const projectId = req.params.id;
   const { ProjectCode, Title, Description, Budget, Status, Client, resources } = req.body;
@@ -320,40 +319,42 @@ app.put("/projects/:id", async (req, res) => {
           WHERE ClientID = (SELECT ClientID FROM projects WHERE ProjectID = @ProjectID)
         `);
 
-      // Delete existing tasks
+      // Delete existing resources and tasks
       await transaction.request()
         .input('ProjectID', sql.Int, projectId)
         .query(`
-          DELETE FROM tasks WHERE ResourceID IN (SELECT ResourceID FROM resources WHERE ProjectID = @ProjectID)
-        `);
-
-      // Delete existing resources
-      await transaction.request()
-        .input('ProjectID', sql.Int, projectId)
-        .query(`
+          DELETE FROM tasks WHERE ResourceID IN (SELECT ResourceID FROM resources WHERE ProjectID = @ProjectID);
           DELETE FROM resources WHERE ProjectID = @ProjectID
         `);
 
       // Insert new resources
-      const resourceValues = resources.map(resource => [
-        projectId,
-        resource.UserID,
-        resource.Role,
-        resource.PlannedHours
-      ]);
-      await transaction.request().query(`
-        INSERT INTO resources (ProjectID, UserID, Role, PlannedHours) 
-        VALUES ${resourceValues.map(() => '(?, ?, ?, ?)').join(', ')}
-      `, resourceValues.flat());
+      const resourceValues = resources.map(resource => ({
+        ProjectID: projectId,
+        UserID: resource.UserID,
+        Role: resource.Role,
+        PlannedHours: resource.PlannedHours
+      }));
+
+      for (const resource of resourceValues) {
+        await transaction.request()
+          .input('ProjectID', sql.Int, resource.ProjectID)
+          .input('UserID', sql.Int, resource.UserID)
+          .input('Role', sql.NVarChar, resource.Role)
+          .input('PlannedHours', sql.Decimal, resource.PlannedHours)
+          .query(`
+            INSERT INTO resources (ProjectID, UserID, Role, PlannedHours) 
+            VALUES (@ProjectID, @UserID, @Role, @PlannedHours)
+          `);
+      }
 
       await transaction.commit();
       res.json({ message: "Project and resources updated successfully" });
     } catch (err) {
       await transaction.rollback();
-      res.status(500).json("Error updating project: " + err);
+      res.status(500).json({ error: "Error updating project: " + err.message });
     }
   } catch (err) {
-    res.status(500).json("Error connecting to the database: " + err);
+    res.status(500).json({ error: "Error connecting to the database: " + err.message });
   }
 });
 
@@ -557,8 +558,7 @@ app.post('/login', async (req, res) => {
         email: user.Email,
         role: user.Role,
         rate: user.HourlyRate,
-        skills: user.SkillSet,
-        cvPath: user.CVPath,
+        
       });
     } else {
       // User not found
