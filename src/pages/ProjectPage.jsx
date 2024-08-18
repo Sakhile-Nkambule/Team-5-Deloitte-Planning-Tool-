@@ -132,7 +132,7 @@ const ProjectPage = ({ deleteProject }) => {
                   </button>
                 </div>
               )}
-            </aside>
+             </aside>
           </div>
         </div>
       </section>

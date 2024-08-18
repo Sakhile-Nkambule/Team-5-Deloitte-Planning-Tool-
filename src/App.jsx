@@ -20,7 +20,8 @@ import UserHomepage from "./pages/UserHomePage";
 import { UserProvider } from './componets/UserContext';
 import TaskBoard from "./pages/TaskBoard";
 import NotificationsPage from "./pages/NotificationsPage";
-
+import CreateUserAccount from "./pages/CreateUserAccount";
+import UserProfile from "./pages/UserProfilePage";
 const App = () => {
 
 
@@ -82,11 +83,13 @@ const deleteProject = async (id) => {
     createRoutesFromElements(
       <>
         <Route path="/" element={<LoginScreen />} />
+        <Route path="/auth/sign-up" element={<CreateUserAccount />} />
         <Route element={<MainLayout />}>
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/Userhomepage" element={<UserHomepage />} />
           <Route path="/projects" element={<Projectspage />} />
           <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
+          <Route path="/userProfile" element={<UserProfile/>}/>
           <Route path="/notifications" element={<NotificationsPage/>}/>
           <Route
             path="/add-project"
@@ -112,6 +115,7 @@ const deleteProject = async (id) => {
           <Route path="/dashboard/:projectId" element={<DashboardPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
+        
       </>
     )
   );

@@ -26,14 +26,34 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
   ];
 
   const [resources, setResources] = useState(initialResources);
-  //const [budget, setBudget] = useState(0);
+  const [availableUsers, setAvailableUsers] = useState([]);
   const [exhaustedBudget, setExhaustedBudget] = useState(0);
 
   useEffect(() => {
-    // Calculate initial budget from newProject's budget
-    // const parsedBudget = parseFloat(newProject.Budget.replace(/[^\d.-]/g, ""));
-    // setBudget(parsedBudget);
+    // Fetch users from the database
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users'); //
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const allUsers = await response.json();
+        console.log(allUsers);
 
+        // Filter out users who are already proposed
+        const proposedUserIDs = resources.map((resource) => resource.UserID);
+        const filteredUsers = allUsers.filter((user) => !proposedUserIDs.includes(user.UserID));
+
+        setAvailableUsers(filteredUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, [resources]);
+
+  useEffect(() => {
     // Calculate initial exhausted budget
     let totalHours = 0;
     resources.forEach((resource) => {
@@ -41,7 +61,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
     });
     const calculatedExhaustedBudget = 300 * totalHours; // Assuming a rate of R300 per hour
     setExhaustedBudget(calculatedExhaustedBudget);
-  }, [newProject, resources]);
+  }, [resources]);
 
   const handleResourceChange = (index, field, value) => {
     const newResources = [...resources];
@@ -49,13 +69,17 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
     setResources(newResources);
   };
 
-  const addNewResource = () => {
-    const newResource = {
-      role: "Partner/Director",
-      name: "",
-      hours: 0,
-    };
-    setResources([...resources, newResource]);
+  const addNewResource = (userID) => {
+    const selectedUser = availableUsers.find(user => user.UserID === userID);
+    if (selectedUser) {
+      const newResource = {
+        UserID: selectedUser.UserID,
+        role: selectedUser.Role,
+        name: selectedUser.UserName,
+        hours: 0,
+      };
+      setResources([...resources, newResource]);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -72,6 +96,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
   const regenerateResources = () => {
     setResources(regenerateResource);
   };
+
 
   return (
     <section className="bg-indigo-50">
@@ -105,6 +130,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
                   handleResourceChange(index, "name", e.target.value)
                 }
                 className="border rounded w-full py-2 px-3 mb-2"
+                disabled
               />
               <label className="block text-gray-700 font-bold mb-2">
                 Planned Working Hours
@@ -121,10 +147,11 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
           ))}
           <div className="flex justify-between mt-6">
             <button
-              onClick={regenerateResources}
-              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-            >
-              Regenerate List
+            
+               onClick={regenerateResources}
+               className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+             >
+               Regenerate List
             </button>
             <button
               onClick={handleSubmit}
@@ -134,14 +161,20 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
             </button>
           </div>
 
-          {/* Button to add new resource */}
-          <div className="flex justify-end mt-6">
-            <button
-              onClick={addNewResource}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+          {/* Dropdown to add new resource */}
+          <div className="flex flex-col mt-6">
+            <label className="block text-gray-700 font-bold mb-2">Add a Resorce</label>
+            <select
+              onChange={(e) => addNewResource(parseInt(e.target.value))}
+              className="border rounded w-full py-2 px-3 mb-2"
             >
-              Add New Resource
-            </button>
+              <option value="">Select a Resource</option>
+              {availableUsers.map((user) => (
+                <option key={user.UserID} value={user.UserID}>
+                  {user.UserName} ({user.Role})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         {/* Budget summary */}
