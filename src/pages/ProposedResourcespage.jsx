@@ -97,108 +97,162 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
     setResources(regenerateResource);
   };
 
+  // Function to send a notification to the Associate Director
+  const sendNotification = async () => {
+    // Find the Partner/Director from the resources array
+    const associateDirector = resources.find(
+      (resource) => resource.role === "Partner/Director"
+    );
+  
+    if (associateDirector) {
+      try {
+        const notificationData = {
+          UserID: associateDirector.UserID,
+          Message: "Permission requested for a project involving you.",
+          Type: "In-App",
+          Priority: "High",
+        };
+  
+        const response = await fetch("http://localhost:8081/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(notificationData),
+        });
+  
+        if (response.ok) {
+          toast.success("Permission request sent successfully");
+        } else {
+          toast.error("Failed to send permission request");
+        }
+      } catch (error) {
+        console.error("Error sending notification:", error);
+        toast.error("An error occurred while sending the permission request");
+      }
+    } else {
+      toast.error("No Partner/Director found in the resources");
+    }
+  };
+  
+  
+
 
   return (
-    <section className="bg-indigo-50">
-      <div className="container m-auto max-w-2xl py-24 flex">
-        <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0 flex-1">
-          <h2 className="text-3xl text-center font-semibold mb-6">
-            Proposed Resources
-          </h2>
-          {resources.map((resource, index) => (
-            <div key={index} className="mb-4">
-              <label className="block text-gray-700 font-bold mb-2">Role</label>
-              <select
-                value={resource.role}
-                onChange={(e) =>
-                  handleResourceChange(index, "role", e.target.value)
-                }
-                className="border rounded w-full py-2 px-3 mb-2"
-              >
-                <option value="Partner/Director">Partner/Director</option>
-                <option value="Senior Manager">Senior Manager</option>
-                <option value="Assistant Manager">Assistant Manager</option>
-                <option value="Associate Director">Associate Director</option>
-                <option value="Senior Assistant">Senior Assistant</option>
-                <option value="Junior Consultant">Junior Consultant</option>
-              </select>
-              <label className="block text-gray-700 font-bold mb-2">Name</label>
-              <input
-                type="text"
-                value={resource.name}
-                onChange={(e) =>
-                  handleResourceChange(index, "name", e.target.value)
-                }
-                className="border rounded w-full py-2 px-3 mb-2"
-                disabled
-              />
-              <label className="block text-gray-700 font-bold mb-2">
-                Planned Working Hours
-              </label>
-              <input
-                type="number"
-                value={resource.hours}
-                onChange={(e) =>
-                  handleResourceChange(index, "hours", e.target.value)
-                }
-                className="border rounded w-full py-2 px-3 mb-2"
-              />
-            </div>
-          ))}
-          <div className="flex justify-between mt-6">
-            <button
-            
-               onClick={regenerateResources}
-               className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-             >
-               Regenerate List
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-            >
-              Accept Resources
-            </button>
-          </div>
+<section className="bg-lime-50">
+  <div className="container m-auto py-24 relative">
+    <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
+      <h2 className="text-3xl text-center font-semibold mb-6">
+        Proposed Resources
+      </h2>
 
-          {/* Dropdown to add new resource */}
-          <div className="flex flex-col mt-6">
-            <label className="block text-gray-700 font-bold mb-2">Add a Resorce</label>
-            <select
-              onChange={(e) => addNewResource(parseInt(e.target.value))}
-              className="border rounded w-full py-2 px-3 mb-2"
-            >
-              <option value="">Select a Resource</option>
-              {availableUsers.map((user) => (
-                <option key={user.UserID} value={user.UserID}>
-                  {user.UserName} ({user.Role})
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Budget summary in the top right corner */}
+      <div className="absolute top-40 right-2 transform translate-x-1/2 -translate-y-1/2 bg-white h-64 p-6 shadow-md rounded-md border w-64">
+        <h2 className="text-2xl font-semibold mb-4 text-center">Budget Summary</h2>
+        <div className="mb-2">
+          <p className="text-gray-700 font-semibold">Total Budget:</p>
+          <p className="text-green-500 font-semibold">{newProject.Budget}</p>
         </div>
-        {/* Budget summary */}
-        <div className="bg-white p-6 mb-4 shadow-md rounded-md border m-4 md:m-0 w-64">
-          <h2 className="text-2xl font-semibold mb-4">Budget Summary</h2>
-          <div className="mb-2">
-            <p className="text-gray-700 font-semibold">Total Budget:</p>
-            <p className="text-green-500 font-semibold">{newProject.Budget}</p>
-          </div>
-          <div className="mb-2">
-            <p className="text-gray-700 font-semibold">Exhausted Budget:</p>
-            <p className="text-red-500 font-semibold">{exhaustedBudget}</p>
-          </div>
-          <div className="mt-4">
-            <p className="text-gray-700 font-semibold">Profit Margin:</p>
-            <p className="font-semibold">
-              {newProject.Budget - exhaustedBudget > 0
-                ? `R${newProject.Budget - exhaustedBudget}`
-                : "-"}
-            </p>
-          </div>
+        <div className="mb-2">
+          <p className="text-gray-700 font-semibold">Exhausted Budget:</p>
+          <p className="text-red-500 font-semibold">{exhaustedBudget}</p>
+        </div>
+        <div className="mt-4">
+          <p className="text-gray-700 font-semibold">Profit Margin:</p>
+          <p className="font-semibold">
+            {newProject.Budget - exhaustedBudget > 0
+              ? `R${newProject.Budget - exhaustedBudget}`
+              : "-"}
+          </p>
         </div>
       </div>
-    </section>
+
+      {/* Container for resource items */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-40">
+        {resources.map((resource, index) => (
+          <div key={index} className="mb-4 shadow-lg p-4 border rounded-md">
+            <label className="block text-gray-700 font-bold mb-2">Role</label>
+            <select
+              value={resource.role}
+              onChange={(e) =>
+                handleResourceChange(index, "role", e.target.value)
+              }
+              className="border rounded w-full py-2 px-3 mb-2"
+            >
+              <option value="Partner/Director">Partner/Director</option>
+              <option value="Senior Manager">Senior Manager</option>
+              <option value="Assistant Manager">Assistant Manager</option>
+              <option value="Associate Director">Associate Director</option>
+              <option value="Senior Assistant">Senior Assistant</option>
+              <option value="Junior Consultant">Junior Consultant</option>
+            </select>
+            <label className="block text-gray-700 font-bold mb-2">Name</label>
+            <input
+              type="text"
+              value={resource.name}
+              onChange={(e) =>
+                handleResourceChange(index, "name", e.target.value)
+              }
+              className="border rounded w-full py-2 px-3 mb-2"
+              disabled
+            />
+            <label className="block text-gray-700 font-bold mb-2">
+              Planned Working Hours
+            </label>
+            <input
+              type="number"
+              value={resource.hours}
+              onChange={(e) =>
+                handleResourceChange(index, "hours", e.target.value)
+              }
+              className="border rounded w-full py-2 px-3 mb-2"
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between mt-6">
+        <button
+          onClick={regenerateResources}
+          className="bg-blue-600 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+        >
+          Regenerate List
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+        >
+          Accept Resources
+        </button>
+        <button
+          onClick={sendNotification}
+          className="bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+        >
+          Request Permission
+        </button>
+      </div>
+
+      {/* Dropdown to add new resource */}
+      <div className="flex flex-col mt-6">
+        <label className="block text-gray-700 font-bold mb-2">
+          Add a Resource
+        </label>
+        <select
+          onChange={(e) => addNewResource(parseInt(e.target.value))}
+          className="border rounded w-full py-2 px-3 mb-2"
+        >
+          <option value="">Select a Resource</option>
+          {availableUsers.map((user) => (
+            <option key={user.UserID} value={user.UserID}>
+              {user.UserName} ({user.Role})
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
+
+
   );
 };
 

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-
+import { toast } from "react-toastify";
 const ManageTasksPage = () => {
   const { resourceId } = useParams(); // Get resourceId from URL params
   const [resource, setResource] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState(""); // Store specific user name
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,23 +21,29 @@ const ManageTasksPage = () => {
           UserID: resourceData.UserID,
           Role: resourceData.Role,
           PlannedHours: resourceData.PlannedHours,
+          Projectid: resourceData.ProjectID,
         });
         setTasks(resourceData.Tasks || []);
-
-        // Fetch user data for the specific resource
-        const userResponse = await fetch(`/api/user/${resourceData.UserID}`);
-        const user = await userResponse.json();
-        setUserName(user.UserName || "Unknown User");
-
+  
+        // Check if UserID exists before fetching user data
+        if (resourceData.UserID) {
+          const userResponse = await fetch(`/api/user/${resourceData.UserID}`);
+          const user = await userResponse.json();
+          setUserName(user.UserName || "Unknown User");
+        } else {
+          setUserName("Unknown User");
+        }
+  
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch data", error);
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
   }, [resourceId]);
+  
 
   const handleTaskChange = (taskId, field, value) => {
     setTasks(
@@ -100,6 +107,44 @@ const ManageTasksPage = () => {
       alert("Tasks saved successfully!");
     } catch (error) {
       console.error("Failed to save tasks", error);
+    }
+  };
+
+
+  const sendNotification = async () => {
+    // Find the Partner/Director from the resources array
+    // const associateDirector = resources.find(
+    //   (resource) => resource.role === "Partner/Director"
+    // );
+  
+    if (resourceId) {
+      try {
+        const notificationData = {
+          UserID: resource.UserID,
+          Message: `You have been assigned a task on project ${resource.Projectid} `,
+          Type: "In-App",
+          Priority: "High",
+        };
+  
+        const response = await fetch("http://localhost:8081/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(notificationData),
+        });
+  
+        if (response.ok) {
+          toast.success("Task Notification sent successfully");
+        } else {
+          toast.error("Failed to send Task Notification");
+        }
+      } catch (error) {
+        console.error("Error sending notification:", error);
+        toast.error("An error occurred while sending the ");
+      }
+    } else {
+      toast.error("No Partner/Director found in the resources");
     }
   };
 
@@ -172,7 +217,9 @@ const ManageTasksPage = () => {
       <button
         type="button"
         className="bg-green-500 text-white rounded px-4 py-2 mt-4 ml-4"
-        onClick={saveTasks}
+        onClick={()=>{saveTasks();
+           sendNotification();
+          }}
       >
         Save Tasks
       </button>
