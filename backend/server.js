@@ -69,6 +69,45 @@ app.get("/notifications/:userID", async (req, res) => {
   }
 });
 
+//Endpoint to create a new notification
+app.post("/notifications", async (req, res) => {
+  const { UserID, Message, Type, Priority } = req.body;
+
+  try {
+    const [result] = await pool.query(
+      "INSERT INTO Deloitte.notifications (UserID, Message, Type, CreatedAt, Read_, Priority) VALUES (?, ?, ?, NOW(), 0, ?)",
+      [UserID, Message, Type, Priority]
+    );
+
+    if (result.affectedRows === 1) {
+      res.status(201).send({ message: 'Notification created successfully' });
+    } else {
+      res.status(400).send({ message: 'Failed to create notification' });
+    }
+  } catch (err) {
+    res.status(500).send({ message: 'Server error occurred' });
+  }
+});
+
+//end point to delete a notification
+app.delete("/notifications/:id", async (req, res) => {
+  const NotificationID = req.params.id;
+
+  try {
+    const [result] = await pool.query("DELETE FROM notifications WHERE NotificationID = ?", [NotificationID]);
+
+    if (result.affectedRows === 1) {
+      res.status(204).send();
+    } else {
+      res.status(404).send({ message: 'Notification not found' });
+    }
+  } catch (err) {
+    res.status(500).send({ message: 'Server error occurred' });
+  }
+});
+
+
+
 // Endpoint to get the company associated with a project
 app.get("/company/:projectId", async (req, res) => {
   try {
@@ -95,23 +134,27 @@ app.get("/resources/:projectId", async (req, res) => {
   }
 });
 
-// Endpoint to get tasks assigned to a user on a project
 app.get("/tasks/:resourceId", async (req, res) => {
   try {
     const resourceId = req.params.resourceId;
     const [rows] = await pool.query(`
-      SELECT r.ResourceID, r.UserID, r.Role, r.PlannedHours,
+      SELECT r.ResourceID, r.UserID, r.Role, r.PlannedHours, r.ProjectID, 
              t.TaskID, t.Description AS TaskDescription, t.Status
       FROM resources r
       LEFT JOIN tasks t ON r.ResourceID = t.ResourceID
       WHERE r.ResourceID = ?
     `, [resourceId]);
 
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Resource not found" });
+    }
+
     const resource = {
-      ResourceID: rows[0]?.ResourceID,
-      UserID: rows[0]?.UserID,
-      Role: rows[0]?.Role,
-      PlannedHours: rows[0]?.PlannedHours,
+      ResourceID: rows[0].ResourceID,
+      UserID: rows[0].UserID,
+      Role: rows[0].Role,
+      PlannedHours: rows[0].PlannedHours,
+      ProjectID: rows[0].ProjectID,
       Tasks: rows.filter(row => row.TaskID !== null).map(row => ({
         TaskID: row.TaskID,
         Description: row.TaskDescription,
@@ -121,9 +164,11 @@ app.get("/tasks/:resourceId", async (req, res) => {
     
     res.json(resource);
   } catch (err) {
+    console.error("Error executing query:", err);
     res.status(500).json({ error: "Error executing query" });
   }
 });
+
 
 // Endpoint to get all users
 app.get("/users", async (req, res) => {
