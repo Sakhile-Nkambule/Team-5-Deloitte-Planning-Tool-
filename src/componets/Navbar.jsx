@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import logo from '../assets/Images/logo.jpg';
 import { useUser } from '../componets/UserContext';
+import { toast } from "react-toastify";
 
 const Navbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -15,6 +16,12 @@ const Navbar = () => {
 
     const handleLogout = () => {
         console.log('Logged out');
+        const confirm = window.confirm(
+            "Are you sure you want to log Out?"
+          );
+
+          if (!confirm) return;
+          toast.success("Successfully Logged Out");
         navigate('/');
     };
 

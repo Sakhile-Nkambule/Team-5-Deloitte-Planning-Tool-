@@ -22,6 +22,7 @@ import TaskBoard from "./pages/TaskBoard";
 import NotificationsPage from "./pages/NotificationsPage";
 import CreateUserAccount from "./pages/CreateUserAccount";
 import UserProfile from "./pages/UserProfilePage";
+//import VerifyEmail from "./pages/VerificationPage";
 const App = () => {
 
 
@@ -83,6 +84,8 @@ const deleteProject = async (id) => {
     createRoutesFromElements(
       <>
         <Route path="/" element={<LoginScreen />} />
+        {/* <Route path="/verify-email" element={<VerifyEmail />} /> */}
+        
         <Route path="/auth/sign-up" element={<CreateUserAccount />} />
         <Route element={<MainLayout />}>
           <Route path="/homepage" element={<Homepage />} />

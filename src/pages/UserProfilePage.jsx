@@ -1,5 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../componets/UserContext';
+import { toast } from "react-toastify";
+
+const CompetencyKey = () => (
+  <div className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+    <h4 className="text-black text-lg font-semibold mb-2">Competency Levels</h4>
+    <ul className="list-disc list-inside">
+      <li><strong>Not assigned:</strong> When proficiency is 0%</li>
+      <li><strong>Beginner:</strong> When proficiency is between 1% and 35%</li>
+      <li><strong>Intermediate:</strong> When proficiency is between 36% and 70%</li>
+      <li><strong>Advanced:</strong> When proficiency is between 71% and 100%</li>
+    </ul>
+  </div>
+);
+
+const getColorClass = (proficiency) => {
+  if (proficiency >= 1 && proficiency <= 30) {
+    return 'bg-red-500'; // Red for 1%-30%
+  } else if (proficiency >= 40 && proficiency <= 70) {
+    return 'bg-orange-500'; // Orange for 40%-70%
+  } else if (proficiency >= 80 && proficiency <= 100) {
+    return 'bg-lime-500'; // Lime Green for 80%-100%
+  } else {
+    return 'bg-gray-300'; // Default for 0%
+  }
+};
 
 const UserProfilePage = () => {
   const { user } = useUser();
@@ -7,13 +32,7 @@ const UserProfilePage = () => {
   const [email, setEmail] = useState(user?.email || '');
   const [role, setRole] = useState(user?.role || '');
   const [hourlyRate, setHourlyRate] = useState(user?.rate || '');
-  const [skills, setSkills] = useState({
-    'Cloud Migration': 0,
-    'SAP': 0,
-    'SQL': 0,
-    'Great Plains': 0,
-    'Sage': 0,
-  });
+  const [skills, setSkills] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -21,33 +40,52 @@ const UserProfilePage = () => {
       setEmail(user.email);
       setRole(user.role);
       setHourlyRate(user.rate);
+      
+      // Fetch user skills from the API
+      fetch(`/api/SkillSets/${user.id}`)
+        .then(response => response.json())
+        .then(data => setSkills(data))
+        .catch(error => console.error('Error fetching skills:', error));
     }
   }, [user]);
 
   const handleSkillChange = (skill, value) => {
-    setSkills({ ...skills, [skill]: value });
+    setSkills(prevSkills => ({ ...prevSkills, [skill]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission for updating user profile
+    
+    // Update user profile
     console.log('User profile updated:', { name, email, role, hourlyRate, skills });
+    toast.success("Profile updated Successfully");
+    // Send updated skills to the API
+    fetch(`/api/Skillsets/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ skills }),
+    })
+      .then(response => response.json())
+      .then(data => console.log('Skills updated:', data))
+      .catch(error => console.error('Error updating skills:', error));
   };
 
   const renderSkillBar = (skill) => {
-    const proficiency = skills[skill];
+    const proficiency = skills[skill] || 0;
 
     return (
       <div key={skill} className="mb-4">
         <div className="flex items-center">
           <span className="block text-gray-700 font-bold w-32">{skill}</span>
-          <div className="flex gap-2">
-            {[25, 50, 75, 100].map((percent, index) => (
+          <div className="flex gap-1">
+            {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((percent, index) => (
               <div
-                key={index}
-                className={`w-6 h-6 cursor-pointer ${
-                  proficiency >= percent ? 'bg-lime-500' : 'bg-gray-300'
-                }`}
+              key={index}
+              className={`w-6 h-6 cursor-pointer ${getColorClass(percent)} ${
+                proficiency >= percent ? 'bg-opacity-100' : 'bg-opacity-5'
+              }`}
                 onClick={() => handleSkillChange(skill, percent)}
               />
             ))}
@@ -97,16 +135,24 @@ const UserProfilePage = () => {
 
             <div className="mb-4">
               <label htmlFor="role" className="block text-gray-700 font-bold mb-2">
-                Role
-              </label>
-              <input
-                type="text"
-                id="role"
-                name="role"
-                className="border rounded w-full py-2 px-3"
+              Role
+              <select
+                className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-              />
+              >
+                <option value="">Select a Role</option>
+                <option value="Director">Director</option>
+                <option value="Senior Manager">Senior Manager</option>
+                <option value="Assistant Manager">Assistant Manager</option>
+                <option value="Associate Director">Associate Director</option>
+                <option value="Assistant">Assistant</option>
+                <option value="Jnr Consultant">Jnr Consultant</option>
+                <option value="Assistant">Analyst</option>
+                
+              </select>
+              </label>
+              
             </div>
 
             <div className="mb-4">
@@ -123,6 +169,7 @@ const UserProfilePage = () => {
               />
             </div>
 
+            <CompetencyKey />
             <div className="mt-6">
               <h3 className="text-black text-xl font-semibold mb-4">
                 Skillsets & Proficiency
