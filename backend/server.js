@@ -1,13 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
+require('dotenv').config();
 
 // Configure the MySQL database connection
 const dbConfig = {
-  host: "deloitte-db.c9c0aemkm0fq.us-east-1.rds.amazonaws.com",
-  user: "Sakhile",
-  password: "Team5Deloitte123",
-  database: "Deloitte",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 };
 
 const app = express();
@@ -430,6 +431,78 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Database error');
   }
 });
+//registration
+app.post('/register', async (req, res) => {
+  const { username, email, role, password } = req.body;
+
+  if (!username || !email || !role || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  const query = 'INSERT INTO users (UserName, Email, Role, Password) VALUES (?, ?, ?, ?)';
+
+  pool.query(query, [username, email, role, password], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Failed to register user' });
+    }
+    res.status(201).json({ message: 'User registered successfully' });
+  });
+});
+
+// Endpoint to get user skills
+app.get("/skillsets/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const [rows] = await pool.query(`
+      SELECT Skillset, Proficiency
+      FROM Skillsets
+      WHERE UserID = ?
+    `, [userId]);
+
+    if (rows.length === 0) return res.status(404).json({ message: 'No skills found for this user.' });
+
+    // Transform rows into an object where the skill is the key and proficiency is the value
+    const skills = rows.reduce((acc, { Skillset, Proficiency }) => {
+      acc[Skillset] = Proficiency;
+      return acc;
+    }, {});
+
+    res.json(skills);
+  } catch (err) {
+    res.status(500).json("Error executing query: " + err);
+  }
+});
+
+
+// Endpoint to update user skills
+app.put("/skillsets/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const { skills } = req.body; // Expecting skills to be an object with skill names and proficiency values
+
+  try {
+    await pool.query('START TRANSACTION'); // Begin transaction
+
+    // Delete existing skills for the user
+    await pool.query('DELETE FROM Skillsets WHERE UserID = ?', [userId]);
+
+    // Insert new skills
+    const skillEntries = Object.entries(skills);
+    const insertPromises = skillEntries.map(([skill, proficiency]) =>
+      pool.query('INSERT INTO Skillsets (UserID, Skillset, Proficiency) VALUES (?, ?, ?)', [userId, skill, proficiency])
+    );
+    
+    await Promise.all(insertPromises); // Execute all insert queries
+
+    await pool.query('COMMIT'); // Commit transaction
+
+    res.status(200).json({ message: 'Skills updated successfully' });
+  } catch (err) {
+    await pool.query('ROLLBACK'); // Rollback transaction on error
+    res.status(500).json("Error executing query: " + err);
+  }
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 8081;

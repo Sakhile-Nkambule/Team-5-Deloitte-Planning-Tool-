@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { toast } from "react-toastify";
 
 export function CreateUserAccount() {
   const navigate = useNavigate();
@@ -9,30 +12,69 @@ export function CreateUserAccount() {
   const [role, setRole] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false); // Changed to boolean to track success state
+
+  useEffect(() => {
+    if (success) {
+      toast.success("Verification Email Sent");
+      navigate('/'); // Navigate to login when success is true
+    }
+  }, [success, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const username = `${name} ${surname}`; // Combine name and surname to form the Username
+
+    const username = `${name} ${surname}`;
 
     try {
-      // Assuming you have an endpoint for Azure authentication and user creation
-      const res = await fetch('http://localhost:8081/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, role, password }),
-      });
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      if (res.ok) {
-        // Navigate to the login page after successful registration
-        navigate('/auth/sign-in');
-      } else {
-        setError('Failed to create account');
-      }
+      await sendEmailVerification(user);
+
+      setSuccess(true ); // Set success to true on successful email verification
+
+      localStorage.setItem('pendingUser', JSON.stringify({ username, email, role, password }));
+
+      const checkVerification = setInterval(async () => {
+        await user.reload();
+        if (user.emailVerified) {
+          clearInterval(checkVerification);
+
+          const pendingUser = localStorage.getItem('pendingUser');
+          if (pendingUser) {
+            const userData = JSON.parse(pendingUser);
+
+            try {
+              const response = await fetch('http://localhost:8081/register', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+              });
+
+              if (response.ok) {
+                localStorage.removeItem('pendingUser');
+                setSuccess(true); // Set success to true to trigger navigation
+              } else {
+                setError('Failed to register user in the database');
+              }
+            } catch (err) {
+              setError('Failed to register user in the database: ' + err.message);
+            }
+          }
+        }
+      }, 5000); // Check every 5 seconds
+
+      setName('');
+      setSurname('');
+      setEmail('');
+      setRole('');
+      setPassword('');
+
     } catch (err) {
-      setError('Failed to create account');
+      setError('Failed to create account: ' + err.message);
     }
   };
 
@@ -45,6 +87,7 @@ export function CreateUserAccount() {
         </div>
         <form onSubmit={handleSubmit} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
           {error && <p className="text-red-500">{error}</p>}
+          {success && <p className="text-green-500">Account created successfully. Redirecting to login...</p>}
           <div className="mb-1 flex flex-col gap-6">
             <label className="text-sm text-gray-500 font-medium mb-3">
               Name

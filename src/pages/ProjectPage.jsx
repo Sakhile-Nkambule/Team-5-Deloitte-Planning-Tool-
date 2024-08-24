@@ -115,7 +115,7 @@ const ProjectPage = ({ deleteProject }) => {
               </div>
 
               {/* Manage */}
-              {userRole === 'Planning Team' && (
+              {['Planning Team', 'Director', 'Senior Manager'].includes(userRole)&& (
                 <div className="bg-white p-6 rounded-lg shadow-md mt-6">
                   <h3 className="text-xl font-bold mb-6">Manage Project</h3>
                   <Link
