@@ -6,7 +6,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { newProject } = location.state;
-
+  console.log(newProject);
   const initialResources = [
     { UserID: 1, role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 40 },
     { UserID: 2, role: "Senior Manager", name: "Hlubi Mavinjelwa", hours: 30 },
@@ -15,7 +15,7 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
     { UserID: 5, role: "Senior Assistant", name: "Mega Gama", hours: 20 },
     { UserID: 6, role: "Junior Consultant", name: "Saneliso Surtee", hours: 15 },
   ];
-
+  
   const regenerateResource = [
     { role: "Partner/Director", name: "Tadiwa Mukuvudza", hours: 35 },
     { role: "Senior Manager", name: "Sakhile Nkambule", hours: 30 },
@@ -139,36 +139,39 @@ const ProposedResourcespage = ({ addProjectSubmit }) => {
 
 
   return (
-<section className="bg-lime-50">
+<section className="bg-lime-100">
   <div className="container m-auto py-24 relative">
     <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
-      <h2 className="text-3xl text-center font-semibold mb-6">
+      <h2 className="text-5xl text-center font-semibold mb-6">
         Proposed Resources
       </h2>
 
       {/* Budget summary in the top right corner */}
-      <div className="absolute top-40 right-2 transform translate-x-1/2 -translate-y-1/2 bg-white h-64 p-6 shadow-md rounded-md border w-64">
+      <div className=" bg-white  p-6 shadow-md rounded-full border w-full">
         <h2 className="text-2xl font-semibold mb-4 text-center">Budget Summary</h2>
-        <div className="mb-2">
-          <p className="text-gray-700 font-semibold">Total Budget:</p>
-          <p className="text-green-500 font-semibold">{newProject.Budget}</p>
-        </div>
-        <div className="mb-2">
-          <p className="text-gray-700 font-semibold">Exhausted Budget:</p>
-          <p className="text-red-500 font-semibold">{exhaustedBudget}</p>
-        </div>
-        <div className="mt-4">
-          <p className="text-gray-700 font-semibold">Profit Margin:</p>
-          <p className="font-semibold">
-            {newProject.Budget - exhaustedBudget > 0
-              ? `R${newProject.Budget - exhaustedBudget}`
-              : "-"}
-          </p>
-        </div>
+        <div className="flex justify-center space-x-40">
+    <div className="mb-2">
+      <p className="text-gray-700 font-semibold">Total Budget:</p>
+      <p className="text-green-500 font-semibold">{newProject.Budget}</p>
+    </div>
+    <div className="mb-2">
+      <p className="text-gray-700 font-semibold">Exhausted Budget:</p>
+      <p className="text-red-500 font-semibold">{exhaustedBudget}</p>
+    </div>
+    <div className="mt-4">
+      <p className="text-gray-700 font-semibold">Profit Margin:</p>
+      <p className="font-semibold">
+        {newProject.Budget - exhaustedBudget > 0
+          ? `R${newProject.Budget - exhaustedBudget}`
+          : "-"}
+    </p>
+  </div>
+</div>
+
       </div>
 
       {/* Container for resource items */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-40">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
         {resources.map((resource, index) => (
           <div key={index} className="mb-4 shadow-lg p-4 border rounded-md">
             <label className="block text-gray-700 font-bold mb-2">Role</label>

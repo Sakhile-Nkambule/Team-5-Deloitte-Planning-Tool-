@@ -11,17 +11,54 @@ const AddProjectPage = () => {
   const [companyDescription, setCompanyDescription] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
-  const status = 'pending';
+  const [complexity, setComplexity] = useState("High");
+  const [checkedItems, setCheckedItems] = useState({});
+
+  const items = [
+    "SAP",
+    "JDE",
+    "Oracle",
+    "Genric Application",
+    "Microsoft SQL",
+    "Oracle DB",
+    "Linux",
+    "Microsoft OS",
+    "Active Directory",
+    "Cyber memo",
+    "CTRA",
+    "DCNO",
+    "SAP-AUTO",
+    "AUTO",
+    "REVIEW",
+    "Project Management",
+  ];
+
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    setCheckedItems((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
+  const status = "pending";
   const navigate = useNavigate();
 
   const submitForm = (e) => {
     e.preventDefault();
+
+    // Get the names of only the checked checkboxes
+    const selectedItems = Object.keys(checkedItems).filter(
+    (key) => checkedItems[key] === true
+  );
     const newProject = {
       title,
       projectCode,
       status,
       description,
       budget,
+      complexity,
+      selectedApplications: selectedItems, // Pass the names of checked checkboxes
       Client: {
         companyName,
         companyDescription,
@@ -30,26 +67,22 @@ const AddProjectPage = () => {
         companyLocation,
       },
     };
-    console.log(newProject);
+    
     navigate("/proposed-resources", { state: { newProject } });
   };
 
   return (
     <section className="bg-lime-100">
-      <div className="container m-auto max-w-4xl py-24">
+      <div className="container m-auto w-full py-24">
         <div className="bg-white p-6 shadow-md rounded-md border m-4">
           <h2 className="text-black text-3xl justify-center text-center font-semibold mb-2">
             Add Project
           </h2>
-          <form onSubmit={submitForm} className="md:grid md:grid-cols-2 md:gap-4 ">
-            <div className="md:col-span-2 ">
-            </div>
-            <div className="pr-4 border-r-2">
-              <div className="mb-4 ">
-              <h3 className="text-lime-500 text-2xl mb-5 ">Project Info</h3>
-                <label className="block text-gray-700 font-bold mb-2">
-                  Project Code
-                </label>
+          <form onSubmit={submitForm} className="md:grid md:grid-cols-3 md:gap-4 ">
+            <div className="pr-4 border-r-2 col-span-1">
+              <div className="mb-4">
+                <h3 className="text-lime-500 text-2xl mb-5">Project Info</h3>
+                <label className="block text-gray-700 font-bold mb-2">Project Code</label>
                 <input
                   type="text"
                   id="ProjectCode"
@@ -61,9 +94,7 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Project Name
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Project Name</label>
                 <input
                   type="text"
                   id="Title"
@@ -76,9 +107,7 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Description
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Description</label>
                 <textarea
                   id="Description"
                   name="Description"
@@ -90,9 +119,7 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Project Budget
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Project Budget</label>
                 <input
                   type="text"
                   id="Budget"
@@ -104,14 +131,24 @@ const AddProjectPage = () => {
                   onChange={(e) => setBudget(e.target.value)}
                 />
               </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-bold mb-2">Project Complexity</label>
+                <select
+                  value={complexity}
+                  onChange={(e) => setComplexity(e.target.value)}
+                  className="border rounded w-full py-2 px-3 mb-2"
+                >
+                  <option value="High">High</option>
+                  <option value="Mid">Mid</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
             </div>
-            
-            <div>
+
+            <div className="col-span-1 border-r-2 pr-4">
               <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Company Name
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Company Name</label>
                 <input
                   type="text"
                   id="CompanyName"
@@ -123,9 +160,7 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Company Description
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Company Description</label>
                 <textarea
                   id="CompanyDescription"
                   name="CompanyDescription"
@@ -137,9 +172,7 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Location
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Location</label>
                 <input
                   type="text"
                   id="location"
@@ -152,9 +185,7 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Contact Email
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Contact Email</label>
                 <input
                   type="email"
                   id="contact_email"
@@ -167,9 +198,7 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Contact Phone
-                </label>
+                <label className="block text-gray-700 font-bold mb-2">Contact Phone</label>
                 <input
                   type="tel"
                   id="contact_phone"
@@ -181,8 +210,32 @@ const AddProjectPage = () => {
                 />
               </div>
             </div>
-  
-            <div className="col-span-2">
+
+            <div className="col-span-1 ">
+              <h3 className="text-lime-500 text-2xl mb-5">Required Systems</h3>
+              <div className="space-y-2 ">
+                {items.map((item, index) => (
+                  <label key={index} className="flex justify-items-end space-x-2">
+                    <input
+                      type="checkbox"
+                      name={item}
+                      checked={checkedItems[item] || false}
+                      onChange={handleCheckboxChange}
+                      className="form-checkbox h-5 w-4"
+                    />
+                    <span
+                      className={`${
+                        checkedItems[item] ? "text-lime-500 font-bold" : "text-gray-900"
+                      }`}
+                    >
+                      {item}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="col-span-3">
               <button
                 className="bg-lime-500 hover:bg-lime-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
                 type="submit"
@@ -195,7 +248,6 @@ const AddProjectPage = () => {
       </div>
     </section>
   );
-  
 };
 
 export default AddProjectPage;
