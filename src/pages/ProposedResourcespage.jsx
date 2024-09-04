@@ -5,6 +5,7 @@
   const ProposedResourcespage = ({ addProjectSubmit }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    console.log(newProject);
     const { newProject } = location.state;
 
     const initialResources = [
@@ -24,6 +25,8 @@
       { role: "Jnr Assistant", name: "Allen Harper", hours: 15 },
       { role: "Consultant", name: "Jake Harper", hours: 15 },
     ];
+
+
 
     const [resources, setResources] = useState(initialResources);
 
@@ -168,7 +171,6 @@
     
     
 
-
     return (
   <section className="bg-lime-50">
     <div className="container m-auto py-24 relative">
@@ -272,6 +274,7 @@
             Request Permission
           </button>
         </div>
+  
 
         {/* Dropdown to add new resource */}
         <div className="flex flex-col mt-6">
