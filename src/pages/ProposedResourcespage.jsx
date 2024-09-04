@@ -5,8 +5,9 @@
   const ProposedResourcespage = ({ addProjectSubmit }) => {
     const location = useLocation();
     const navigate = useNavigate();
-    console.log(newProject);
+    
     const { newProject } = location.state;
+    console.log(newProject);
 
     const initialResources = [
       { UserID: 1, role: "Director", name: "Tadiwa Mukuvudza", hours: 40 },
