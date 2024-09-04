@@ -5,7 +5,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const EditProjectPage = ({ updateProjectSubmit }) => {
-  const { project, client, resources } = useLoaderData();
+  const { project, client, resources, financials } = useLoaderData();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -23,16 +23,23 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   );
   const [ContactPhone, setContactPhone] = useState(client.ContactPhone);
   const [ContactEmail, setContactEmail] = useState(client.ContactEmail);
+  const [exhaustedBudget, setExhaustedBudget] = useState(0);
+  const [profitMargin, setProfitMargin] = useState(0);
+  const [netRevenue, setNetRevenue] = useState(0);
+  const [recoveryRate, setRecoveryRate] = useState(0);
+
   const [projectResources, setProjectResources] = useState(resources || []);
   const [userMap, setUserMap] = useState({});
   const [users, setUsers] = useState([]);
 
   // Fetching user data to get name of resource using UserID
+
   useEffect(() => {
     // Fetch user data when the component mounts
     const fetchUserData = async () => {
       try {
         const response = await fetch("/api/users");
+        if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
         const userMapping = usersData.reduce((acc, user) => {
           acc[user.UserID] = { UserName: user.UserName, Role: user.Role };
@@ -41,12 +48,39 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
         setUserMap(userMapping);
         setUsers(usersData);
       } catch (error) {
-        console.error("Failed to fetch user data", error);
+        toast.error("Failed to fetch user data");
+        console.error(error);
       }
     };
 
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    // Calculate financial metrics whenever resources or budget changes
+    const calculateFinancials = () => {
+      let totalHours = resources.reduce(
+        (acc, resource) => acc + parseInt(resource.PlannedHours || 0),
+        0
+      );
+      const calculatedExhaustedBudget = 300 * totalHours; // Adjust the rate if necessary
+      setExhaustedBudget(calculatedExhaustedBudget);
+
+      const formattedBudget = Math.round(Budget);
+      const calculatedNetRevenue = formattedBudget - calculatedExhaustedBudget;
+      setNetRevenue(calculatedNetRevenue);
+
+      const calculatedProfitMargin = formattedBudget
+        ? (calculatedNetRevenue / formattedBudget) * 100
+        : 0;
+      setProfitMargin(calculatedProfitMargin);
+
+      const calculatedRecoveryRate = 100 - calculatedProfitMargin;
+      setRecoveryRate(calculatedRecoveryRate);
+    };
+
+    calculateFinancials();
+  }, [resources, Budget]);
 
   const handleResourceChange = (index, field, value) => {
     const newResources = [...projectResources];
@@ -109,8 +143,9 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   }));
 
   // Filter users to exclude those already assigned
-  const unassignedUsers = users.filter(user => 
-    !projectResources.some(resource => resource.UserID === user.UserID)
+  const unassignedUsers = users.filter(
+    (user) =>
+      !projectResources.some((resource) => resource.UserID === user.UserID)
   );
   const handleSelectChange = (e) => {
     const selectedUserID = e.target.value;
@@ -140,6 +175,33 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
           </Link>
         </div>
       </section>
+
+      <div className="absolute top-80 right-20 transform translate-x-1/2 -translate-y-1/2 bg-white h-120 p-6 shadow-md rounded-md border w-100">
+        <h2 className="text-2xl font-semibold mb-4 text-center">
+          Budget Summary
+        </h2>
+        <div className="mb-2">
+          <p className="text-gray-700 font-semibold">Gross Revenue:</p>
+          <p className="text-green-500 font-semibold">{`R${project.Budget}`}</p>
+        </div>
+
+        <div className="mb-2">
+          <p className="text-gray-700 font-semibold">Total Costs:</p>
+          <p className="text-red-500 font-semibold">{`R${exhaustedBudget}`}</p>
+        </div>
+        <div className="mt-4">
+          <p className="text-gray-700 font-semibold">Net Revenue:</p>
+          <p className="font-semibold">{`R${netRevenue}`}</p>
+        </div>
+        <div className="mt-4">
+          <p className="text-gray-700 font-semibold">Profit Margin:</p>
+          <p className="font-semibold">{`${profitMargin}%`}</p>
+        </div>
+        <div className="mb-2">
+          <p className="text-gray-700 font-semibold">Recovery Rate:</p>
+          <p className="text-red-500 font-semibold">{`${recoveryRate}%`}</p>
+        </div>
+      </div>
       <section className="bg-lime-100">
         <div className="container m-auto max-w-2xl py-24">
           <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
