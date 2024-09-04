@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
-require('dotenv').config();
+require("dotenv").config();
 
 // Configure the MySQL database connection
 const dbConfig = {
@@ -33,12 +33,15 @@ app.get("/projects", async (req, res) => {
 app.get("/user-projects/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
-    const [rows] = await pool.query(`
+    const [rows] = await pool.query(
+      `
       SELECT p.ProjectID, p.ProjectCode, p.Title, p.Description, p.Budget, p.ClientID, p.Status
       FROM projects p
       JOIN resources r ON p.ProjectID = r.ProjectID
       WHERE r.UserID = ?
-    `, [userId]);
+    `,
+      [userId]
+    );
     res.json(rows);
   } catch (err) {
     res.status(500).json("Error executing query: " + err);
@@ -49,7 +52,10 @@ app.get("/user-projects/:userId", async (req, res) => {
 app.get("/project/:id", async (req, res) => {
   try {
     const projectId = req.params.id;
-    const [rows] = await pool.query("SELECT * FROM projects WHERE ProjectID = ?", [projectId]);
+    const [rows] = await pool.query(
+      "SELECT * FROM projects WHERE ProjectID = ?",
+      [projectId]
+    );
     if (rows.length === 0) return res.status(404).json("Project not found");
     res.json(rows[0]);
   } catch (err) {
@@ -61,11 +67,17 @@ app.get("/project/:id", async (req, res) => {
 app.get("/notifications/:userID", async (req, res) => {
   const UserID = req.params.userID;
   try {
-    const [rows] = await pool.query("SELECT * FROM notifications WHERE UserID = ?", [UserID]);
-    if (rows.length === 0) return res.status(404).send({ message: 'No notifications found for this resource.' });
+    const [rows] = await pool.query(
+      "SELECT * FROM notifications WHERE UserID = ?",
+      [UserID]
+    );
+    if (rows.length === 0)
+      return res
+        .status(404)
+        .send({ message: "No notifications found for this resource." });
     res.status(200).json(rows);
   } catch (err) {
-    res.status(500).send({ message: 'Server error occurred' });
+    res.status(500).send({ message: "Server error occurred" });
   }
 });
 
@@ -80,12 +92,12 @@ app.post("/notifications", async (req, res) => {
     );
 
     if (result.affectedRows === 1) {
-      res.status(201).send({ message: 'Notification created successfully' });
+      res.status(201).send({ message: "Notification created successfully" });
     } else {
-      res.status(400).send({ message: 'Failed to create notification' });
+      res.status(400).send({ message: "Failed to create notification" });
     }
   } catch (err) {
-    res.status(500).send({ message: 'Server error occurred' });
+    res.status(500).send({ message: "Server error occurred" });
   }
 });
 
@@ -94,29 +106,33 @@ app.delete("/notifications/:id", async (req, res) => {
   const NotificationID = req.params.id;
 
   try {
-    const [result] = await pool.query("DELETE FROM notifications WHERE NotificationID = ?", [NotificationID]);
+    const [result] = await pool.query(
+      "DELETE FROM notifications WHERE NotificationID = ?",
+      [NotificationID]
+    );
 
     if (result.affectedRows === 1) {
       res.status(204).send();
     } else {
-      res.status(404).send({ message: 'Notification not found' });
+      res.status(404).send({ message: "Notification not found" });
     }
   } catch (err) {
-    res.status(500).send({ message: 'Server error occurred' });
+    res.status(500).send({ message: "Server error occurred" });
   }
 });
-
-
 
 // Endpoint to get the company associated with a project
 app.get("/company/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
-    const [rows] = await pool.query(`
+    const [rows] = await pool.query(
+      `
       SELECT c.* FROM clients c
       JOIN projects p ON p.ClientID = c.ClientID
       WHERE p.ProjectID = ?
-    `, [projectId]);
+    `,
+      [projectId]
+    );
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json("Error executing query: " + err);
@@ -127,8 +143,24 @@ app.get("/company/:projectId", async (req, res) => {
 app.get("/resources/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
-    const [rows] = await pool.query("SELECT * FROM resources WHERE ProjectID = ?", [projectId]);
+    const [rows] = await pool.query(
+      "SELECT * FROM resources WHERE ProjectID = ?",
+      [projectId]
+    );
     res.json(rows);
+  } catch (err) {
+    res.status(500).json("Error executing query: " + err);
+  }
+});
+// Endpoint to get project financials
+app.get("/financials/:projectId", async (req, res) => {
+  try {
+    const projectId = req.params.projectId;
+    const [rows] = await pool.query(
+      "SELECT * FROM financials WHERE ProjectID = ?",
+      [projectId]
+    );
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json("Error executing query: " + err);
   }
@@ -137,13 +169,16 @@ app.get("/resources/:projectId", async (req, res) => {
 app.get("/tasks/:resourceId", async (req, res) => {
   try {
     const resourceId = req.params.resourceId;
-    const [rows] = await pool.query(`
+    const [rows] = await pool.query(
+      `
       SELECT r.ResourceID, r.UserID, r.Role, r.PlannedHours, r.ProjectID, 
              t.TaskID, t.Description AS TaskDescription, t.Status
       FROM resources r
       LEFT JOIN tasks t ON r.ResourceID = t.ResourceID
       WHERE r.ResourceID = ?
-    `, [resourceId]);
+    `,
+      [resourceId]
+    );
 
     if (rows.length === 0) {
       return res.status(404).json({ error: "Resource not found" });
@@ -155,20 +190,21 @@ app.get("/tasks/:resourceId", async (req, res) => {
       Role: rows[0].Role,
       PlannedHours: rows[0].PlannedHours,
       ProjectID: rows[0].ProjectID,
-      Tasks: rows.filter(row => row.TaskID !== null).map(row => ({
-        TaskID: row.TaskID,
-        Description: row.TaskDescription,
-        Status: row.Status
-      }))
+      Tasks: rows
+        .filter((row) => row.TaskID !== null)
+        .map((row) => ({
+          TaskID: row.TaskID,
+          Description: row.TaskDescription,
+          Status: row.Status,
+        })),
     };
-    
+
     res.json(resource);
   } catch (err) {
     console.error("Error executing query:", err);
     res.status(500).json({ error: "Error executing query" });
   }
 });
-
 
 // Endpoint to get all users
 app.get("/users", async (req, res) => {
@@ -185,7 +221,9 @@ app.get("/users", async (req, res) => {
 app.get("/user/:id", async (req, res) => {
   try {
     const userId = req.params.id;
-    const [rows] = await pool.query("SELECT * FROM users WHERE UserID = ?", [userId]);
+    const [rows] = await pool.query("SELECT * FROM users WHERE UserID = ?", [
+      userId,
+    ]);
     if (rows.length === 0) return res.status(404).json("User not found");
     res.json(rows[0]);
   } catch (err) {
@@ -194,31 +232,43 @@ app.get("/user/:id", async (req, res) => {
 });
 
 // Endpoint to get resourceId
-app.get('/resource-id/:userId/:projectId', async (req, res) => {
+app.get("/resource-id/:userId/:projectId", async (req, res) => {
   const userId = req.params.userId;
   const projectId = req.params.projectId;
-  
+
   try {
-    const [rows] = await pool.query(`
+    const [rows] = await pool.query(
+      `
       SELECT r.ResourceID
       FROM resources r
       WHERE r.UserID = ? AND r.ProjectID = ?
-    `, [userId, projectId]);
-    
+    `,
+      [userId, projectId]
+    );
+
     if (rows.length > 0) {
       const resourceId = rows[0].ResourceID;
       res.json({ resourceId });
     } else {
-      res.status(404).send('Resource not found');
+      res.status(404).send("Resource not found");
     }
   } catch (err) {
-    res.status(500).send('Database error');
+    res.status(500).send("Database error");
   }
 });
 
 // Endpoint to add a new project
 app.post("/newprojects", async (req, res) => {
-  const { ProjectCode, Title, Description, Budget, Status, Client, resources } = req.body;
+  const {
+    ProjectCode,
+    Title,
+    Description,
+    Budget,
+    Status,
+    Client,
+    resources,
+    financials,
+  } = req.body;
 
   try {
     const connection = await pool.getConnection();
@@ -226,18 +276,30 @@ app.post("/newprojects", async (req, res) => {
 
     try {
       // Insert client data
-      const [clientResult] = await connection.query(`
+      const [clientResult] = await connection.query(
+        `
         INSERT INTO clients (CompanyName, CompanyDescription, ContactEmail, ContactPhone, CompanyLocation) 
         VALUES (?, ?, ?, ?, ?)
-      `, [Client.CompanyName, Client.CompanyDescription, Client.ContactEmail, Client.ContactPhone, Client.CompanyLocation]);
+      `,
+        [
+          Client.CompanyName,
+          Client.CompanyDescription,
+          Client.ContactEmail,
+          Client.ContactPhone,
+          Client.CompanyLocation,
+        ]
+      );
 
       const clientId = clientResult.insertId;
 
       // Insert project data
-      const [projectResult] = await connection.query(`
+      const [projectResult] = await connection.query(
+        `
         INSERT INTO projects (ProjectCode, Title, Description, Budget, ClientID, Status) 
         VALUES (?, ?, ?, ?, ?, ?)
-      `, [ProjectCode, Title, Description, Budget, clientId, Status]);
+      `,
+        [ProjectCode, Title, Description, Budget, clientId, Status]
+      );
 
       const projectId = projectResult.insertId;
 
@@ -248,11 +310,35 @@ app.post("/newprojects", async (req, res) => {
       `;
 
       for (const resource of resources) {
-        await connection.query(insertResourceQuery, [projectId, resource.UserID, resource.role, resource.hours]);
+        await connection.query(insertResourceQuery, [
+          projectId,
+          resource.UserID,
+          resource.role,
+          resource.hours,
+        ]);
+      }
+      // Handle financials as an object
+      if (financials && typeof financials === "object") {
+        const insertFinancialsQuery = `
+      INSERT INTO financials (ProjectID, GrossRevenue, NetRevenue, RecoveryRate, ProfitMargin) 
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+        await connection.query(insertFinancialsQuery, [
+          projectId,
+          financials.Budget,          //financials.exhaustedBudget, // Assuming exhaustedBudget as GrossRevenue (based on naming context)
+          financials.netRevenue,
+          financials.recoveryRate,
+          financials.profitMargin,
+        ]);
+      } else {
+        throw new Error("Financials data is not correctly formatted.");
       }
 
       await connection.commit();
-      res.json({ message: "Project, client, and resources added successfully" });
+      res.json({
+        message: "Project, client, and resources added successfully",
+      });
     } catch (err) {
       await connection.rollback();
       res.status(500).json("Error adding project: " + err);
@@ -267,7 +353,8 @@ app.post("/newprojects", async (req, res) => {
 // Endpoint to update a project
 app.put("/projects/:id", async (req, res) => {
   const projectId = req.params.id;
-  const { ProjectCode, Title, Description, Budget, Status, Client, resources } = req.body;
+  const { ProjectCode, Title, Description, Budget, Status, Client, resources } =
+    req.body;
 
   try {
     const connection = await pool.getConnection();
@@ -275,27 +362,46 @@ app.put("/projects/:id", async (req, res) => {
 
     try {
       // Update project data
-      await connection.query(`
+      await connection.query(
+        `
         UPDATE projects 
         SET ProjectCode = ?, Title = ?, Description = ?, Budget = ?, Status = ?
         WHERE ProjectID = ?
-      `, [ProjectCode, Title, Description, Budget, Status, projectId]);
+      `,
+        [ProjectCode, Title, Description, Budget, Status, projectId]
+      );
 
       // Update client data
-      await connection.query(`
+      await connection.query(
+        `
         UPDATE clients 
         SET CompanyName = ?, CompanyDescription = ?, ContactEmail = ?, ContactPhone = ?, CompanyLocation = ?
         WHERE ClientID = (SELECT ClientID FROM projects WHERE ProjectID = ?)
-      `, [Client.CompanyName, Client.CompanyDescription, Client.ContactEmail, Client.ContactPhone, Client.CompanyLocation, projectId]);
+      `,
+        [
+          Client.CompanyName,
+          Client.CompanyDescription,
+          Client.ContactEmail,
+          Client.ContactPhone,
+          Client.CompanyLocation,
+          projectId,
+        ]
+      );
 
       // Delete existing resources and tasks
-      await connection.query(`
+      await connection.query(
+        `
         DELETE FROM tasks WHERE ResourceID IN (SELECT ResourceID FROM resources WHERE ProjectID = ?)
-      `, [projectId]);
+      `,
+        [projectId]
+      );
 
-      await connection.query(`
+      await connection.query(
+        `
         DELETE FROM resources WHERE ProjectID = ?
-      `, [projectId]);
+      `,
+        [projectId]
+      );
 
       // Insert updated resources
       const insertResourceQuery = `
@@ -304,11 +410,18 @@ app.put("/projects/:id", async (req, res) => {
       `;
 
       for (const resource of resources) {
-        await connection.query(insertResourceQuery, [projectId, resource.UserID, resource.Role, resource.PlannedHours]);
+        await connection.query(insertResourceQuery, [
+          projectId,
+          resource.UserID,
+          resource.Role,
+          resource.PlannedHours,
+        ]);
       }
 
       await connection.commit();
-      res.json({ message: "Project, client, and resources updated successfully" });
+      res.json({
+        message: "Project, client, and resources updated successfully",
+      });
     } catch (err) {
       await connection.rollback();
       res.status(500).json("Error updating project: " + err);
@@ -330,16 +443,23 @@ app.delete("/projects/:id", async (req, res) => {
 
     try {
       // Delete tasks associated with the project
-      await connection.query(`
+      await connection.query(
+        `
         DELETE FROM tasks 
         WHERE ResourceID IN (SELECT ResourceID FROM resources WHERE ProjectID = ?)
-      `, [projectId]);
+      `,
+        [projectId]
+      );
 
       // Delete resources associated with the project
-      await connection.query("DELETE FROM resources WHERE ProjectID = ?", [projectId]);
+      await connection.query("DELETE FROM resources WHERE ProjectID = ?", [
+        projectId,
+      ]);
 
       // Delete the project
-      await connection.query("DELETE FROM projects WHERE ProjectID = ?", [projectId]);
+      await connection.query("DELETE FROM projects WHERE ProjectID = ?", [
+        projectId,
+      ]);
 
       await connection.commit();
       res.status(204).send();
@@ -361,10 +481,10 @@ app.post("/tasks", async (req, res) => {
   console.log("Request body:", req.body);
 
   // Validate and filter the input to ensure it does not contain TaskID
-  const filteredTasks = newTasks.map(task => ({
+  const filteredTasks = newTasks.map((task) => ({
     ResourceID: task.ResourceID,
     Description: task.Description,
-    Status: task.Status
+    Status: task.Status,
   }));
 
   const tasksSql = `
@@ -378,7 +498,11 @@ app.post("/tasks", async (req, res) => {
 
     try {
       for (const task of filteredTasks) {
-        await connection.execute(tasksSql, [task.ResourceID, task.Description, task.Status]);
+        await connection.execute(tasksSql, [
+          task.ResourceID,
+          task.Description,
+          task.Status,
+        ]);
       }
 
       await connection.commit();
@@ -407,9 +531,12 @@ app.put("/tasks/:resourceId", async (req, res) => {
 
     try {
       // Validate if the ResourceID exists in the resources table
-      const [validateResult] = await connection.execute(`
+      const [validateResult] = await connection.execute(
+        `
         SELECT * FROM resources WHERE ResourceID = ?
-      `, [resourceId]);
+      `,
+        [resourceId]
+      );
 
       if (validateResult.length === 0) {
         await connection.rollback();
@@ -417,9 +544,12 @@ app.put("/tasks/:resourceId", async (req, res) => {
       }
 
       // Delete existing tasks for the resource
-      await connection.execute(`
+      await connection.execute(
+        `
         DELETE FROM tasks WHERE ResourceID = ?
-      `, [resourceId]);
+      `,
+        [resourceId]
+      );
 
       // Insert updated tasks
       const insertSql = `
@@ -427,7 +557,11 @@ app.put("/tasks/:resourceId", async (req, res) => {
         VALUES (?, ?, ?)
       `;
       for (const task of tasks) {
-        await connection.execute(insertSql, [resourceId, task.Description, task.Status]);
+        await connection.execute(insertSql, [
+          resourceId,
+          task.Description,
+          task.Status,
+        ]);
       }
 
       await connection.commit();
@@ -446,17 +580,20 @@ app.put("/tasks/:resourceId", async (req, res) => {
 });
 
 // Endpoint for login
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  
+
   try {
     const connection = await pool.getConnection();
 
-    const [result] = await connection.execute(`
+    const [result] = await connection.execute(
+      `
       SELECT * FROM users 
       WHERE email = ? AND password = ?
-    `, [email, password]);
-    
+    `,
+      [email, password]
+    );
+
     if (result.length > 0) {
       // User found
       const user = result[0];
@@ -469,29 +606,30 @@ app.post('/login', async (req, res) => {
       });
     } else {
       // User not found
-      res.status(401).send('Invalid credentials');
+      res.status(401).send("Invalid credentials");
     }
   } catch (err) {
     console.error("Error executing query:", err);
-    res.status(500).send('Database error');
+    res.status(500).send("Database error");
   }
 });
 //registration
-app.post('/register', async (req, res) => {
+app.post("/register", async (req, res) => {
   const { username, email, role, password } = req.body;
 
   if (!username || !email || !role || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
+    return res.status(400).json({ message: "All fields are required" });
   }
 
-  const query = 'INSERT INTO users (UserName, Email, Role, Password) VALUES (?, ?, ?, ?)';
+  const query =
+    "INSERT INTO users (UserName, Email, Role, Password) VALUES (?, ?, ?, ?)";
 
   pool.query(query, [username, email, role, password], (error, results) => {
     if (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Failed to register user' });
+      return res.status(500).json({ message: "Failed to register user" });
     }
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: "User registered successfully" });
   });
 });
 
@@ -499,13 +637,19 @@ app.post('/register', async (req, res) => {
 app.get("/skillsets/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
-    const [rows] = await pool.query(`
+    const [rows] = await pool.query(
+      `
       SELECT Skillset, Proficiency
       FROM Skillsets
       WHERE UserID = ?
-    `, [userId]);
+    `,
+      [userId]
+    );
 
-    if (rows.length === 0) return res.status(404).json({ message: 'No skills found for this user.' });
+    if (rows.length === 0)
+      return res
+        .status(404)
+        .json({ message: "No skills found for this user." });
 
     // Transform rows into an object where the skill is the key and proficiency is the value
     const skills = rows.reduce((acc, { Skillset, Proficiency }) => {
@@ -519,35 +663,36 @@ app.get("/skillsets/:userId", async (req, res) => {
   }
 });
 
-
 // Endpoint to update user skills
 app.put("/skillsets/:userId", async (req, res) => {
   const userId = req.params.userId;
   const { skills } = req.body; // Expecting skills to be an object with skill names and proficiency values
 
   try {
-    await pool.query('START TRANSACTION'); // Begin transaction
+    await pool.query("START TRANSACTION"); // Begin transaction
 
     // Delete existing skills for the user
-    await pool.query('DELETE FROM Skillsets WHERE UserID = ?', [userId]);
+    await pool.query("DELETE FROM Skillsets WHERE UserID = ?", [userId]);
 
     // Insert new skills
     const skillEntries = Object.entries(skills);
     const insertPromises = skillEntries.map(([skill, proficiency]) =>
-      pool.query('INSERT INTO Skillsets (UserID, Skillset, Proficiency) VALUES (?, ?, ?)', [userId, skill, proficiency])
+      pool.query(
+        "INSERT INTO Skillsets (UserID, Skillset, Proficiency) VALUES (?, ?, ?)",
+        [userId, skill, proficiency]
+      )
     );
-    
+
     await Promise.all(insertPromises); // Execute all insert queries
 
-    await pool.query('COMMIT'); // Commit transaction
+    await pool.query("COMMIT"); // Commit transaction
 
-    res.status(200).json({ message: 'Skills updated successfully' });
+    res.status(200).json({ message: "Skills updated successfully" });
   } catch (err) {
-    await pool.query('ROLLBACK'); // Rollback transaction on error
+    await pool.query("ROLLBACK"); // Rollback transaction on error
     res.status(500).json("Error executing query: " + err);
   }
 });
-
 
 // Start the server
 const PORT = process.env.PORT || 8081;

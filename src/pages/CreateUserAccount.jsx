@@ -131,8 +131,10 @@ export function CreateUserAccount() {
                 <option value="Senior Manager">Senior Manager</option>
                 <option value="Assistant Manager">Assistant Manager</option>
                 <option value="Associate Director">Associate Director</option>
-                <option value="Senior Assistant">Senior Assistant</option>
-                <option value="Junior Consultant">Junior Consultant</option>
+                <option value="Assistant">Assistant</option>
+                <option value="Jnr Consultant">Jnr Consultant</option>
+                <option value="Assistant">Analyst</option>
+                
               </select>
             </label>
             <label className="text-sm text-gray-500 font-medium mb-3">

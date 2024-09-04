@@ -2,17 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AddProjectPage = () => {
-  const [title, setTitle] = useState("");
-  const [projectCode, setProjectCode] = useState("");
-  const [companyLocation, setCompanyLocation] = useState("");
-  const [description, setDescription] = useState("");
-  const [budget, setBudget] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [companyDescription, setCompanyDescription] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
+  const [Title, setTitle] = useState("");
+  const [ProjectCode, setProjectCode] = useState("");
+  const [CompanyLocation, setCompanyLocation] = useState("");
+  const [Description, setDescription] = useState("");
+  const [Budget, setBudget] = useState("");
+  const [CompanyName, setCompanyName] = useState("");
+  const [CompanyDescription, setCompanyDescription] = useState("");
+  const [ContactPhone, setContactPhone] = useState("");
+  const [ContactEmail, setContactEmail] = useState("");
   const [complexity, setComplexity] = useState("High");
   const [checkedItems, setCheckedItems] = useState({});
+  const Status = 'pending';
+  
 
   const items = [
     "SAP",
@@ -42,6 +44,7 @@ const AddProjectPage = () => {
   };
 
   const status = "pending";
+
   const navigate = useNavigate();
 
   const submitForm = (e) => {
@@ -52,20 +55,22 @@ const AddProjectPage = () => {
     (key) => checkedItems[key] === true
   );
     const newProject = {
-      title,
-      projectCode,
-      status,
-      description,
-      budget,
+
+      Title,
+      ProjectCode,
+      Status,
+      Description,
+      Budget,
       complexity,
       selectedApplications: selectedItems, // Pass the names of checked checkboxes
-      Client: {
-        companyName,
-        companyDescription,
-        contactEmail,
-        contactPhone,
-        companyLocation,
-      },
+  Client: {
+        CompanyName,
+        CompanyDescription,
+        ContactEmail,
+        ContactPhone,
+        CompanyLocation,},
+
+    
     };
     
     navigate("/proposed-resources", { state: { newProject } });
@@ -89,7 +94,7 @@ const AddProjectPage = () => {
                   name="ProjectCode"
                   className="border rounded w-full py-2 px-3"
                   required
-                  value={projectCode}
+                  value={ProjectCode}
                   onChange={(e) => setProjectCode(e.target.value)}
                 />
               </div>
@@ -102,7 +107,7 @@ const AddProjectPage = () => {
                   className="border rounded w-full py-2 px-3 mb-2"
                   placeholder="e.g., Planning Tool"
                   required
-                  value={title}
+                  value={Title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
@@ -114,7 +119,7 @@ const AddProjectPage = () => {
                   className="border rounded w-full py-2 px-3"
                   rows="4"
                   placeholder="Add any project expectations, requirements, etc."
-                  value={description}
+                  value={Description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
@@ -127,7 +132,7 @@ const AddProjectPage = () => {
                   className="border rounded w-full py-2 px-3 mb-2"
                   placeholder="Enter project budget"
                   required
-                  value={budget}
+                  value={Budget}
                   onChange={(e) => setBudget(e.target.value)}
                 />
               </div>
@@ -155,7 +160,7 @@ const AddProjectPage = () => {
                   name="CompanyName"
                   className="border rounded w-full py-2 px-3"
                   placeholder="Company Name"
-                  value={companyName}
+                  value={CompanyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                 />
               </div>
@@ -167,7 +172,7 @@ const AddProjectPage = () => {
                   className="border rounded w-full py-2 px-3"
                   rows="4"
                   placeholder="What does the company do?"
-                  value={companyDescription}
+                  value={CompanyDescription}
                   onChange={(e) => setCompanyDescription(e.target.value)}
                 />
               </div>
@@ -180,7 +185,7 @@ const AddProjectPage = () => {
                   className="border rounded w-full py-2 px-3 mb-2"
                   placeholder="Company Location"
                   required
-                  value={companyLocation}
+                  value={CompanyLocation}
                   onChange={(e) => setCompanyLocation(e.target.value)}
                 />
               </div>
@@ -193,7 +198,7 @@ const AddProjectPage = () => {
                   className="border rounded w-full py-2 px-3"
                   placeholder="Email address for client"
                   required
-                  value={contactEmail}
+                  value={ContactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                 />
               </div>
@@ -205,7 +210,7 @@ const AddProjectPage = () => {
                   name="contact_phone"
                   className="border rounded w-full py-2 px-3"
                   placeholder="Optional phone for client"
-                  value={contactPhone}
+                  value={ContactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                 />
               </div>
