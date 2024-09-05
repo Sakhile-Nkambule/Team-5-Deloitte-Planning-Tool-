@@ -36,12 +36,20 @@ const ProjectDashboard = () => {
     <div>
       <h2 className="text-green-500 text-3xl text-center font-semibold mb-25">Project Dashboard Currently Not Available</h2>
       {resourceId ? (
-        <NavLink
-          to={`/taskboard/${resourceId}`}
-          className={linkClass}
-        >
-          Task board
-        </NavLink>
+        <div className="flex space-x-4"> {/* Container for links with space between them */}
+          <NavLink
+            to={`/taskboard/${resourceId}`}
+            className={linkClass}
+          >
+            Task board
+          </NavLink>
+          <NavLink
+            to={`/resources/${resourceId}`} // Route for Available Resources
+            className={linkClass}
+          >
+            Available Resources
+          </NavLink>
+        </div>
       ) : (
         <p>Loading...</p>
       )}

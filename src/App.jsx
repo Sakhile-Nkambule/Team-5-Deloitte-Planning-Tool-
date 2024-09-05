@@ -115,7 +115,11 @@ const deleteProject = async (id) => {
             element={<ProjectPage deleteProject={deleteProject} />}
             loader={projectLoader}
           />
-          <Route path="/dashboard/:projectId" element={<DashboardPage />} />
+          <Route 
+          path="/dashboard/:id" 
+          element={<DashboardPage />} 
+          loader={projectLoader}
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
         
