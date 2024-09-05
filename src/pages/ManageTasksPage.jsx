@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 const ManageTasksPage = () => {
   const { resourceId } = useParams(); // Get resourceId from URL params
   const [resource, setResource] = useState(null);
@@ -24,7 +27,7 @@ const ManageTasksPage = () => {
           Projectid: resourceData.ProjectID,
         });
         setTasks(resourceData.Tasks || []);
-  
+
         // Check if UserID exists before fetching user data
         if (resourceData.UserID) {
           const userResponse = await fetch(`/api/user/${resourceData.UserID}`);
@@ -33,17 +36,16 @@ const ManageTasksPage = () => {
         } else {
           setUserName("Unknown User");
         }
-  
+
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch data", error);
         setIsLoading(false);
       }
     };
-  
+
     fetchData();
   }, [resourceId]);
-  
 
   const handleTaskChange = (taskId, field, value) => {
     setTasks(
@@ -61,11 +63,12 @@ const ManageTasksPage = () => {
         ResourceID: resourceId,
         Description: "",
         Status: "To-Do",
+        Hours: "",
+        DueDate: null, // Initialize with null or default date
         isNew: true,
       },
     ]);
   };
-
   const removeTask = async (taskId) => {
     try {
       await fetch(`/api/task/${taskId}`, {
@@ -95,6 +98,7 @@ const ManageTasksPage = () => {
           ResourceID: task.ResourceID,
           Description: task.Description,
           Status: task.Status,
+          DueDate: task.DueDate, // Include DueDate
         }));
 
         await fetch(`/api/tasks`, {
@@ -110,13 +114,12 @@ const ManageTasksPage = () => {
     }
   };
 
-
   const sendNotification = async () => {
     // Find the Partner/Director from the resources array
     // const associateDirector = resources.find(
     //   (resource) => resource.role === "Partner/Director"
     // );
-  
+
     if (resourceId) {
       try {
         const notificationData = {
@@ -125,7 +128,7 @@ const ManageTasksPage = () => {
           Type: "In-App",
           Priority: "High",
         };
-  
+
         const response = await fetch("http://localhost:8081/notifications", {
           method: "POST",
           headers: {
@@ -133,7 +136,7 @@ const ManageTasksPage = () => {
           },
           body: JSON.stringify(notificationData),
         });
-  
+
         if (response.ok) {
           toast.success("Task Notification sent successfully");
         } else {
@@ -159,7 +162,8 @@ const ManageTasksPage = () => {
         <div className="mb-4">
           <h3 className="text-xl font-semibold">Resource Details</h3>
           <div className="mb-2">
-            <strong>Name:</strong> {userName} {/* Display the specific user name */}
+            <strong>Name:</strong> {userName}{" "}
+            {/* Display the specific user name */}
           </div>
           <div className="mb-2">
             <strong>Role:</strong> {resource.Role}
@@ -175,6 +179,7 @@ const ManageTasksPage = () => {
       {tasks.length > 0 ? (
         tasks.map((task) => (
           <div key={task.TaskID} className="mb-4">
+            <label className="block mb-1 font-semibold">Task Description</label>
             <input
               type="text"
               value={task.Description || ""}
@@ -184,6 +189,7 @@ const ManageTasksPage = () => {
               placeholder="Task Description"
               className="border rounded w-full py-2 px-3 mb-2"
             />
+            <label className="block mb-1 font-semibold">Status</label>
             <select
               value={task.Status || "To-Do"}
               onChange={(e) =>
@@ -195,6 +201,26 @@ const ManageTasksPage = () => {
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>
+            <label className="block mb-1 font-semibold">Hours</label>
+            <input
+              type="text"
+              value={task.Hours || ""}
+              onChange={(e) =>
+                handleTaskChange(task.TaskID, "Hours", e.target.value)
+              }
+              placeholder="Task Hours"
+              className="border rounded w-full py-2 px-3 mb-2"
+            />
+            <label className="block mb-1 font-semibold">Due Date</label>
+            <DatePicker
+              selected={task.DueDate ? new Date(task.DueDate) : null}
+              onChange={(date) =>
+                handleTaskChange(task.TaskID, "DueDate", date)
+              }
+              placeholderText="Select Due Date"
+              className="border rounded w-full py-2 px-3 mb-2"
+              dateFormat="yyyy-MM-dd"
+            />
             <button
               type="button"
               className="bg-red-500 text-white rounded px-2 py-1"
@@ -217,9 +243,10 @@ const ManageTasksPage = () => {
       <button
         type="button"
         className="bg-green-500 text-white rounded px-4 py-2 mt-4 ml-4"
-        onClick={()=>{saveTasks();
-           sendNotification();
-          }}
+        onClick={() => {
+          saveTasks();
+          sendNotification();
+        }}
       >
         Save Tasks
       </button>

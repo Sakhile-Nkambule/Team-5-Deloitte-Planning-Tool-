@@ -8,7 +8,7 @@ import { useUser } from '../componets/UserContext'; // Import the useUser hook
 const ProjectPage = ({ deleteProject }) => { 
   const navigate = useNavigate();
   const { id } = useParams();
-  const { project, client, resources } = useLoaderData(); // Destructure data from loader
+  const { project, client, resources, financials } = useLoaderData(); // Destructure data from loader
   const { user } = useUser(); // Get user from context
 
   const userRole = user?.role; // Get the user's role
@@ -27,6 +27,13 @@ const ProjectPage = ({ deleteProject }) => {
     navigate("/projects");
   };
 
+  //DATE
+  const formattedStartDate = project.StartDate 
+  ? new Date(project.StartDate).toLocaleDateString() 
+  : '_';
+  const formattedEndDate = project.EndDate
+  ? new Date(project.EndDate).toLocaleDateString() 
+  : '_';
   return (
     <>
       <section>
@@ -47,6 +54,14 @@ const ProjectPage = ({ deleteProject }) => {
               <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left">
                 <div className="text-gray-500 mb-4">{project.ProjectCode}</div>
                 <h1 className="text-3xl font-bold mb-4">{project.Title}</h1>
+                <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
+                   <p className="text-orange-700"> {`Start Date: ${formattedStartDate}`}</p>
+                </div>
+                <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
+                <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
+                   <p className="text-orange-700"> {`End Date: ${formattedEndDate}`}</p>
+                </div>
+                </div>
                 <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
                   <FaMapMarker className="text-orange-700 mr-2" />
                   <p className="text-orange-700"> {project.Status}</p>
@@ -77,6 +92,7 @@ const ProjectPage = ({ deleteProject }) => {
                 </p>
                 <h3 className="text-gray-700 mb-4">Contact Email:</h3>
                 <p className="my-2 bg-indigo-100 p-2 font-bold">
+                  {/* ///////// */}
                   {client.ContactEmail}
                 </p>
                 <h3 className="text-gray-700 mb-4">Contact Phone:</h3>
@@ -147,6 +163,9 @@ const projectLoader = async ({ params }) => {
   const clientRes = await fetch(`/api/company/${params.id}`);
   const clientData = await clientRes.json();
 
+  const financialsRes = await fetch(`/api/financials/${params.id}`);
+  const financialsData = await financialsRes.json();
+
   const resourcesRes = await fetch(`/api/resources/${params.id}`);
   const resourcesData = await resourcesRes.json();
 
@@ -162,6 +181,7 @@ const projectLoader = async ({ params }) => {
   return {
     project: projectData,
     client: clientData,
+    financials: financialsData,
     resources: resourcesWithUserDetails,
   };
 };

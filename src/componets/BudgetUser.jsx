@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLoaderData } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
@@ -60,4 +61,6 @@ const BudgetUser = () => {
 };
 
 export default BudgetUser;
+
+
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ProjectDashboard from '../componets/ProjectDashboard';
 import AvailableResources from '../componets/AvailableResources';
@@ -8,6 +9,7 @@ import { useParams } from 'react-router-dom';
 const DashboardPage = () => {
   const { project, client, resources } = useLoaderData();
   console.log(project);
+
   return (
     <>
       <ProjectDashboard />
