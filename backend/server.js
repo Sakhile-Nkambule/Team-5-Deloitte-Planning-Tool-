@@ -172,7 +172,7 @@ app.get("/tasks/:resourceId", async (req, res) => {
     const [rows] = await pool.query(
       `
       SELECT r.ResourceID, r.UserID, r.Role, r.PlannedHours, r.ProjectID, 
-             t.TaskID, t.Description AS TaskDescription, t.Status
+             t.TaskID, t.Description AS TaskDescription, t.Status, t.DueDate, t.Hours
       FROM resources r
       LEFT JOIN tasks t ON r.ResourceID = t.ResourceID
       WHERE r.ResourceID = ?
@@ -196,6 +196,8 @@ app.get("/tasks/:resourceId", async (req, res) => {
           TaskID: row.TaskID,
           Description: row.TaskDescription,
           Status: row.Status,
+          Hours : row.Hours,
+          DueDate: row.DueDate,
         })),
     };
 
