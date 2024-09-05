@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -15,6 +16,12 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const [profitMargin, setProfitMargin] = useState(0);
   const [netRevenue, setNetRevenue] = useState(0);
   const [recoveryRate, setRecoveryRate] = useState(0);
+
+  const removeResource = (index) => {
+    setResources(resources.filter((_, i) => i !== index));
+  };
+
+  
 
   useEffect(() => {
     // Fetch users from the backend
@@ -206,37 +213,37 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
    
 
   return (
-    <section className="bg-lime-50">
+    <section className="bg-lime-100">
       
 
       <div className="container m-auto py-24 relative">
-      <h2 className="text-3xl text-center font-semibold mb-6">
+      <h1 className="text-4xl text-center font-semibold mb-6">
             Proposed Resources
-          </h2>
+          </h1>
         <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
          
           
 
         {/* Budget summary in the top right corner */}
         <h2 className="text-2xl font-semibold mb-4 text-center">Budget Summary</h2>
-        <div className="flex justify-center items-center space-x-10 bg-white h-120 p-6 shadow-md rounded-md border w-100">
+        <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md rounded-full  w-100">
           
-          <div className="mb-2 ml-4">
+          <div className="mb-2 ">
             <p className="text-gray-700 font-semibold">Gross Revenue:</p>
             <p className="text-green-500 font-semibold">{`R${newProject.Budget}`}</p>
           </div>
           
-          <div className="mb-2 ml-4">
+          <div className="mb-2 ">
             <p className="text-gray-700 font-semibold">Total Costs:</p>
           <p className="text-red-500 font-semibold">{`R${exhaustedBudget}`}</p>
           </div>
-          <div className="mb-2 ml-4">
+          <div className="mb-2 ">
             <p className="text-gray-700 font-semibold">Net Revenue:</p>
             <p className="font-semibold">
               {`R${netRevenue}`}
             </p>
           </div>
-          <div className="mb-2 ml-4">
+          <div className="mb-2 ">
             <p className="text-gray-700 font-semibold">Profit Margin:</p>
             <p className="font-semibold">
               {`${profitMargin}%`
@@ -249,38 +256,42 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           </div>
 
         </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-40">
-            {resources.map((resource, index) => (
-              <div key={index} className="mb-4 shadow-lg p-4 border rounded-md">
-                <label className="block text-gray-700 font-bold mb-2">Role</label>
-                <input
-                  type="text"
-                  value={resource.role}
-                  onChange={(e) => handleResourceChange(index, "role", e.target.value)}
-                  className="border rounded w-full py-2 px-3 mb-2"
-                  readOnly // Make the role input read-only
-                />
-                <label className="block text-gray-700 font-bold mb-2">Name</label>
-                <input
-                  type="text"
-                  value={resource.name}
-                  onChange={(e) => handleResourceChange(index, "name", e.target.value)}
-                  className="border rounded w-full py-2 px-3 mb-2"
-                  disabled
-                />
-                <label className="block text-gray-700 font-bold mb-2">Planned Working Hours</label>
-                <input
-                  type="number"
-                  value={resource.hours}
-                  onChange={(e) => handleResourceChange(index, "hours", e.target.value)}
-                  className="border rounded w-full py-2 px-3"
-                />
-              </div>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+          {resources.map((resource, index) => (
+            <div key={index} className="relative mb-4 shadow-lg p-4 border rounded-md">
+              <FontAwesomeIcon 
+                icon={faTimes} 
+                className="cursor-pointer text-gray-500 absolute top-2 right-2" 
+                onClick={() => removeResource(index)} 
+              />
+              <label className="block text-gray-700 font-bold mb-2">Role</label>
+              <input
+                type="text"
+                value={resource.role}
+                onChange={(e) => handleResourceChange(index, "role", e.target.value)}
+                className="border rounded w-full py-2 px-3 mb-2"
+                readOnly // Make the role input read-only
+              />
+              <label className="block text-gray-700 font-bold mb-2">Name</label>
+              <input
+                type="text"
+                value={resource.name}
+                onChange={(e) => handleResourceChange(index, "name", e.target.value)}
+                className="border rounded w-full py-2 px-3 mb-2"
+                disabled
+              />
+              <label className="block text-gray-700 font-bold mb-2">Planned Working Hours</label>
+              <input
+                type="number"
+                value={resource.hours}
+                onChange={(e) => handleResourceChange(index, "hours", e.target.value)}
+                className="border rounded w-full py-2 px-3"
+              />
+            </div>
+          ))}
+        </div>
 
-           </div>
         <div className="flex justify-between mt-6">
-         
           <button
             onClick={handleSubmit}
             className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
