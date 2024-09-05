@@ -1,136 +1,169 @@
-  import React, { useState, useEffect } from "react";
-  import { useLocation, useNavigate } from "react-router-dom";
-  import { toast } from "react-toastify";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-  const ProposedResourcespage = ({ addProjectSubmit }) => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    
-    const { newProject } = location.state;
-    console.log(newProject);
+const ProposedResourcesPage = ({ addProjectSubmit }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const initialResources = [
-      { UserID: 1, role: "Director", name: "Tadiwa Mukuvudza", hours: 40 },
-      { UserID: 2, role: "Senior Manager", name: "Hlubi Mavinjelwa", hours: 30 },
-      { UserID: 3, role: "Assistant Manager", name: "Athraa Reynard", hours: 30 },
-      { UserID: 4, role: "Associate Director", name: "Sakhile Nkambule", hours: 25 },
-      { UserID: 5, role: "Senior Assistant", name: "Mega Gama", hours: 20 },
-      { UserID: 6, role: "Junior Consultant", name: "Saneliso Surtee", hours: 15 },
-    ];
+  const { newProject } = location.state;
 
-    const regenerateResource = [
-      { role: "Director", name: "Tadiwa Mukuvudza", hours: 35 },
-      { role: "Senior Manager", name: "Sakhile Nkambule", hours: 30 },
-      { role: "Assistant Manager", name: "Hlubi Mavinjelwa", hours: 35 },
-      { role: "Associate Director", name: "Athraa Reynard", hours: 30 },
-      { role: "Jnr Assistant", name: "Allen Harper", hours: 15 },
-      { role: "Consultant", name: "Jake Harper", hours: 15 },
-    ];
+  const [resources, setResources] = useState([]);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [Budget, setBudget] = useState(newProject.Budget);
+  const [exhaustedBudget, setExhaustedBudget] = useState(0);
+  const [profitMargin, setProfitMargin] = useState(0);
+  const [netRevenue, setNetRevenue] = useState(0);
+  const [recoveryRate, setRecoveryRate] = useState(0);
 
+  useEffect(() => {
+    // Fetch users from the backend
+   // Fetch users from the backend
+   const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const allUsers = await response.json();
 
-
-    const [resources, setResources] = useState(initialResources);
-
-    const [availableUsers, setAvailableUsers] = useState([]);
-    const [Budget, setBudget] = useState(newProject.Budget);
-    const [exhaustedBudget, setExhaustedBudget] = useState(0);
-    const [profitMargin, setProfitMargin] = useState(0);
-    const [netRevenue, setNetRevenue] = useState(0);
-    const [recoveryRate, setRecoveryRate] = useState(0);
-
-    const financials = {
-      Budget,
-      exhaustedBudget,
-      profitMargin,
-      netRevenue,
-      recoveryRate
-
-    }
-    useEffect(() => {
-      // Fetch users from the database
-      const fetchUsers = async () => {
+      // Fetch skills proficiency for each user
+      const usersWithSkills = await Promise.all(allUsers.map(async (user) => {
         try {
-          const response = await fetch('/api/users'); //
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
+          const skillsResponse = await fetch(`api/skillsets/${user.UserID}`);
+          if (!skillsResponse.ok) {
+            throw new Error(`Failed to fetch skills for user ${user.UserID}`);
           }
-          const allUsers = await response.json();
-          console.log(allUsers);
-
-          // Filter out users who are already proposed
-          const proposedUserIDs = resources.map((resource) => resource.UserID);
-          const filteredUsers = allUsers.filter((user) => !proposedUserIDs.includes(user.UserID));
-
-          setAvailableUsers(filteredUsers);
+          const skillsProficiency = await skillsResponse.json();
+          return { ...user, SkillsProficiency: skillsProficiency };
         } catch (error) {
-          console.error("Error fetching users:", error);
+          console.error(`Error fetching skills for user ${user.UserID}:`, error);
+          return { ...user, SkillsProficiency: {} }; // Handle error by setting empty skills
+        }
+      }));
+
+      console.log('Fetched Users with Skills:', usersWithSkills); // Debug fetched users with skills
+      setAvailableUsers(usersWithSkills);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  fetchUsers();
+}, []);
+
+  useEffect(() => {
+    if (availableUsers.length > 0) {
+      // Prepare the payload for the ML API
+      const mlPayload = {
+        ProjectComplexity: newProject.complexity,
+        SystemRequirement: newProject.selectedApplications,
+        Users: availableUsers.map(user => ({
+          UserID: user.UserID,
+          UserRole: user.Role,
+          UserSkillsProficiency: user.SkillsProficiency // Adjust based on your backend data structure
+        }))
+      };
+
+      console.log('ML Payload:', mlPayload); // Debug ML payload
+
+      // Send the payload to the ML API
+      const fetchMLPredictions = async () => {
+        try {
+          const response = await fetch('http://localhost:5000/predict', { 
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(mlPayload),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch predictions from the ML API');
+          }
+
+          const predictionResult = await response.json();
+          console.log('ML Predictions:', predictionResult); // Debug ML predictions
+
+          const selectedUsers = predictionResult.predictions
+            .filter(prediction => prediction.prediction === 1)
+            .slice(0, 6);
+
+          // Map the selected users to the format needed for display
+          const selectedResources = selectedUsers.map(prediction => {
+            const user = availableUsers.find(u => u.UserID === prediction.UserID);
+            return {
+              UserID: user.UserID,
+              role: user.Role,
+              name: user.UserName,
+              hours: 20, // Default planned hours
+            };
+          });
+
+          setResources(selectedResources);
+          console.log('Selected Resources:', selectedResources); // Debug selected resources
+        } catch (error) {
+          console.error("Error fetching ML predictions:", error);
         }
       };
 
-      fetchUsers();
-    }, [resources]);
-
-    useEffect(() => {
-
-      //THE FINANCIALS
-      // Calculate initial exhausted budget
-      let totalHours = 0;
-      resources.forEach((resource) => {
-        totalHours += parseInt(resource.hours);
-      });
-      const calculatedExhaustedBudget = 300 * totalHours; // Assuming a rate of R300 per hour//NEED TO FIX--Fetch user rates
-      setExhaustedBudget(calculatedExhaustedBudget);
-      //Net Revenue
-      const calculateNetRevenue = (newProject.Budget - exhaustedBudget); 
-      setNetRevenue(calculateNetRevenue);
-      //profit margin
-      const calculateProfitMargin = (netRevenue / newProject.Budget) *100; 
-      setProfitMargin(calculateProfitMargin);
-      //Recovery rate
-      const calculateRecoveryRate = (profitMargin); 
-      setRecoveryRate(calculateRecoveryRate);
-      
+      fetchMLPredictions();
     }
-  
-    , [resources]);
+  }, [availableUsers, newProject.complexity, newProject.requiredApplications]);
 
-  
+  useEffect(() => {
+    // Calculate the financials
+    const calculateFinancials = () => {
+      let totalHours = resources.reduce((acc, resource) => acc + parseInt(resource.hours), 0);
+      const calculatedExhaustedBudget = 300 * totalHours; // Assuming a rate of R300 per hour
+      setExhaustedBudget(calculatedExhaustedBudget);
+      
+      const calculatedNetRevenue = newProject.Budget - calculatedExhaustedBudget;
+      setNetRevenue(calculatedNetRevenue);
 
+      const calculatedProfitMargin = (calculatedNetRevenue / newProject.Budget) * 100;
+      setProfitMargin(calculatedProfitMargin);
 
-    const handleResourceChange = (index, field, value) => {
-      const newResources = [...resources];
-      newResources[index][field] = value;
-      setResources(newResources);
+      const calculatedRecoveryRate = calculatedProfitMargin; // Assuming recovery rate = profit margin
+      setRecoveryRate(calculatedRecoveryRate);
     };
 
-    const addNewResource = (userID) => {
-      const selectedUser = availableUsers.find(user => user.UserID === userID);
-      if (selectedUser) {
-        const newResource = {
-          UserID: selectedUser.UserID,
-          role: selectedUser.Role,
-          name: selectedUser.UserName,
-          hours: 0,
-        };
-        setResources([...resources, newResource]);
-      }
-    };
+    calculateFinancials();
+  }, [resources, newProject.Budget]);
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const projectWithResources = {
-        ...newProject,
-        resources,
-        financials,
+  const handleResourceChange = (index, field, value) => {
+    const newResources = [...resources];
+    newResources[index][field] = value;
+    setResources(newResources);
+  };
+
+  const addNewResource = (userID) => {
+    const selectedUser = availableUsers.find(user => user.UserID === userID);
+    if (selectedUser) {
+      const newResource = {
+        UserID: selectedUser.UserID,
+        role: selectedUser.Role,
+        name: selectedUser.UserName,
+        hours: 0,
       };
-      await addProjectSubmit(projectWithResources);
-      toast.success("Project Added Successfully");
-      return navigate("/projects");
-    };
+      setResources([...resources, newResource]);
+    }
+  };
 
-    const regenerateResources = () => {
-      setResources(regenerateResource);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const projectWithResources = {
+      ...newProject,
+      resources,
+      financials: { Budget, exhaustedBudget, profitMargin, netRevenue, recoveryRate },
     };
+    console.log('Project with Resources Payload:', projectWithResources); // Debug project with resources payload
+    await addProjectSubmit(projectWithResources);
+    toast.success("Project Added Successfully");
+    navigate("/projects");
+  };
+
+
 
     // Function to send a notification to the Associate Director
     const sendNotification = async () => {
@@ -170,15 +203,16 @@
       }
     };
     
-    
+   
 
-    return (
-  <section className="bg-lime-50">
-    <div className="container m-auto py-24 relative">
-      <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
-        <h2 className="text-3xl text-center font-semibold mb-6">
-          Proposed Resources
-        </h2>
+  return (
+    <section className="bg-lime-50">
+      <div className="container m-auto py-24 relative">
+        <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
+          <h2 className="text-3xl text-center font-semibold mb-6">
+            Proposed Resources
+          </h2>
+          
 
         {/* Budget summary in the top right corner */}
         <div className="absolute top-40 right-20 transform translate-x-1/2 -translate-y-1/2 bg-white h-120 p-6 shadow-md rounded-md border w-100">
@@ -211,57 +245,38 @@
           </div>
 
         </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-40">
+            {resources.map((resource, index) => (
+              <div key={index} className="mb-4 shadow-lg p-4 border rounded-md">
+                <label className="block text-gray-700 font-bold mb-2">Role</label>
+                <input
+                  type="text"
+                  value={resource.role}
+                  onChange={(e) => handleResourceChange(index, "role", e.target.value)}
+                  className="border rounded w-full py-2 px-3 mb-2"
+                  readOnly // Make the role input read-only
+                />
+                <label className="block text-gray-700 font-bold mb-2">Name</label>
+                <input
+                  type="text"
+                  value={resource.name}
+                  onChange={(e) => handleResourceChange(index, "name", e.target.value)}
+                  className="border rounded w-full py-2 px-3 mb-2"
+                  disabled
+                />
+                <label className="block text-gray-700 font-bold mb-2">Planned Working Hours</label>
+                <input
+                  type="number"
+                  value={resource.hours}
+                  onChange={(e) => handleResourceChange(index, "hours", e.target.value)}
+                  className="border rounded w-full py-2 px-3"
+                />
+              </div>
+            ))}
 
-        {/* Container for resource items */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-40">
-          {resources.map((resource, index) => (
-            <div key={index} className="mb-4 shadow-lg p-4 border rounded-md">
-              <label className="block text-gray-700 font-bold mb-2">Role</label>
-              <select
-                value={resource.role}
-                onChange={(e) =>
-                  handleResourceChange(index, "role", e.target.value)
-                }
-                className="border rounded w-full py-2 px-3 mb-2"
-              >
-                <option value="Partner/Director">Director</option>
-                <option value="Senior Manager">Senior Manager</option>
-                <option value="Assistant Manager">Assistant Manager</option>
-                <option value="Associate Director">Associate Director</option>
-                <option value="Senior Assistant">Senior Assistant</option>
-                <option value="Junior Consultant">Junior Consultant</option>
-              </select>
-              <label className="block text-gray-700 font-bold mb-2">Name</label>
-              <input
-                type="text"
-                value={resource.name}
-                onChange={(e) =>
-                  handleResourceChange(index, "name", e.target.value)
-                }
-                className="border rounded w-full py-2 px-3 mb-2"
-                disabled
-              />
-              <label className="block text-gray-700 font-bold mb-2">
-                Planned Working Hours
-              </label>
-              <input
-                type="number"
-                value={resource.hours}
-                onChange={(e) =>
-                  handleResourceChange(index, "hours", e.target.value)
-                }
-                className="border rounded w-full py-2 px-3 mb-2"
-              />
-            </div>
-          ))}
-        </div>
+           </div>
         <div className="flex justify-between mt-6">
-          <button
-            onClick={regenerateResources}
-            className="bg-blue-600 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-          >
-            Regenerate List
-          </button>
+         
           <button
             onClick={handleSubmit}
             className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
@@ -298,8 +313,7 @@
     </div>
   </section>
 
+  );
+};
 
-    );
-  };
-
-  export default ProposedResourcespage;
+export default ProposedResourcesPage;
