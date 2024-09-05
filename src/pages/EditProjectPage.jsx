@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const EditProjectPage = ({ updateProjectSubmit }) => {
   const { project, client, resources, financials } = useLoaderData();
@@ -17,6 +19,13 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   const [Description, setDescription] = useState(project.Description);
   const [Budget, setBudget] = useState(project.Budget);
   const [Status, setStatus] = useState(project.Status || "Pending");
+  const [startDate, setStartDate] = useState(
+    project.StartDate ? new Date(project.StartDate) : null
+  );
+  const [endDate, setEndDate] = useState(
+    project.EndDate ? new Date(project.EndDate) : null
+  );
+  
   const [CompanyName, setCompanyName] = useState(client.CompanyName);
   const [CompanyDescription, setCompanyDescription] = useState(
     client.CompanyDescription
@@ -98,6 +107,26 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   const removeResource = (index) => {
     setProjectResources(projectResources.filter((_, i) => i !== index));
   };
+  //Date
+  const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
+
+  // Check and set a default value if dates are missing
+  const handleStartDateChange = (date) => {
+    if (isValidDate(date)) {
+      setStartDate(date);
+    } else {
+      setStartDate(null); // or some default value
+    }
+  };
+  
+  const handleEndDateChange = (date) => {
+    if (isValidDate(date)) {
+      setEndDate(date);
+    } else {
+      setEndDate(null); // or some default value
+    }
+  };
+  
 
   // Task management
   const handleManageTasks = (resourceId) => {
@@ -118,6 +147,8 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
       Description,
       Budget,
       Status, // Include status in the updated project
+      StartDate: startDate ? startDate.toISOString() : null,
+       EndDate: endDate ? endDate.toISOString() : null,
       Client: {
         CompanyName,
         CompanyDescription,
@@ -132,6 +163,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     toast.success("Project updated successfully");
     return navigate(`/project/${updatedProject.id}`);
   };
+  console.log(project.startDate)
 
   // Map resources to include user names
   // Map resources to include user names
@@ -277,6 +309,39 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   onChange={(e) => setBudget(e.target.value)}
                 ></textarea>
               </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="startDate"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  Start Date
+                </label>
+
+                <DatePicker
+                  selected={isValidDate(startDate) ? startDate : null}
+                  onChange={handleStartDateChange}
+                  dateFormat="yyyy/MM/dd"
+                  className="border rounded w-full py-2 px-3"
+                 
+                />
+              </div>
+
+              <div className="mb-4">
+                <label
+                  htmlFor="endDate"
+                  className="block text-gray-700 font-bold mb-2"
+                >
+                  End Date
+                </label>
+                <DatePicker
+                  selected={isValidDate(endDate) ? endDate : null}
+                  onChange={handleEndDateChange}
+                  dateFormat="yyyy/MM/dd"
+                  className="border rounded w-full py-2 px-3"
+                
+                />
+              </div>
+
               <div className="mb-4">
                 <label
                   htmlFor="status"

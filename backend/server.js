@@ -21,7 +21,7 @@ const pool = mysql.createPool(dbConfig);
 // Endpoints to get all projects
 app.get("/projects", async (req, res) => {
   try {
-    const limit = parseInt(req.query._limit) || 10;
+    const limit = parseInt(req.query._limit) || 100;
     const [rows] = await pool.query("SELECT * FROM projects LIMIT ?", [limit]);
     res.json(rows);
   } catch (err) {
@@ -209,7 +209,7 @@ app.get("/tasks/:resourceId", async (req, res) => {
 // Endpoint to get all users
 app.get("/users", async (req, res) => {
   try {
-    const limit = parseInt(req.query._limit) || 10;
+    const limit = parseInt(req.query._limit) || 100;
     const [rows] = await pool.query("SELECT * FROM users LIMIT ?", [limit]);
     res.json(rows);
   } catch (err) {
@@ -353,7 +353,7 @@ app.post("/newprojects", async (req, res) => {
 // Endpoint to update a project
 app.put("/projects/:id", async (req, res) => {
   const projectId = req.params.id;
-  const { ProjectCode, Title, Description, Budget, Status, Client, resources } =
+  const { ProjectCode, Title, Description, Budget, Status, Client, resources, StartDate, EndDate } =
     req.body;
 
   try {
@@ -365,10 +365,10 @@ app.put("/projects/:id", async (req, res) => {
       await connection.query(
         `
         UPDATE projects 
-        SET ProjectCode = ?, Title = ?, Description = ?, Budget = ?, Status = ?
+        SET ProjectCode = ?, Title = ?, Description = ?, Budget = ?, Status = ?, StartDate = ?, EndDate = ?
         WHERE ProjectID = ?
       `,
-        [ProjectCode, Title, Description, Budget, Status, projectId]
+        [ProjectCode, Title, Description, Budget, Status, StartDate, EndDate, projectId]
       );
 
       // Update client data
