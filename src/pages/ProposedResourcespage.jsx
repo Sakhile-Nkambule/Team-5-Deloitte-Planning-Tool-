@@ -207,32 +207,36 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
   return (
     <section className="bg-lime-50">
+      
+
       <div className="container m-auto py-24 relative">
-        <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
-          <h2 className="text-3xl text-center font-semibold mb-6">
+      <h2 className="text-3xl text-center font-semibold mb-6">
             Proposed Resources
           </h2>
+        <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
+         
           
 
         {/* Budget summary in the top right corner */}
-        <div className="absolute top-40 right-20 transform translate-x-1/2 -translate-y-1/2 bg-white h-120 p-6 shadow-md rounded-md border w-100">
-          <h2 className="text-2xl font-semibold mb-4 text-center">Budget Summary</h2>
-          <div className="mb-2">
+        <h2 className="text-2xl font-semibold mb-4 text-center">Budget Summary</h2>
+        <div className="flex justify-center items-center space-x-10 bg-white h-120 p-6 shadow-md rounded-md border w-100">
+          
+          <div className="mb-2 ml-4">
             <p className="text-gray-700 font-semibold">Gross Revenue:</p>
             <p className="text-green-500 font-semibold">{`R${newProject.Budget}`}</p>
           </div>
           
-          <div className="mb-2">
+          <div className="mb-2 ml-4">
             <p className="text-gray-700 font-semibold">Total Costs:</p>
           <p className="text-red-500 font-semibold">{`R${exhaustedBudget}`}</p>
           </div>
-          <div className="mt-4">
+          <div className="mb-2 ml-4">
             <p className="text-gray-700 font-semibold">Net Revenue:</p>
             <p className="font-semibold">
               {`R${netRevenue}`}
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mb-2 ml-4">
             <p className="text-gray-700 font-semibold">Profit Margin:</p>
             <p className="font-semibold">
               {`${profitMargin}%`
