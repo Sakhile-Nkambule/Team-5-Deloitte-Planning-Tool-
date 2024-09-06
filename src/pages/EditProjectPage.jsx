@@ -511,7 +511,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   Add Resource
                 </label>
                 <select
-                  id="UserID"
+                  id="UserID" 
                   name="UserID"
                   className="border rounded w-full py-2 px-3 mb-2"
                   onChange={handleSelectChange}

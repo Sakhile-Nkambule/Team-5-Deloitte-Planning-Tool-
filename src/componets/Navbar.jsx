@@ -24,6 +24,9 @@ const Navbar = () => {
           toast.success("Successfully Logged Out");
         navigate('/');
     };
+    const handleUserProfile = ()=>{
+        navigate ('/userProfile')
+    }
 
     const linkClass = ({ isActive }) =>
         isActive
@@ -31,7 +34,8 @@ const Navbar = () => {
             : "text-white hover:bg-lime-500 hover:text-black rounded-md px-3 py-2";
 
     // Determine the URL for the Home link based on user role
-    const homeLink = userRole === 'Planning Team' ? '/homepage' : '/Userhomepage';
+    const rolesWithAdminAccess = ['Planning Team', 'Director', 'Senior Manager'];
+    const homeLink = rolesWithAdminAccess.includes(userRole) ? '/homepage' : '/Userhomepage';
 
     return (
         <>
@@ -53,12 +57,7 @@ const Navbar = () => {
                                 </span>
                             </NavLink>
                             <div className="md:ml-auto flex items-center space-x-2">
-                            <NavLink
-                                    to="/notifications" // Use the dynamic homeLink here as well
-                                    className={linkClass}
-                                >
-                                   Notifications
-                                </NavLink>
+                            
                                 <NavLink
                                     to={homeLink} // Use the dynamic homeLink here as well
                                     className={linkClass}
@@ -71,7 +70,7 @@ const Navbar = () => {
                                 >
                                     Projects
                                 </NavLink>
-                                {userRole === 'Planning Team' && (
+                                 {['Planning Team', 'Director', 'Senior Manager'].includes(userRole) && (
                                     <NavLink
                                         to="/add-project"
                                         className={linkClass}
@@ -79,6 +78,12 @@ const Navbar = () => {
                                         Add Project
                                     </NavLink>
                                 )}
+                                <NavLink
+                                    to="/notifications" // Use the dynamic homeLink here as well
+                                    className={linkClass}
+                                >
+                                   Notifications
+                                </NavLink>
                                 <div className="relative">
                                     <button
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -109,7 +114,14 @@ const Navbar = () => {
                                             >
                                                 Logout
                                             </button>
+                                            <button
+                                                onClick={handleUserProfile}
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            >
+                                                Profile
+                                            </button>
                                         </div>
+                                        
                                     )}
                                 </div>
                             </div>

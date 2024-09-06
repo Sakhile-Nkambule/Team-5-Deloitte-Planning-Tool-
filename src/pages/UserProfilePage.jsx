@@ -26,13 +26,32 @@ const getColorClass = (proficiency) => {
   }
 };
 
+const defaultSkills = {
+  SAP: 0,
+  JDE: 0,
+  Oracle: 0,
+  "Genric Application": 0,
+  "Microsoft SQL": 0,
+  "Oracle DB": 0,
+  Linux: 0,
+  "Microsoft OS": 0,
+  "Active Directory": 0,
+  "Cyber memo": 0,
+  CTRA: 0,
+  DCNO: 0,
+  "SAP-AUTO": 0,
+  AUTO: 0,
+  REVIEW: 0,
+  "Project Management": 0,
+};
+
 const UserProfilePage = () => {
   const { user } = useUser();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [role, setRole] = useState(user?.role || '');
   const [hourlyRate, setHourlyRate] = useState(user?.rate || '');
-  const [skills, setSkills] = useState({});
+  const [skills, setSkills] = useState(defaultSkills);
 
   useEffect(() => {
     if (user) {
@@ -40,11 +59,15 @@ const UserProfilePage = () => {
       setEmail(user.email);
       setRole(user.role);
       setHourlyRate(user.rate);
-      
+
       // Fetch user skills from the API
       fetch(`/api/SkillSets/${user.id}`)
         .then(response => response.json())
-        .then(data => setSkills(data))
+        .then(data => {
+          // Merge fetched skills with default skills
+          const updatedSkills = { ...defaultSkills, ...data };
+          setSkills(updatedSkills);
+        })
         .catch(error => console.error('Error fetching skills:', error));
     }
   }, [user]);
@@ -59,6 +82,7 @@ const UserProfilePage = () => {
     // Update user profile
     console.log('User profile updated:', { name, email, role, hourlyRate, skills });
     toast.success("Profile updated Successfully");
+    
     // Send updated skills to the API
     fetch(`/api/Skillsets/${user.id}`, {
       method: 'PUT',
@@ -82,10 +106,10 @@ const UserProfilePage = () => {
           <div className="flex gap-1">
             {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((percent, index) => (
               <div
-              key={index}
-              className={`w-6 h-6 cursor-pointer ${getColorClass(percent)} ${
-                proficiency >= percent ? 'bg-opacity-100' : 'bg-opacity-5'
-              }`}
+                key={index}
+                className={`w-6 h-6 cursor-pointer ${getColorClass(percent)} ${
+                  proficiency >= percent ? 'bg-opacity-100' : 'bg-opacity-5'
+                }`}
                 onClick={() => handleSkillChange(skill, percent)}
               />
             ))}
@@ -135,24 +159,24 @@ const UserProfilePage = () => {
 
             <div className="mb-4">
               <label htmlFor="role" className="block text-gray-700 font-bold mb-2">
-              Role
+                Role
+              </label>
               <select
                 className="mt-1 p-2 border border-gray-300 rounded-lg w-full"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
+              
                 <option value="">Select a Role</option>
                 <option value="Director">Director</option>
-                <option value="Senior Manager">Senior Manager</option>
-                <option value="Assistant Manager">Assistant Manager</option>
+                <option value="Snr Associate Director">Snr AssociateDirector</option>
                 <option value="Associate Director">Associate Director</option>
-                <option value="Assistant">Assistant</option>
+                <option value="Senior Manager">Senior Manager</option>
+                <option value="Manager">Manager</option>
+                <option value="Snr Consultant">Snr Consultant</option>
+                <option value="Consultant">Consultant</option>
                 <option value="Jnr Consultant">Jnr Consultant</option>
-                <option value="Assistant">Analyst</option>
-                
               </select>
-              </label>
-              
             </div>
 
             <div className="mb-4">

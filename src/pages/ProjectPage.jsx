@@ -1,39 +1,65 @@
 import { useParams, useLoaderData } from "react-router-dom";
 import { FaArrowLeft, FaMapMarker } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useUser } from '../componets/UserContext'; // Import the useUser hook
+import { useUser } from '../componets/UserContext'; // Corrected typo in components
+import { useEffect, useState } from "react";
 
 const ProjectPage = ({ deleteProject }) => { 
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const navigate = useNavigate(); 
+  const { id: projectId } = useParams(); // Use projectId for clarity
   const { project, client, resources, financials } = useLoaderData(); // Destructure data from loader
   const { user } = useUser(); // Get user from context
-
   const userRole = user?.role; // Get the user's role
 
+  const [resourceId, setResourceId] = useState(null);
+  const [userMap, setUserMap] = useState({});
+
+  useEffect(() => {
+    if (user && projectId) {
+      fetch(`/api/resource-id/${user.id}/${projectId}`)
+        .then((response) => response.json())
+        .then((data) => setResourceId(data.resourceId))
+        .catch((error) => console.error('Error fetching resourceId:', error));
+    }
+  }, [user, projectId]);
+
+  // Fetch user data to create a map of UserID to UserName
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("/api/users");
+        if (!response.ok) throw new Error("Failed to fetch user data");
+        const usersData = await response.json();
+        const userMapping = usersData.reduce((acc, user) => {
+          acc[user.UserID] = { UserName: user.UserName, Role: user.Role };
+          return acc;
+        }, {});
+        setUserMap(userMapping);
+      } catch (error) {
+        toast.error("Failed to fetch user data");
+        console.error(error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const onDeleteClick = (projectId) => {
-    const confirm = window.confirm(
-      "Are you sure you want to delete this project?"
-    );
-
-    if (!confirm) return;
-
-    deleteProject(projectId);
-
-    toast.success("Project Deleted Successfully");
-
-    navigate("/projects");
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      deleteProject(projectId);
+      toast.success("Project Deleted Successfully");
+      navigate("/projects");
+    }
   };
 
-  //DATE
   const formattedStartDate = project.StartDate 
-  ? new Date(project.StartDate).toLocaleDateString() 
-  : '_';
+    ? new Date(project.StartDate).toLocaleDateString() 
+    : '_';
   const formattedEndDate = project.EndDate
-  ? new Date(project.EndDate).toLocaleDateString() 
-  : '_';
+    ? new Date(project.EndDate).toLocaleDateString() 
+    : '_';
+
   return (
     <>
       <section>
@@ -55,60 +81,54 @@ const ProjectPage = ({ deleteProject }) => {
                 <div className="text-gray-500 mb-4">{project.ProjectCode}</div>
                 <h1 className="text-3xl font-bold mb-4">{project.Title}</h1>
                 <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
-                   <p className="text-orange-700"> {`Start Date: ${formattedStartDate}`}</p>
+                  <p className="text-orange-700">{`Start Date: ${formattedStartDate}`}</p>
                 </div>
                 <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
-                <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
-                   <p className="text-orange-700"> {`End Date: ${formattedEndDate}`}</p>
-                </div>
+                  <p className="text-orange-700">{`End Date: ${formattedEndDate}`}</p>
                 </div>
                 <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
                   <FaMapMarker className="text-orange-700 mr-2" />
-                  <p className="text-orange-700"> {project.Status}</p>
+                  <p className="text-orange-700">{project.Status}</p>
                 </div>
               </div>
 
               {/* Project Info */}
               <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-                <h3 className="text-lime-500 text-lg font-bold mb-6">
-                  Project Description
-                </h3>
+                <h3 className="text-lime-500 text-lg font-bold mb-6">Project Description</h3>
                 <p className="mb-4">{project.Description}</p>
-                <h3 className="text-lime-500 text-lg font-bold mb-2">
-                  Project Budget
-                </h3>
+                <h3 className="text-lime-500 text-lg font-bold mb-2">Project Budget</h3>
                 <p className="mb-4">{project.Budget}</p>
               </div>
 
               {/* Company Info */}
               <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left mt-6">
-                <h3 className="text-lime-500 text-lg font-bold mb-2">
-                  Company Info
-                </h3>
+                <h3 className="text-lime-500 text-lg font-bold mb-2">Company Info</h3>
                 <div className="text-gray-700 mb-4">{client.CompanyName}</div>
                 <p className="mb-4">{client.CompanyDescription}</p>
-                <p className="my-2 bg-indigo-100 p-2 font-bold">
-                  {client.CompanyLocation}
-                </p>
+                <p className="my-2 bg-indigo-100 p-2 font-bold">{client.CompanyLocation}</p>
                 <h3 className="text-gray-700 mb-4">Contact Email:</h3>
-                <p className="my-2 bg-indigo-100 p-2 font-bold">
-                  {/* ///////// */}
-                  {client.ContactEmail}
-                </p>
+                <p className="my-2 bg-indigo-100 p-2 font-bold">{client.ContactEmail}</p>
                 <h3 className="text-gray-700 mb-4">Contact Phone:</h3>
-                <p className="my-2 bg-indigo-100 p-2 font-bold">
-                  {client.ContactPhone}
-                </p>
+                <p className="my-2 bg-indigo-100 p-2 font-bold">{client.ContactPhone}</p>
               </div>
 
-              {/* Dashboard */}
+              {/* Dashboard Link */}
               <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left mt-6">
-                <Link
-                  to={`/dashboard/${project.ProjectID}`}
-                  className="bg-black hover:bg-lime-500 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
-                >
-                  View Project Dashboard
-                </Link>
+                {['Planning Team', 'Director', 'Senior Manager'].includes(userRole) ? (
+                  <Link
+                    to={`/dashboard/${project.ProjectID}`}
+                    className="bg-black hover:bg-lime-500 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                  >
+                    View Project Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    to={`/taskboard/${resourceId}`}
+                    className="bg-black hover:bg-lime-500 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                  >
+                    View Taskboard
+                  </Link>
+                )}
               </div>
             </main>
 
@@ -116,14 +136,12 @@ const ProjectPage = ({ deleteProject }) => {
             <aside>
               {/* Project Resources */}
               <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lime-400 text-xl font-bold mb-6">
-                  Project Resources
-                </h3>
+                <h3 className="text-lime-400 text-xl font-bold mb-6">Project Resources</h3>
                 <ul>
                   {resources.map((resource) => (
                     <li key={resource.ResourceID} className="mb-4">
                       <h4 className="font-bold">{resource.Role}</h4>
-                      <p>Name: {resource.UserName}</p>
+                      <p>Name: {userMap[resource.UserID]?.UserName || 'Unknown User'}</p>
                       <p>Planned Hours: {resource.PlannedHours}</p>
                     </li>
                   ))}
@@ -131,7 +149,7 @@ const ProjectPage = ({ deleteProject }) => {
               </div>
 
               {/* Manage */}
-              {['Planning Team', 'Director', 'Senior Manager'].includes(userRole)&& (
+              {['Planning Team', 'Director', 'Senior Manager'].includes(userRole) && (
                 <div className="bg-white p-6 rounded-lg shadow-md mt-6">
                   <h3 className="text-xl font-bold mb-6">Manage Project</h3>
                   <Link
@@ -156,6 +174,9 @@ const ProjectPage = ({ deleteProject }) => {
   );
 };
 
+
+
+
 const projectLoader = async ({ params }) => {
   const projectRes = await fetch(`/api/project/${params.id}`);
   const projectData = await projectRes.json();
@@ -173,16 +194,16 @@ const projectLoader = async ({ params }) => {
   const userPromises = resourcesData.map(async (resource) => {
     const userRes = await fetch(`/api/user/${resource.UserID}`);
     const userData = await userRes.json();
-    return { ...resource, UserName: userData.UserName };
+    return { ...resource, UserName: userData.name };
   });
 
-  const resourcesWithUserDetails = await Promise.all(userPromises);
+  const resourcesWithUserData = await Promise.all(userPromises);
 
   return {
     project: projectData,
     client: clientData,
+    resources: resourcesWithUserData,
     financials: financialsData,
-    resources: resourcesWithUserDetails,
   };
 };
 

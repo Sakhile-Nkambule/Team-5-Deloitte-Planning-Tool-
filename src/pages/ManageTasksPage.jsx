@@ -98,7 +98,8 @@ const ManageTasksPage = () => {
           ResourceID: task.ResourceID,
           Description: task.Description,
           Status: task.Status,
-          DueDate: task.DueDate, // Include DueDate
+          Hours: task.Hours,
+          DueDate: task.DueDate,
         }));
 
         await fetch(`/api/tasks`, {
@@ -198,8 +199,7 @@ const ManageTasksPage = () => {
               className="border rounded w-full py-2 px-3 mb-2"
             >
               <option value="To-Do">To-Do</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
+            
             </select>
             <label className="block mb-1 font-semibold">Hours</label>
             <input

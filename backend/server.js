@@ -353,10 +353,10 @@ app.post("/newprojects", async (req, res) => {
 });
 
 // Endpoint to update a project
+// Endpoint to update a project
 app.put("/projects/:id", async (req, res) => {
   const projectId = req.params.id;
-  const { ProjectCode, Title, Description, Budget, Status, Client, resources, StartDate, EndDate } =
-    req.body;
+  const { ProjectCode, Title, Description, Budget, Status, Client, resources, StartDate, EndDate } = req.body;
 
   try {
     const connection = await pool.getConnection();
@@ -390,34 +390,28 @@ app.put("/projects/:id", async (req, res) => {
         ]
       );
 
-      // Delete existing resources and tasks
-      await connection.query(
-        `
-        DELETE FROM tasks WHERE ResourceID IN (SELECT ResourceID FROM resources WHERE ProjectID = ?)
-      `,
-        [projectId]
-      );
-
-      await connection.query(
-        `
-        DELETE FROM resources WHERE ProjectID = ?
-      `,
-        [projectId]
-      );
-
-      // Insert updated resources
-      const insertResourceQuery = `
-        INSERT INTO resources (ProjectID, UserID, Role, PlannedHours) 
-        VALUES (?, ?, ?, ?)
-      `;
-
+      // Update existing resources and insert new resources if they don't exist
       for (const resource of resources) {
-        await connection.query(insertResourceQuery, [
-          projectId,
-          resource.UserID,
-          resource.Role,
-          resource.PlannedHours,
-        ]);
+        if (resource.ResourceID) {
+          // Update existing resource
+          await connection.query(
+            `
+            UPDATE resources 
+            SET Role = ?, PlannedHours = ?
+            WHERE ResourceID = ? AND ProjectID = ?
+          `,
+            [resource.Role, resource.PlannedHours, resource.ResourceID, projectId]
+          );
+        } else {
+          // Insert new resource
+          await connection.query(
+            `
+            INSERT INTO resources (ProjectID, UserID, Role, PlannedHours) 
+            VALUES (?, ?, ?, ?)
+          `,
+            [projectId, resource.UserID, resource.Role, resource.PlannedHours]
+          );
+        }
       }
 
       await connection.commit();
@@ -426,14 +420,17 @@ app.put("/projects/:id", async (req, res) => {
       });
     } catch (err) {
       await connection.rollback();
-      res.status(500).json("Error updating project: " + err);
+      console.error("Error updating project:", err);
+      res.status(500).json({ error: "Error updating project: " + err });
     } finally {
       connection.release();
     }
   } catch (err) {
-    res.status(500).json("Error connecting to the database: " + err);
+    console.error("Error connecting to the database:", err);
+    res.status(500).json({ error: "Error connecting to the database: " + err });
   }
 });
+
 
 // Delete a project
 app.delete("/projects/:id", async (req, res) => {
@@ -487,12 +484,14 @@ app.post("/tasks", async (req, res) => {
     ResourceID: task.ResourceID,
     Description: task.Description,
     Status: task.Status,
+    Hours: task.Hours,
+    DueDate: task.DueDate,
   }));
 
-  const tasksSql = `
-    INSERT INTO tasks (ResourceID, Description, Status)
-    VALUES (?, ?, ?)
-  `;
+  const tasksSql = `   
+        INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate)
+        VALUES (?, ?, ?, ?, ?)
+      `;
 
   try {
     const connection = await pool.getConnection();
@@ -504,6 +503,8 @@ app.post("/tasks", async (req, res) => {
           task.ResourceID,
           task.Description,
           task.Status,
+          task.Hours,
+          task.DueDate,
         ]);
       }
 
@@ -545,25 +546,41 @@ app.put("/tasks/:resourceId", async (req, res) => {
         return res.status(400).json({ error: "ResourceID does not exist" });
       }
 
-      // Delete existing tasks for the resource
-      await connection.execute(
-        `
-        DELETE FROM tasks WHERE ResourceID = ?
-      `,
-        [resourceId]
-      );
-
-      // Insert updated tasks
-      const insertSql = `
-        INSERT INTO tasks (ResourceID, Description, Status)
-        VALUES (?, ?, ?)
-      `;
+      // Loop through each task and update or insert
       for (const task of tasks) {
-        await connection.execute(insertSql, [
-          resourceId,
-          task.Description,
-          task.Status,
-        ]);
+        if (task.TaskID) {
+          // Check if the task exists
+          const [existingTask] = await connection.execute(
+            `
+            SELECT * FROM tasks WHERE TaskID = ? AND ResourceID = ?
+          `,
+            [task.TaskID, resourceId]
+          );
+
+          if (existingTask.length > 0) {
+            // Update existing task
+            await connection.execute(
+              `
+              UPDATE tasks 
+              SET Description = ?, Status = ?, Hours = ?, DueDate = ?
+              WHERE TaskID = ? AND ResourceID = ?
+            `,
+              [task.Description, task.Status, task.Hours, task.DueDate, task.TaskID, resourceId]
+            );
+          } else {
+            // If TaskID is provided but doesn't match an existing task, return an error or insert a new task as per your requirement
+            return res.status(400).json({ error: `Task with TaskID ${task.TaskID} does not exist for this ResourceID` });
+          }
+        } else {
+          // Insert new task
+          await connection.execute(
+            `
+            INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate)
+            VALUES (?, ?, ?, ?, ?)
+          `,
+            [resourceId, task.Description, task.Status, task.Hours, task.DueDate]
+          );
+        }
       }
 
       await connection.commit();
@@ -578,6 +595,47 @@ app.put("/tasks/:resourceId", async (req, res) => {
   } catch (err) {
     console.error("Error connecting to the database:", err);
     res.status(500).json({ error: "Error connecting to the database: " + err });
+  }
+});
+
+
+//Endpoint to Delete Task
+
+
+app.delete("/task/:taskId", async (req, res) => {
+  const taskId = req.params.taskId;
+
+  try {
+    // Get a connection from the pool
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // Prepare and execute the SQL query to delete the task
+      const [result] = await connection.query('DELETE FROM tasks WHERE TaskID = ?', [taskId]);
+
+      // Commit the transaction
+      await connection.commit();
+
+      // Check if any rows were affected (task was found and deleted)
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      // Send success response
+      res.json({ message: "Task deleted successfully" });
+    } catch (err) {
+      // Rollback the transaction in case of an error
+      await connection.rollback();
+      console.error("Error deleting task:", err);
+      res.status(500).json({ error: "Error deleting task: " + err });
+    } finally {
+      // Release the connection back to the pool
+      connection.release();
+    }
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).send("Database error: " + err);
   }
 });
 
