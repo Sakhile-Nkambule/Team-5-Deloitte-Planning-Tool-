@@ -128,12 +128,14 @@ export function CreateUserAccount() {
               >
                 <option value="">Select a Role</option>
                 <option value="Director">Director</option>
-                <option value="Senior Manager">Senior Manager</option>
-                <option value="Assistant Manager">Assistant Manager</option>
+                <option value="Snr Associate Director">Snr AssociateDirector</option>
                 <option value="Associate Director">Associate Director</option>
-                <option value="Assistant">Assistant</option>
+                <option value="Senior Manager">Senior Manager</option>
+                <option value="Manager">Manager</option>
+                <option value="Snr Consultant">Snr Consultant</option>
+                <option value="Consultant">Consultant</option>
                 <option value="Jnr Consultant">Jnr Consultant</option>
-                <option value="Assistant">Analyst</option>
+               
                 
               </select>
             </label>

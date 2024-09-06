@@ -8,14 +8,14 @@ const linkClass = ({ isActive }) => isActive ?
     : "text-black hover:bg-lime-500 hover:text-black rounded-md px-3 py-2";
 
 const ProjectDashboard = () => {
-  const { projectId } = useParams();
+  const { id } = useParams();
   const { user } = useUser(); // Get the logged-in user's information
   const [resourceId, setResourceId] = useState(null);
 
   useEffect(() => {
-    if (user && projectId) {
-      console.log(`Fetching resourceId for userId: ${user.id} and projectId: ${projectId}`);
-      fetch(`/api/resource-id/${user.id}/${projectId}`)
+    if (user && id) {
+      console.log(`Fetching resourceId for userId: ${user.id} and projectId: ${id}`);
+      fetch(`/api/resource-id/${user.id}/${id}`)
         .then((response) => {
           console.log('Fetch response:', response);
           return response.json();
@@ -28,30 +28,24 @@ const ProjectDashboard = () => {
           console.error('Error fetching resourceId:', error);
         });
     } else {
-      console.log('User or ProjectId is missing:', { user, projectId });
+      console.log('User or ProjectId is missing:', { user, id });
     }
-  }, [user, projectId]);
+  }, [user, id]);
 
   return (
     <div>
-      <h2 className="text-green-500 text-3xl text-center font-semibold mb-25">Project Dashboard Currently Not Available</h2>
-      {resourceId ? (
+        {resourceId ? (
         <div className="flex space-x-4"> {/* Container for links with space between them */}
           <NavLink
             to={`/taskboard/${resourceId}`}
             className={linkClass}
           >
-            Task board
+            View  Task board
           </NavLink>
-          <NavLink
-            to={`/resources/${resourceId}`} // Route for Available Resources
-            className={linkClass}
-          >
-            Available Resources
-          </NavLink>
+        
         </div>
       ) : (
-        <p>Loading...</p>
+        <p></p>
       )}
     </div>
   );
