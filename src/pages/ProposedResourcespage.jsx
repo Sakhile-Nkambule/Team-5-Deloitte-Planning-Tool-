@@ -3,6 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import  Spinner from "../componets/Spinner";
+
+
 const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,6 +19,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const [profitMargin, setProfitMargin] = useState(0);
   const [netRevenue, setNetRevenue] = useState(0);
   const [recoveryRate, setRecoveryRate] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const removeResource = (index) => {
     setResources(resources.filter((_, i) => i !== index));
@@ -25,40 +29,44 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
   useEffect(() => {
     // Fetch users from the backend
-   // Fetch users from the backend
-   const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users');
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const allUsers = await response.json();
-
-      // Fetch skills proficiency for each user
-      const usersWithSkills = await Promise.all(allUsers.map(async (user) => {
-        try {
-          const skillsResponse = await fetch(`api/skillsets/${user.UserID}`);
-          if (!skillsResponse.ok) {
-            throw new Error(`Failed to fetch skills for user ${user.UserID}`);
-          }
-          const skillsProficiency = await skillsResponse.json();
-          return { ...user, SkillsProficiency: skillsProficiency };
-        } catch (error) {
-          console.error(`Error fetching skills for user ${user.UserID}:`, error);
-          return { ...user, SkillsProficiency: {} }; // Handle error by setting empty skills
+    const fetchUsers = async () => {
+      setLoading(true); // Set loading to true when the fetch starts
+      try {
+        const response = await fetch('/api/users');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-      }));
-
-      console.log('Fetched Users with Skills:', usersWithSkills); // Debug fetched users with skills
-      setAvailableUsers(usersWithSkills);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-
-  fetchUsers();
-}, []);
-
+        const allUsers = await response.json();
+  
+        // Fetch skills proficiency for each user
+        const usersWithSkills = await Promise.all(
+          allUsers.map(async (user) => {
+            try {
+              const skillsResponse = await fetch(`/api/skillsets/${user.UserID}`);
+              if (!skillsResponse.ok) {
+                throw new Error(`Failed to fetch skills for user ${user.UserID}`);
+              }
+              const skillsProficiency = await skillsResponse.json();
+              return { ...user, SkillsProficiency: skillsProficiency };
+            } catch (error) {
+              console.error(`Error fetching skills for user ${user.UserID}:`, error);
+              return { ...user, SkillsProficiency: {} }; // Handle error by setting empty skills
+            }
+          })
+        );
+  
+        console.log('Fetched Users with Skills:', usersWithSkills); // Debug fetched users with skills
+        setAvailableUsers(usersWithSkills);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setLoading(false); // Set loading to false when the fetch completes, whether successful or failed
+      }
+    };
+  
+    fetchUsers();
+  }, []);
+  
   useEffect(() => {
     if (availableUsers.length > 0) {
       // Prepare the payload for the ML API
@@ -77,7 +85,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
       // Send the payload to the ML API
       const fetchMLPredictions = async () => {
         try {
-          const response = await fetch('http://localhost:5000/predict', { 
+          const response = await fetch('http://localhost:5051/predict', { 
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -226,7 +234,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
         {/* Budget summary in the top right corner */}
         <h2 className="text-2xl font-semibold mb-4 text-center">Budget Summary</h2>
-        <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md rounded-full  w-100">
+        <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md  rounded-full boarder w-100 ">
           
           <div className="mb-2 ">
             <p className="text-gray-700 font-semibold">Gross Revenue:</p>
@@ -256,27 +264,31 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           </div>
 
         </div>
+        <div>
+      {loading ? (
+        <Spinner />
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
           {resources.map((resource, index) => (
             <div key={index} className="relative mb-4 shadow-lg p-4 border rounded-md">
-              <FontAwesomeIcon 
-                icon={faTimes} 
-                className="cursor-pointer text-gray-500 absolute top-2 right-2" 
-                onClick={() => removeResource(index)} 
+              <FontAwesomeIcon
+                icon={faTimes}
+                className="cursor-pointer text-gray-500 absolute top-2 right-2"
+                onClick={() => removeResource(index)}
               />
               <label className="block text-gray-700 font-bold mb-2">Role</label>
               <input
                 type="text"
                 value={resource.role}
-                onChange={(e) => handleResourceChange(index, "role", e.target.value)}
+                onChange={(e) => handleResourceChange(index, 'role', e.target.value)}
                 className="border rounded w-full py-2 px-3 mb-2"
-                readOnly // Make the role input read-only
+                readOnly
               />
               <label className="block text-gray-700 font-bold mb-2">Name</label>
               <input
                 type="text"
                 value={resource.name}
-                onChange={(e) => handleResourceChange(index, "name", e.target.value)}
+                onChange={(e) => handleResourceChange(index, 'name', e.target.value)}
                 className="border rounded w-full py-2 px-3 mb-2"
                 disabled
               />
@@ -284,12 +296,14 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
               <input
                 type="number"
                 value={resource.hours}
-                onChange={(e) => handleResourceChange(index, "hours", e.target.value)}
+                onChange={(e) => handleResourceChange(index, 'hours', e.target.value)}
                 className="border rounded w-full py-2 px-3"
               />
             </div>
           ))}
         </div>
+      )}
+    </div>
 
         <div className="flex justify-between mt-6">
           <button

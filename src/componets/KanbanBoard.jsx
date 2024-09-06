@@ -4,7 +4,9 @@ import Column from "./Column";
 import { useParams } from "react-router-dom";
 
 export default function Board() {
-    const { resourceId } = useParams();
+    const { resourceId } = { resourceId: 7 };
+    console.log(resourceId); // Output: 1
+
 
     const [completed, setCompleted] = useState([]);
     const [ToDo, setToDo] = useState([]);
