@@ -22,7 +22,7 @@ const UserCards = () => {
           <Card>
             <h2 className="text-2xl font-bold">User Profile</h2>
             <p className="mt-2 mb-4">
-            View and update your profile information. You can also upload your CV to keep your information up to date.
+            View and update your profile information. You can also update your proficiencies in each of the available skillsets.
             </p>
             <Link
               to="/userProfile"

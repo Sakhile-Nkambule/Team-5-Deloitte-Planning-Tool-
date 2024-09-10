@@ -84,7 +84,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
         : 0;
       setProfitMargin(calculatedProfitMargin);
 
-      const calculatedRecoveryRate = 100 - calculatedProfitMargin;
+      const calculatedRecoveryRate =calculatedProfitMargin;
       setRecoveryRate(calculatedRecoveryRate);
     };
 
@@ -104,8 +104,19 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     ]);
   };
 
-  const removeResource = (index) => {
-    setProjectResources(projectResources.filter((_, i) => i !== index));
+  const removeResource = async (resourceId) => {
+    try {
+      // Send a DELETE request to the server to remove the resource
+      await fetch(`/api/resources/${resourceId}`, {
+        method: "DELETE",
+      });
+  
+      // Update the local state after removing the resource from the database
+      setProjectResources(projectResources.filter((resource) => resource.ResourceID !== resourceId));
+      
+    } catch (error) {
+      console.error("Failed to remove resource", error);
+    }
   };
   //Date
   const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
@@ -322,6 +333,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   onChange={handleStartDateChange}
                   dateFormat="yyyy/MM/dd"
                   className="border rounded w-full py-2 px-3"
+                  placeholder="Select Project Start Date"
                  
                 />
               </div>
@@ -338,6 +350,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   onChange={handleEndDateChange}
                   dateFormat="yyyy/MM/dd"
                   className="border rounded w-full py-2 px-3"
+                  placeholder="Select Project End Date"
                 
                 />
               </div>
@@ -461,7 +474,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                     <button
                       type="button"
                       className="text-red-600 hover:text-red-700"
-                      onClick={() => removeResource(resourceIndex)}
+                      onClick={() => removeResource(resource.ResourceID)}
                     >
                       Remove Resource
                     </button>

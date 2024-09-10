@@ -69,7 +69,7 @@ const ManageTasksPage = () => {
       },
     ]);
   };
-  const removeTask = async (taskId) => {
+  const removeTask = async (taskId) => { 
     try {
       await fetch(`/api/task/${taskId}`, {
         method: "DELETE",
