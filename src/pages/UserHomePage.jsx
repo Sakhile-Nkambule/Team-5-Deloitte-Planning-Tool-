@@ -17,7 +17,7 @@ const UserHomepage = () => {
       <Hero />
       <UserCards />
       <UserProjectListings userId={user.id} isUserHome={true} />
-
+      <ViewAllProjects/>
 
     </>
   );

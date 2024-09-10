@@ -91,6 +91,7 @@ const deleteProject = async (id) => {
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/Userhomepage" element={<UserHomepage />} />
           <Route path="/projects" element={<Projectspage />} />
+          <Route path="/user-projects/:id" element={<Projectspage />} />
           <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
           <Route path="/userProfile" element={<UserProfile/>}/>
           <Route path="/notifications" element={<NotificationsPage/>}/>

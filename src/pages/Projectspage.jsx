@@ -9,10 +9,10 @@ const Projectspage = () => {
 
   return (
     <section className='bg-white px-4 py-6'>
-      {userRole === 'Planning Team' ? (
+      {['Planning Team', 'Director', 'Senior Manager'].includes(userRole) ? (
         <ProjectListings isHome = {false} />
       ) : (
-        <UserProjectListings userId={user.id} isUserHome={true} /> // Render this if role is not Planning Team
+        <UserProjectListings userId={user.id} isUserHome={false} /> // Render this if role is not Planning Team
       )}
     </section>
   );

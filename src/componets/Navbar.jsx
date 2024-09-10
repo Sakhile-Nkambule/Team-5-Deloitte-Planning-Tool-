@@ -36,6 +36,9 @@ const Navbar = () => {
     // Determine the URL for the Home link based on user role
     const rolesWithAdminAccess = ['Planning Team', 'Director', 'Senior Manager'];
     const homeLink = rolesWithAdminAccess.includes(userRole) ? '/homepage' : '/Userhomepage';
+      // Determine the URL for the Projects link based on user role
+    const projectsLink = rolesWithAdminAccess.includes(userRole) ? '/projects' :`/user-projects/${user?.id}`; // Ensure user?.id is available
+    ;
 
     return (
         <>
@@ -65,7 +68,7 @@ const Navbar = () => {
                                     Home
                                 </NavLink>
                                 <NavLink
-                                    to="/projects"
+                                    to={projectsLink}
                                     className={linkClass}
                                 >
                                     Projects
