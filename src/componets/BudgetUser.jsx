@@ -24,7 +24,7 @@ const BudgetUser = () => {
         datasets: [
             {
                 data: [used, remaining],
-                backgroundColor: ["black", "green"],
+                backgroundColor: ["black", "#9AD62A"  ],
             },
         ],
     };

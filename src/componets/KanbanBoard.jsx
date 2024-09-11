@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
 import { useParams } from "react-router-dom";
-
+import { toast } from "react-toastify";
 export default function Board() {
   const { resourceId } = useParams();
 
@@ -106,73 +106,53 @@ export default function Board() {
     return array.filter((item) => item.TaskID != id);
   }
 
- const handleSave = () => {
-  for (let i = 0; i < ToDo.length; i++) {
-    fetch(`/api/tasks/${ToDo[i].TaskID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ Status: "To-Do" }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((json) => {
-        console.log("Task updated:", json);
-      })
-      .catch((error) => {
-        console.error("Error updating task:", error);
-      });
-  }
-
-  for (let i = 0; i < inReview.length; i++) {
-    fetch(`/api/tasks/${inReview[i].TaskID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ Status: "In Progress" }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((json) => {
-        console.log("Task updated:", json);
-      })
-      .catch((error) => {
-        console.error("Error updating task:", error);
-      });
-  }
-
-  for (let i = 0; i < completed.length; i++) {
-    fetch(`/api/tasks/${completed[i].TaskID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ Status: "Completed" }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((json) => {
-        console.log("Task updated:", json);
-      })
-      .catch((error) => {
-        console.error("Error updating task:", error);
-      });
-  }
- };
+  const handleSave = async () => {
+    const promises = [];
+  
+    if (ToDo.length > 0) {
+      promises.push(
+        fetch(`/api/tasks/${resourceId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(ToDo),
+        })
+      );
+    }
+  
+    if (inReview.length > 0) {
+      promises.push(
+        fetch(`/api/tasks/${resourceId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(inReview),
+        })
+      );
+    }
+  
+    if (completed.length > 0) {
+      promises.push(
+        fetch(`/api/tasks/${resourceId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(completed),
+        })
+      );
+    }
+  
+    // Execute all requests in parallel
+    const responses = await Promise.all(promises);
+  
+    // Check if all responses are ok
+    const allSuccessful = responses.every(response => response.ok);
+  
+    if (allSuccessful) {
+      toast.success("Tasks saved successfully");
+    } else {
+      toast.error("Failed to save some or all tasks");
+    }
+  };
+  
+  
 
   return (
     <div>
@@ -181,7 +161,7 @@ export default function Board() {
           PROGRESS BOARD
         </h2>
         <div class="text-center  pb-4">
-          <button onClick={handleSave} class="bg-lime-500  rounded-full text-white px-10  py-2 ">Save </button>
+          <button onClick={handleSave} class="bg-lime-500 hover:bg-lime-700 rounded-full text-white px-10  py-2 ">Save </button>
         </div>
 
         <div className="flex justify-center space-x-4 rounded-md flex-row h-screen mx-auto ">
