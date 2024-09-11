@@ -13,13 +13,15 @@ export function CreateUserAccount() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false); // Changed to boolean to track success state
-
+  
   useEffect(() => {
     if (success) {
-      toast.success("Verification Email Sent");
+      alert("Verification Email Sent");
       navigate('/'); // Navigate to login when success is true
     }
   }, [success, navigate]);
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +35,8 @@ export function CreateUserAccount() {
       await sendEmailVerification(user);
 
       setSuccess(true ); // Set success to true on successful email verification
+      notify();
+      
 
       localStorage.setItem('pendingUser', JSON.stringify({ username, email, role, password }));
 
