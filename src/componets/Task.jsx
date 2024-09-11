@@ -18,6 +18,10 @@ export default function Task({ task, index, columnId }) {
                 return "bg-gray-300";  // Default color
         }
     }
+    const formattedStartDate = task.DueDate 
+    ? new Date(task.DueDate).toLocaleDateString() 
+    : '_';
+
 
     return (
         <Draggable draggableId={`${task.TaskID}`} key={task.TaskID} index={index}>
@@ -30,13 +34,13 @@ export default function Task({ task, index, columnId }) {
                 >
                     <div className="flex justify-start font-bold p-2 bg-black rounded-xl">
                         <span>
-                            <small>Task {task.TaskID}{"  "}</small>
+                            <small> Due Date: {formattedStartDate}{"  "}</small>
                         </span>
                     </div>
-                    <div className="flex justify-center p-2">
+                    <div className="flex justify-left p-2">
                         <div>{task.Description}</div>
                     </div>
-                    {provided.placeholder}
+                    
                 </div>
             )}
         </Draggable>

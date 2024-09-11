@@ -22,6 +22,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
   const removeResource = (index) => {
     setResources(resources.filter((_, i) => i !== index));
+
   }
  
     useEffect(() => {
@@ -62,6 +63,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
       };
     
 
+
     fetchUsers();
   }, []);
 
@@ -97,6 +99,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
           const predictionResult = await response.json();
           console.log("ML Predictions:", predictionResult); // Debug ML predictions
+
 
           // Filter users with prediction of 1 and sort them by their probability
           const usersWithPrediction1 = predictionResult.predictions
@@ -139,6 +142,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           const selectedResources = Array.from(roleMap.values())
             .slice(0, 9)
             .map((user) => ({
+
               UserID: user.UserID,
               role: user.Role,
               name: user.UserName,
@@ -268,7 +272,10 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           <h2 className="text-2xl font-semibold mb-4 text-center">
             Budget Summary
           </h2>
+
+
           <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md rounded-full  w-100">
+
             <div className="mb-2 ">
               <p className="text-gray-700 font-semibold">Gross Revenue:</p>
               <p className="text-green-500 font-semibold">{`R${newProject.Budget}`}</p>
@@ -291,6 +298,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
               <p className="text-red-500 font-semibold">{`${recoveryRate}%`}</p>
             </div>
           </div>
+
 
           <div>
             {loading ? (
