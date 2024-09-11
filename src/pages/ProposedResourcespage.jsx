@@ -22,51 +22,47 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
   const removeResource = (index) => {
     setResources(resources.filter((_, i) => i !== index));
-  };
 
-  useEffect(() => {
-    // Fetch users from the backend
-    const fetchUsers = async () => {
-      setLoading(true); // Set loading to true when the fetch starts
-      try {
-        const response = await fetch("/api/users");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const allUsers = await response.json();
-
-        // Fetch skills proficiency for each user
-        const usersWithSkills = await Promise.all(
-          allUsers.map(async (user) => {
-            try {
-              const skillsResponse = await fetch(
-                `/api/skillsets/${user.UserID}`
-              );
-              if (!skillsResponse.ok) {
-                throw new Error(
-                  `Failed to fetch skills for user ${user.UserID}`
-                );
+  }
+ 
+    useEffect(() => {
+      // Fetch users from the backend
+      const fetchUsers = async () => {
+        setLoading(true); // Set loading to true when the fetch starts
+        try {
+          const response = await fetch('/api/users');
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const allUsers = await response.json();
+    
+          // Fetch skills proficiency for each user
+          const usersWithSkills = await Promise.all(
+            allUsers.map(async (user) => {
+              try {
+                const skillsResponse = await fetch(`/api/skillsets/${user.UserID}`);
+                if (!skillsResponse.ok) {
+                  throw new Error(`Failed to fetch skills for user ${user.UserID}`);
+                }
+                const skillsProficiency = await skillsResponse.json();
+                return { ...user, SkillsProficiency: skillsProficiency };
+              } catch (error) {
+                console.error(`Error fetching skills for user ${user.UserID}:`, error);
+                return { ...user, SkillsProficiency: {} }; // Handle error by setting empty skills
               }
-              const skillsProficiency = await skillsResponse.json();
-              return { ...user, SkillsProficiency: skillsProficiency };
-            } catch (error) {
-              console.error(
-                `Error fetching skills for user ${user.UserID}:`,
-                error
-              );
-              return { ...user, SkillsProficiency: {} }; // Handle error by setting empty skills
-            }
-          })
-        );
+            })
+          );
+    
+          console.log('Fetched Users with Skills:', usersWithSkills); // Debug fetched users with skills
+          setAvailableUsers(usersWithSkills);
+        } catch (error) {
+          console.error('Error fetching users:', error);
+        } finally {
+          setLoading(false); // Set loading to false when the fetch completes, whether successful or failed
+        }
+      };
+    
 
-        console.log("Fetched Users with Skills:", usersWithSkills); // Debug fetched users with skills
-        setAvailableUsers(usersWithSkills);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setLoading(false); // Set loading to false when the fetch completes, whether successful or failed
-      }
-    };
 
     fetchUsers();
   }, []);
@@ -104,22 +100,54 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           const predictionResult = await response.json();
           console.log("ML Predictions:", predictionResult); // Debug ML predictions
 
-          const selectedUsers = predictionResult.predictions
-            .filter((prediction) => prediction.prediction === 1)
-            .slice(0, 6);
 
-          // Map the selected users to the format needed for display
-          const selectedResources = selectedUsers.map((prediction) => {
+          // Filter users with prediction of 1 and sort them by their probability
+          const usersWithPrediction1 = predictionResult.predictions
+            .filter((prediction) => prediction.prediction === 1)
+            .sort((a, b) => b.probability - a.probability); // Assuming there's a probability field
+
+          // Create a map of roles to users
+          const roleMap = new Map();
+          usersWithPrediction1.forEach((prediction) => {
             const user = availableUsers.find(
               (u) => u.UserID === prediction.UserID
             );
-            return {
+            if (user) {
+              if (!roleMap.has(user.Role)) {
+                roleMap.set(user.Role, user);
+              }
+            }
+          });
+
+          // Add users with the highest probability if some roles are missing
+          const missingRoles = new Set([
+            "Director",
+            "Associate Director",
+            "Snr Associate Director",
+            "Snr Manager",
+            "Manager",
+            "Assistant Manager",
+            "Snr Consultant",
+            "Consult",
+            "Jnr Consultant",
+          ]); // Replace with actual role names
+          availableUsers.forEach((user) => {
+            if (!roleMap.has(user.Role) && missingRoles.has(user.Role)) {
+              roleMap.set(user.Role, user);
+              missingRoles.delete(user.Role);
+            }
+          });
+
+          // Convert the roleMap to an array and slice to get up to 9 users
+          const selectedResources = Array.from(roleMap.values())
+            .slice(0, 9)
+            .map((user) => ({
+
               UserID: user.UserID,
               role: user.Role,
               name: user.UserName,
               hours: 20, // Default planned hours
-            };
-          });
+            }));
 
           setResources(selectedResources);
           console.log("Selected Resources:", selectedResources); // Debug selected resources
@@ -130,7 +158,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
       fetchMLPredictions();
     }
-  }, [availableUsers, newProject.complexity, newProject.requiredApplications]);
+  }, [availableUsers, newProject.complexity, newProject.selectedApplications]);
 
   useEffect(() => {
     // Calculate the financials
@@ -244,7 +272,10 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           <h2 className="text-2xl font-semibold mb-4 text-center">
             Budget Summary
           </h2>
-          <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md  rounded-full boarder w-100 ">
+
+
+          <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md rounded-full  w-100">
+
             <div className="mb-2 ">
               <p className="text-gray-700 font-semibold">Gross Revenue:</p>
               <p className="text-green-500 font-semibold">{`R${newProject.Budget}`}</p>
@@ -267,6 +298,8 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
               <p className="text-red-500 font-semibold">{`${recoveryRate}%`}</p>
             </div>
           </div>
+
+
           <div>
             {loading ? (
               <Spinner />
