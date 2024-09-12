@@ -5,7 +5,7 @@ import BudgetUser from '../componets/BudgetUser';
 import { useLoaderData } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useUser } from '../componets/UserContext'; // Assuming you're using a UserContext to manage user state
-
+import Calendar from '../componets/Calendar';
 const DashboardPage = () => {
   const { project, client, resources } = useLoaderData();
   const { user } = useUser(); // Get the logged-in user
@@ -14,6 +14,7 @@ const DashboardPage = () => {
 
   return (
     <>
+       {/* <Calendar/> */}
       <ProjectDashboard />
       <AvailableResources />
       <BudgetUser project={project} />
