@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import Calendar from "../componets/Calendar";
 const ManageTasksPage = () => {
   const { resourceId } = useParams(); // Get resourceId from URL params
   const [resource, setResource] = useState(null);
@@ -11,7 +11,8 @@ const ManageTasksPage = () => {
   const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState(""); // Store specific user name
   const [isLoading, setIsLoading] = useState(true);
-
+  const[datetasks,setdatetasks]=useState([]);
+  const [occupiedDates, setOccupiedDates] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,6 +38,15 @@ const ManageTasksPage = () => {
           setUserName("Unknown User");
         }
 
+        //fetch all tasks based on userid only to get all tasks associeted to that user
+        if (resourceData.UserID) {
+          const taskdates = await fetch(`/api/tasks/user/${resourceData.UserID}`);
+          const data = await taskdates.json();
+          setdatetasks(data);
+        } else {
+          setUserName("Unknown User");
+        }
+        
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch data", error);
@@ -44,8 +54,58 @@ const ManageTasksPage = () => {
       }
     };
 
+    // // Function to add days to a date
+    // Date.prototype.addDays = function(days) {
+    //   const date = new Date(this.valueOf());
+    //   date.setDate(date.getDate() + days);
+    //   return date;
+    // };
+
+    // const forloopoccupiedDates = [];
+
+    // for (let i = 0; i < datetasks.length; i++) {
+    //   let currentDate = new Date(datetasks[i].StartDate); // Create a new date object to avoid mutating the original date
+      
+    //   while (currentDate <= new Date(datetasks[i].DueDate)) {
+    //    forloopoccupiedDates.push(new Date(currentDate)); // Add the current date to the array
+    //     currentDate = currentDate.addDays(1); // Move to the next day
+    //     setOccupiedDates(forloopoccupiedDates);
+    //   }
+    // }
+    
+    //console.log(occupiedDates);
     fetchData();
+    
   }, [resourceId]);
+
+
+  useEffect(() => {
+    // Function to add days to a date
+    Date.prototype.addDays = function(days) {
+      const date = new Date(this.valueOf());
+      date.setDate(date.getDate() + days);
+      return date;
+    };
+  
+    const forloopoccupiedDates = [];
+  
+    for (let i = 0; i < datetasks.length; i++) {
+      let currentDate = new Date(datetasks[i].StartDate); // Create a new date object to avoid mutating the original date
+      
+      while (currentDate <= new Date(datetasks[i].DueDate)) {
+        forloopoccupiedDates.push(new Date(currentDate)); // Add the current date to the array
+        currentDate = currentDate.addDays(1); // Move to the next day
+      }
+    }
+  
+    setOccupiedDates(forloopoccupiedDates); // Update occupiedDates after processing all datetasks
+  
+  }, [datetasks]); // Trigger this effect when datetasks changes
+  
+
+
+  
+  
 
   const handleTaskChange = (taskId, field, value) => {
     setTasks(
@@ -153,7 +213,8 @@ const ManageTasksPage = () => {
   };
 
   return (
-    <div className="container m-auto py-6 px-6">
+    <div className="flex  gap-96 m-auto py-6 px-6">
+    <div className="container ">
       <h2 className="text-black text-3xl text-center font-semibold mb-6">
         Manage Tasks
       </h2>
@@ -179,7 +240,7 @@ const ManageTasksPage = () => {
       <h3 className="text-xl font-semibold mb-2">Tasks</h3>
       {tasks.length > 0 ? (
         tasks.map((task) => (
-          <div key={task.TaskID} className="mb-4">
+          <div key={task.TaskID} className="mb-10 border-2 border-lime-500 rounded-xl shadow-lg shadow-t pl-5 pr-5 pb-5 pt-5">
             <label className="block mb-1 font-semibold">Task Description</label>
             <input
               type="text"
@@ -223,7 +284,7 @@ const ManageTasksPage = () => {
             />
             <button
               type="button"
-              className="bg-red-500 text-white rounded px-2 py-1"
+              className="bg-red-500 ml-5 text-white rounded px-2 py-1"
               onClick={() => removeTask(task.TaskID)}
             >
               Remove Task
@@ -250,6 +311,10 @@ const ManageTasksPage = () => {
       >
         Save Tasks
       </button>
+    </div>
+    <div className="container  justify-left h-screen">
+      <Calendar occupiedDates={occupiedDates} />
+    </div>
     </div>
   );
 };
