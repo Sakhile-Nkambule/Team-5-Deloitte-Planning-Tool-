@@ -213,11 +213,12 @@ const ManageTasksPage = () => {
   };
 
   return (
-    <div className="flex  gap-96 m-auto py-6 px-6">
-    <div className="container ">
-      <h2 className="text-black text-3xl text-center font-semibold mb-6">
+    <div> 
+      <h2 className="text-black text-3xl text-center font-semibold mb-6 pt-5">
         Manage Tasks
       </h2>
+    <div className="flex  gap-96 m-auto py-6 px-6">
+    <div className="container ">
       {isLoading ? (
         <p>Loading resource details...</p>
       ) : resource ? (
@@ -312,8 +313,9 @@ const ManageTasksPage = () => {
         Save Tasks
       </button>
     </div>
-    <div className="container  justify-left h-screen">
+    <div className="container  rounded-xl shadow-lg pl-20 justify-left h-screen">
       <Calendar occupiedDates={occupiedDates} />
+    </div>
     </div>
     </div>
   );
