@@ -11,7 +11,7 @@ const ManageTasksPage = () => {
   const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState(""); // Store specific user name
   const [isLoading, setIsLoading] = useState(true);
-  const[datetasks,setdatetasks]=useState([]);
+  const [datetasks, setdatetasks] = useState([]);
   const [occupiedDates, setOccupiedDates] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -40,13 +40,15 @@ const ManageTasksPage = () => {
 
         //fetch all tasks based on userid only to get all tasks associeted to that user
         if (resourceData.UserID) {
-          const taskdates = await fetch(`/api/tasks/user/${resourceData.UserID}`);
+          const taskdates = await fetch(
+            `/api/tasks/user/${resourceData.UserID}`
+          );
           const data = await taskdates.json();
           setdatetasks(data);
         } else {
           setUserName("Unknown User");
         }
-        
+
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch data", error);
@@ -65,47 +67,39 @@ const ManageTasksPage = () => {
 
     // for (let i = 0; i < datetasks.length; i++) {
     //   let currentDate = new Date(datetasks[i].StartDate); // Create a new date object to avoid mutating the original date
-      
+
     //   while (currentDate <= new Date(datetasks[i].DueDate)) {
     //    forloopoccupiedDates.push(new Date(currentDate)); // Add the current date to the array
     //     currentDate = currentDate.addDays(1); // Move to the next day
     //     setOccupiedDates(forloopoccupiedDates);
     //   }
     // }
-    
+
     //console.log(occupiedDates);
     fetchData();
-    
   }, [resourceId]);
-
 
   useEffect(() => {
     // Function to add days to a date
-    Date.prototype.addDays = function(days) {
+    Date.prototype.addDays = function (days) {
       const date = new Date(this.valueOf());
       date.setDate(date.getDate() + days);
       return date;
     };
-  
+
     const forloopoccupiedDates = [];
-  
+
     for (let i = 0; i < datetasks.length; i++) {
       let currentDate = new Date(datetasks[i].StartDate); // Create a new date object to avoid mutating the original date
-      
+
       while (currentDate <= new Date(datetasks[i].DueDate)) {
         forloopoccupiedDates.push(new Date(currentDate)); // Add the current date to the array
         currentDate = currentDate.addDays(1); // Move to the next day
       }
     }
-  
+
     setOccupiedDates(forloopoccupiedDates); // Update occupiedDates after processing all datetasks
-  
   }, [datetasks]); // Trigger this effect when datetasks changes
-  
-
-
-  
-  
 
   const handleTaskChange = (taskId, field, value) => {
     setTasks(
@@ -124,12 +118,16 @@ const ManageTasksPage = () => {
         Description: "",
         Status: "To-Do",
         Hours: "",
+        StartDate: null,
         DueDate: null, // Initialize with null or default date
+        SystemRequired: "",
+        ProjectID: resource.Projectid ,
+        UserID: resource.UserID,
         isNew: true,
       },
     ]);
   };
-  const removeTask = async (taskId) => { 
+  const removeTask = async (taskId) => {
     try {
       await fetch(`/api/task/${taskId}`, {
         method: "DELETE",
@@ -145,11 +143,24 @@ const ManageTasksPage = () => {
       const updatedTasks = tasks.filter((task) => !task.isNew);
       const newTasks = tasks.filter((task) => task.isNew);
 
-      if (updatedTasks.length > 0) {
+      const sanitizedUpdatedTasks = updatedTasks.map((task) => ({
+        TaskID: task.TaskID,
+        ResourceID: task.ResourceID,
+        Description: task.Description,
+        Status: task.Status,
+        Hours: task.Hours,
+        DueDate: task.DueDate,
+        StartDate: task.StartDate,
+        SystemRequired: task.SystemRequired,
+        ProjectID: task.ProjectID, // Ensure ProjectID is included
+        UserID: task.UserID, 
+      }));
+
+      if (sanitizedUpdatedTasks.length > 0) {
         await fetch(`/api/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedTasks),
+          body: JSON.stringify(sanitizedUpdatedTasks),
         });
       }
 
@@ -160,6 +171,11 @@ const ManageTasksPage = () => {
           Status: task.Status,
           Hours: task.Hours,
           DueDate: task.DueDate,
+          StartDate: task.StartDate,
+          
+          SystemRequired: task.SystemRequired,
+          ProjectID: task.ProjectID,
+          UserID: task.UserID,
         }));
 
         await fetch(`/api/tasks`, {
@@ -213,110 +229,156 @@ const ManageTasksPage = () => {
   };
 
   return (
-    <div> 
+    <div>
       <h2 className="text-black text-3xl text-center font-semibold mb-6 pt-5">
         Manage Tasks
       </h2>
-    <div className="flex  gap-96 m-auto py-6 px-6">
-    <div className="container ">
-      {isLoading ? (
-        <p>Loading resource details...</p>
-      ) : resource ? (
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold">Resource Details</h3>
-          <div className="mb-2">
-            <strong>Name:</strong> {userName}{" "}
-            {/* Display the specific user name */}
-          </div>
-          <div className="mb-2">
-            <strong>Role:</strong> {resource.Role}
-          </div>
-          <div className="mb-2">
-            <strong>Planned Hours:</strong> {resource.PlannedHours}
-          </div>
+      <div className="flex  gap-96 m-auto py-6 px-6">
+        <div className="container ">
+          {isLoading ? (
+            <p>Loading resource details...</p>
+          ) : resource ? (
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold">Resource Details</h3>
+              <div className="mb-2">
+                <strong>Name:</strong> {userName}{" "}
+                {/* Display the specific user name */}
+              </div>
+              <div className="mb-2">
+                <strong>Role:</strong> {resource.Role}
+              </div>
+              <div className="mb-2">
+                <strong>Planned Hours:</strong> {resource.PlannedHours}
+              </div>
+            </div>
+          ) : (
+            <p>Loading resource details...</p>
+          )}
+          <h3 className="text-xl font-semibold mb-2">Tasks</h3>
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <div
+                key={task.TaskID}
+                className="mb-10 border-2 border-lime-500 rounded-xl shadow-lg shadow-t pl-5 pr-5 pb-5 pt-5"
+              >
+                <label className="block mb-1 font-semibold">
+                  Task Description
+                </label>
+                <input
+                  type="text"
+                  value={task.Description || ""}
+                  onChange={(e) =>
+                    handleTaskChange(task.TaskID, "Description", e.target.value)
+                  }
+                  placeholder="Task Description"
+                  className="border rounded w-full py-2 px-3 mb-2"
+                />
+                <label className="block mb-1 font-semibold">
+                  System to be worked on
+                </label>
+                <select
+                  value={task.SystemRequired || "Choose System"}
+                  onChange={(e) =>
+                    handleTaskChange(
+                      task.TaskID,
+                      "SystemRequired",
+                      e.target.value
+                    )
+                  }
+                  className="border rounded w-full py-2 px-3 mb-2"
+                >
+                  <option value="SAP">SAP</option>
+                  <option value="JDE">JDE</option>
+                  <option value="Oracle">Oracle</option>
+                  <option value="Genric Application">Genric Application</option>
+                  <option value="Microsoft SQL">Microsoft SQL</option>
+                  <option value="Oracle DB">Oracle DB</option>
+                  <option value="Linux">Linux</option>
+                  <option value="Microsoft OS">Microsoft OS</option>
+                  <option value="Active Directory">Active Directory</option>
+                  <option value="Cyber memo">Cyber memo</option>
+                  <option value="CTRA">CTRA</option>
+                  <option value="DCNO">DCNO</option>
+                  <option value="SAP-AUTO">SAP-AUTO</option>
+                  <option value="AUTO">AUTO</option>
+                  <option value="REVIEW">REVIEW</option>
+                  <option value="Project Management">Project Management</option>
+                </select>
+
+                <label className="block mb-1 font-semibold">Status</label>
+                <select
+                  value={task.Status || "To-Do"}
+                  onChange={(e) =>
+                    handleTaskChange(task.TaskID, "Status", e.target.value)
+                  }
+                  className="border rounded w-full py-2 px-3 mb-2"
+                >
+                  <option value="To-Do">To-Do</option>
+                </select>
+                <label className="block mb-1 font-semibold">Hours</label>
+                <input
+                  type="text"
+                  value={task.Hours || ""}
+                  onChange={(e) =>
+                    handleTaskChange(task.TaskID, "Hours", e.target.value)
+                  }
+                  placeholder="Task Hours"
+                  className="border rounded w-full py-2 px-3 mb-2"
+                />
+                <label className="block mb-1 font-semibold">Due Date</label>
+                <DatePicker
+                  selected={task.StartDate ? new Date(task.StartDate) : null}
+                  onChange={(date) =>
+                    handleTaskChange(task.TaskID, "StartDate", date)
+                  }
+                  placeholderText="Select Start Date"
+                  className="border rounded w-full py-2 px-3 mb-2"
+                  dateFormat="yyyy-MM-dd"
+                />
+                <label className="block mb-1 font-semibold">Start Date</label>
+                <DatePicker
+                  selected={task.DueDate ? new Date(task.DueDate) : null}
+                  onChange={(date) =>
+                    handleTaskChange(task.TaskID, "DueDate", date)
+                  }
+                  placeholderText="Select Due Date"
+                  className="border rounded w-full py-2 px-3 mb-2"
+                  dateFormat="yyyy-MM-dd"
+                />
+                <button
+                  type="button"
+                  className="bg-red-500 ml-5 text-white rounded px-2 py-1"
+                  onClick={() => removeTask(task.TaskID)}
+                >
+                  Remove Task
+                </button>
+              </div>
+            ))
+          ) : (
+            <p>No tasks available.</p>
+          )}
+          <button
+            type="button"
+            className="bg-blue-500 text-white rounded px-4 py-2 mt-4"
+            onClick={addTask}
+          >
+            Add Task
+          </button>
+          <button
+            type="button"
+            className="bg-green-500 text-white rounded px-4 py-2 mt-4 ml-4"
+            onClick={() => {
+              saveTasks();
+              sendNotification();
+            }}
+          >
+            Save Tasks
+          </button>
         </div>
-      ) : (
-        <p>Loading resource details...</p>
-      )}
-      <h3 className="text-xl font-semibold mb-2">Tasks</h3>
-      {tasks.length > 0 ? (
-        tasks.map((task) => (
-          <div key={task.TaskID} className="mb-10 border-2 border-lime-500 rounded-xl shadow-lg shadow-t pl-5 pr-5 pb-5 pt-5">
-            <label className="block mb-1 font-semibold">Task Description</label>
-            <input
-              type="text"
-              value={task.Description || ""}
-              onChange={(e) =>
-                handleTaskChange(task.TaskID, "Description", e.target.value)
-              }
-              placeholder="Task Description"
-              className="border rounded w-full py-2 px-3 mb-2"
-            />
-            <label className="block mb-1 font-semibold">Status</label>
-            <select
-              value={task.Status || "To-Do"}
-              onChange={(e) =>
-                handleTaskChange(task.TaskID, "Status", e.target.value)
-              }
-              className="border rounded w-full py-2 px-3 mb-2"
-            >
-              <option value="To-Do">To-Do</option>
-            
-            </select>
-            <label className="block mb-1 font-semibold">Hours</label>
-            <input
-              type="text"
-              value={task.Hours || ""}
-              onChange={(e) =>
-                handleTaskChange(task.TaskID, "Hours", e.target.value)
-              }
-              placeholder="Task Hours"
-              className="border rounded w-full py-2 px-3 mb-2"
-            />
-            <label className="block mb-1 font-semibold">Due Date</label>
-            <DatePicker
-              selected={task.DueDate ? new Date(task.DueDate) : null}
-              onChange={(date) =>
-                handleTaskChange(task.TaskID, "DueDate", date)
-              }
-              placeholderText="Select Due Date"
-              className="border rounded w-full py-2 px-3 mb-2"
-              dateFormat="yyyy-MM-dd"
-            />
-            <button
-              type="button"
-              className="bg-red-500 ml-5 text-white rounded px-2 py-1"
-              onClick={() => removeTask(task.TaskID)}
-            >
-              Remove Task
-            </button>
-          </div>
-        ))
-      ) : (
-        <p>No tasks available.</p>
-      )}
-      <button
-        type="button"
-        className="bg-blue-500 text-white rounded px-4 py-2 mt-4"
-        onClick={addTask}
-      >
-        Add Task
-      </button>
-      <button
-        type="button"
-        className="bg-green-500 text-white rounded px-4 py-2 mt-4 ml-4"
-        onClick={() => {
-          saveTasks();
-          sendNotification();
-        }}
-      >
-        Save Tasks
-      </button>
-    </div>
-    <div className="container  rounded-xl shadow-lg pl-20 justify-left h-screen">
-      <Calendar occupiedDates={occupiedDates} />
-    </div>
-    </div>
+        <div className="container  rounded-xl shadow-lg pl-20 justify-left h-screen">
+          <Calendar occupiedDates={occupiedDates} />
+        </div>
+      </div>
     </div>
   );
 };

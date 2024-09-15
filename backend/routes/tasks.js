@@ -39,6 +39,8 @@ router.get("/tasks/:resourceId", async (req, res) => {
           Hours: row.Hours,
           StartDate: row.StartDate,
           DueDate: row.DueDate,
+          ProjectID: row.ProjectID,
+          UserID: row.UserID,
           
         })),
     };
@@ -195,7 +197,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
             await connection.execute(
               `
               UPDATE tasks 
-              SET Description = ?, Status = ?, Hours = ?, DueDate = ?, SystemRequired = ?, StartDate = ? UserID = ?, ProjectID = ?
+              SET Description = ?, Status = ?, Hours = ?, DueDate = ?, SystemRequired = ?, StartDate = ?, UserID = ?, ProjectID = ?
               WHERE TaskID = ? AND ResourceID = ?
             `,
               [
