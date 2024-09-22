@@ -3,6 +3,8 @@ import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 export default function Board() {
   const { resourceId } = useParams();
 
@@ -105,10 +107,9 @@ export default function Board() {
   function removeItemById(id, array) {
     return array.filter((item) => item.TaskID != id);
   }
-
   const handleSave = async () => {
     const promises = [];
-  
+
     if (ToDo.length > 0) {
       promises.push(
         fetch(`/api/tasks/${resourceId}`, {
@@ -118,7 +119,7 @@ export default function Board() {
         })
       );
     }
-  
+
     if (inReview.length > 0) {
       promises.push(
         fetch(`/api/tasks/${resourceId}`, {
@@ -128,7 +129,7 @@ export default function Board() {
         })
       );
     }
-  
+
     if (completed.length > 0) {
       promises.push(
         fetch(`/api/tasks/${resourceId}`, {
@@ -138,30 +139,65 @@ export default function Board() {
         })
       );
     }
-  
+
     // Execute all requests in parallel
     const responses = await Promise.all(promises);
-  
+
     // Check if all responses are ok
-    const allSuccessful = responses.every(response => response.ok);
-  
+    const allSuccessful = responses.every((response) => response.ok);
+
     if (allSuccessful) {
       toast.success("Tasks saved successfully");
+      // Re-fetch tasks or update the state manually after successful save
+      fetch(`/api/tasks/${resourceId}`)
+        .then((response) => response.json())
+        .then((json) => {
+          const completedTasks = json.Tasks.filter(
+            (task) => task.Status === "Completed"
+          );
+          const inProgressTasks = json.Tasks.filter(
+            (task) => task.Status === "In Progress"
+          );
+          const ToDoTasks = json.Tasks.filter(
+            (task) => task.Status === "To-Do"
+          );
+
+          setCompleted(completedTasks);
+          setToDo(ToDoTasks);
+          setInReview(inProgressTasks);
+        });
     } else {
       toast.error("Failed to save some or all tasks");
     }
   };
-  
-  
+
+  //BACK BUTTON
+const navigate = useNavigate();
+  const handleGoBack = () => {
+    navigate(-1); // Goes back to the previous page
+  };
 
   return (
     <div>
+      <section>
+        <div className="container m-auto py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
+          <button onClick={handleGoBack}>
+            {" "}
+            <FaArrowLeft className="mr-1" /> Back
+          </button>
+        </div>
+      </section>
       <DragDropContext onDragEnd={handleDragEnd}>
         <h2 className="text-black text-3xl text-center font-semibold pb-4 pt-4">
           PROGRESS BOARD
         </h2>
         <div class="text-center  pb-4">
-          <button onClick={handleSave} class="bg-lime-500 hover:bg-lime-700 rounded-full text-white px-10  py-2 ">Save </button>
+          <button
+            onClick={handleSave}
+            class="bg-lime-500 hover:bg-lime-700 rounded-full text-white px-10  py-2 "
+          >
+            Save{" "}
+          </button>
         </div>
 
         <div className="flex justify-center space-x-4 rounded-md flex-row h-screen mx-auto ">

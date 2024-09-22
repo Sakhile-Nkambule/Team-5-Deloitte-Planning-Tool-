@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../componets/UserContext';
 import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const CompetencyKey = () => (
   <div className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
@@ -62,15 +64,21 @@ const UserProfilePage = () => {
 
       // Fetch user skills from the API
       fetch(`/api/SkillSets/${user.id}`)
-        .then(response => response.json())
-        .then(data => {
-          // Merge fetched skills with default skills
-          const updatedSkills = { ...defaultSkills, ...data };
-          setSkills(updatedSkills);
-        })
-        .catch(error => console.error('Error fetching skills:', error));
-    }
-  }, [user]);
+      .then(response => {
+        if (response.status === 204) {
+          // No content, so return an empty object
+          return {};
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Merge fetched skills with default skills
+        const updatedSkills = { ...defaultSkills, ...data };
+        setSkills(updatedSkills);
+      })
+      .catch(error => console.error('Error fetching skills:', error));
+  }
+}, [user]);
 
   const handleSkillChange = (skill, value) => {
     setSkills(prevSkills => ({ ...prevSkills, [skill]: value }));
@@ -95,6 +103,7 @@ const UserProfilePage = () => {
       .then(data => console.log('Skills updated:', data))
       .catch(error => console.error('Error updating skills:', error));
   };
+ 
 
   const renderSkillBar = (skill) => {
     const proficiency = skills[skill] || 0;
@@ -120,8 +129,21 @@ const UserProfilePage = () => {
     );
   };
 
+   //BACK BUTTON
+   const navigate = useNavigate();
+   const handleGoBack = () => {
+     navigate(-1);
+    } // Goes back to the previous page
   return (
+    
     <section className="bg-lime-100">
+      <div className="container m-auto py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
+          <button onClick={handleGoBack}>
+            {" "}
+            <FaArrowLeft className="mr-1" /> Back
+          </button>
+        </div>
+
       <div className="container m-auto max-w-2xl py-24">
         <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
           <form onSubmit={handleSubmit}>

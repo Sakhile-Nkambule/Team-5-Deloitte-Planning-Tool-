@@ -2,13 +2,11 @@ import dayjs from "dayjs";
 import React, { useState } from "react";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 
-export default function Calendar({occupiedDates}) {
-  
+export default function Calendar({ occupiedDates, tasks }) {
   const days = ["S", "M", "T", "W", "T", "F", "S"];
   const currentDate = dayjs();
   const [today, setToday] = useState(currentDate);
   const [selectDate, setSelectDate] = useState(currentDate);
-  
 
   // Utility function to generate the dates for the calendar
   const generateDate = (month = dayjs().month(), year = dayjs().year()) => {
@@ -67,6 +65,38 @@ export default function Calendar({occupiedDates}) {
     "December",
   ];
 
+  // Calculate the total hours for the selected date
+  const getTotalHoursForSelectedDate = (DueDate) => {
+    const selectedDateString = DueDate.toDate().toDateString();
+    const tasksForSelectedDate = tasks.filter(
+      (task) => new Date(task.DueDate).toDateString() === selectedDateString
+    );
+  
+    const totalHours = tasksForSelectedDate.reduce((acc, task) => {
+      const hours = parseFloat(task.Hours); // Ensure hours are parsed as float
+      return acc + (isNaN(hours) ? 0 : hours); // Add hours only if they are valid numbers
+    }, 0);
+  
+    return totalHours;
+  };
+  
+
+  // Calculate available hours (8 - total assigned hours)
+  const getAvailableHours = (totalHours) => {
+    return 8 - totalHours;
+  };
+
+  // Determine the color based on available hours
+  const getAvailabilityColor = (availableHours) => {
+    if (availableHours === 8) {
+      return "bg-white-500"; // Fully available
+    } else if (availableHours > 0) {
+      return "bg-red-200"; // Partially available
+    } else {
+      return "bg-red-500"; // Not available
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center mx-auto h-screen">
       <div className="w-96 ">
@@ -108,33 +138,65 @@ export default function Calendar({occupiedDates}) {
           ))}
         </div>
         <div className="grid grid-cols-7">
-          {generateDate(today.month(), today.year()).map(({ date, currentMonth, today }, index) => (
-            <div key={index} className="p-2 text-center h-14 grid place-content-center text-sm border-t">
-              <h1
-                className={cn(
-                  currentMonth ? "" : "text-gray-400",
-                  today ? "bg-lime-500 text-white" : "",
-                  occupiedDates.some(occDate => new Date(occDate).toDateString() === date.toDate().toDateString())? "bg-red-500 text-white" : "",
-                  selectDate.toDate().toDateString() === date.toDate().toDateString()
-                    ? "bg-black text-white"
-                    : "",
-                  "h-10 w-10 rounded-full grid place-content-center hover:bg-black hover:text-white transition-all cursor-pointer select-none"
-                )}
-                onClick={() => {
-                  setSelectDate(date);
-                }}
+          {generateDate(today.month(), today.year()).map(({ date, currentMonth, today }, index) => {
+            const totalHours = getTotalHoursForSelectedDate(date);
+            const availableHours = getAvailableHours(totalHours);
+
+            return (
+              <div
+                key={index}
+                className="p-2 text-center h-14 grid place-content-center text-sm border-t"
               >
-                {date.date()}
-              </h1>
-            </div>
-          ))}
+                <h1
+                  className={cn(
+                    currentMonth ? "" : "text-gray-400",
+                    today ? "bg-lime-500 text-white" : "",
+                    getAvailabilityColor(availableHours),
+                    selectDate.toDate().toDateString() === date.toDate().toDateString()
+                      ? "bg-black text-white"
+                      : "",
+                    "h-10 w-10 rounded-full grid place-content-center hover:bg-black hover:text-white transition-all cursor-pointer select-none"
+                  )}
+                  onClick={() => {
+                    setSelectDate(date);
+                  }}
+                >
+                  {date.date()}
+                </h1>
+              </div>
+            );
+          })}
         </div>
       </div>
       <div className="h-96 w-96 sm:px-5 mt-5">
         <h1 className="font-semibold">
           Schedule for {selectDate.toDate().toDateString()}
         </h1>
-        <p className="text-gray-400">No meetings for today.</p>
+        <p className="text-gray-400">
+          {tasks.some(task => new Date(task.DueDate).toDateString() === selectDate.toDate().toDateString())
+            ? `Total Assigned hours: ${getTotalHoursForSelectedDate(selectDate)}`
+            : "No tasks for today."
+          }
+        </p>
+        <p className="text-gray-400">
+          {`Available hours: ${getAvailableHours(getTotalHoursForSelectedDate(selectDate))}`}
+        </p>
+      </div>
+       {/* Key for colors at the bottom */}
+       <div className="mt-5">
+        <h2 className="font-semibold">Key:</h2>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 bg-white-100"></div>
+          <p>Fully Available </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 bg-red-200"></div>
+          <p>Partially Available </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 bg-red-500"></div>
+          <p>Unavailable </p>
+        </div>
       </div>
     </div>
   );
