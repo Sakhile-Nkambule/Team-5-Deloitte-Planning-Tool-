@@ -14,12 +14,13 @@ const AddProjectPage = () => {
   const [complexity, setComplexity] = useState("High");
   const [checkedItems, setCheckedItems] = useState({});
   const Status = 'pending';
+  
 
   const items = [
     "SAP",
     "JDE",
     "Oracle",
-    "Generic Application",
+    "Genric Application",
     "Microsoft SQL",
     "Oracle DB",
     "Linux",
@@ -42,68 +43,36 @@ const AddProjectPage = () => {
     }));
   };
 
+  const status = "pending";
+
   const navigate = useNavigate();
-
-  const validateForm = () => {
-    // Check for empty fields
-    if (!ProjectCode || !Title || !CompanyLocation || !Budget || !ContactEmail) {
-      alert("Please fill in all required fields.");
-      return false;
-    }
-
-    // Validate email format
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(ContactEmail)) {
-      alert("Please enter a valid email address.");
-      return false;
-    }
-
-    // Validate phone number format (optional)
-    const phonePattern = /^\+?[0-9]{7,15}$/; 
-    if (ContactPhone && !phonePattern.test(ContactPhone)) {
-      alert("Please enter a valid phone number.");
-      return false;
-    }
-
-    // Validate that Budget is a positive number
-    const budgetNumber = parseFloat(Budget);
-    if (isNaN(budgetNumber) || budgetNumber <= 0) {
-      alert("Please enter a valid budget amount.");
-      return false;
-    }
-
-    return true;
-  };
 
   const submitForm = (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
-
     // Get the names of only the checked checkboxes
     const selectedItems = Object.keys(checkedItems).filter(
-      (key) => checkedItems[key] === true
-    );
-
+    (key) => checkedItems[key] === true
+  );
     const newProject = {
+
       Title,
       ProjectCode,
       Status,
       Description,
-      Budget: budgetNumber,
+      Budget,
       complexity,
       selectedApplications: selectedItems, // Pass the names of checked checkboxes
-      Client: {
+  Client: {
         CompanyName,
         CompanyDescription,
         ContactEmail,
         ContactPhone,
-        CompanyLocation,
-      },
-    };
+        CompanyLocation,},
 
+    
+    };
+    
     navigate("/proposed-resources", { state: { newProject } });
   };
 
