@@ -35,7 +35,7 @@ export function CreateUserAccount() {
       await sendEmailVerification(user);
 
       setSuccess(true ); // Set success to true on successful email verification
-      notify();
+      //notify();
       
 
       localStorage.setItem('pendingUser', JSON.stringify({ username, email, role, password }));
@@ -160,7 +160,7 @@ export function CreateUserAccount() {
         </form>
       </div>
       <div className="w-2/5 h-128">
-        {/* You can add an image here if needed */}
+        
       </div>
     </section>
   );

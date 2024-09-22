@@ -4,13 +4,19 @@ import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Calendar from "../componets/Calendar";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
+import Spinner from "../componets/Spinner";
+
 const ManageTasksPage = () => {
+  const [errors, setErrors] = useState({});
   const { resourceId } = useParams(); // Get resourceId from URL params
   const [resource, setResource] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [userId, setUserId] = useState(null);
+  const [projectCode, setProjectCode] = useState(null);
   const [userName, setUserName] = useState(""); // Store specific user name
   const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [datetasks, setdatetasks] = useState([]);
   const [occupiedDates, setOccupiedDates] = useState([]);
   useEffect(() => {
@@ -25,6 +31,7 @@ const ManageTasksPage = () => {
           UserID: resourceData.UserID,
           Role: resourceData.Role,
           PlannedHours: resourceData.PlannedHours,
+          WorkedHours: resourceData.WorkedHours,
           Projectid: resourceData.ProjectID,
         });
         setTasks(resourceData.Tasks || []);
@@ -37,6 +44,15 @@ const ManageTasksPage = () => {
         } else {
           setUserName("Unknown User");
         }
+
+        if (resourceData.ProjectID) {
+          const projectResponse = await fetch(`/api/project/${resourceData.ProjectID}`);
+          const project = await projectResponse.json();
+          setProjectCode(project.ProjectCode || "Unknown Project Code");
+        } else {
+          setProjectCode("Unknown Project Code");
+        }
+        
 
         //fetch all tasks based on userid only to get all tasks associeted to that user
         if (resourceData.UserID) {
@@ -56,57 +72,76 @@ const ManageTasksPage = () => {
       }
     };
 
-    // // Function to add days to a date
-    // Date.prototype.addDays = function(days) {
-    //   const date = new Date(this.valueOf());
-    //   date.setDate(date.getDate() + days);
-    //   return date;
-    // };
-
-    // const forloopoccupiedDates = [];
-
-    // for (let i = 0; i < datetasks.length; i++) {
-    //   let currentDate = new Date(datetasks[i].StartDate); // Create a new date object to avoid mutating the original date
-
-    //   while (currentDate <= new Date(datetasks[i].DueDate)) {
-    //    forloopoccupiedDates.push(new Date(currentDate)); // Add the current date to the array
-    //     currentDate = currentDate.addDays(1); // Move to the next day
-    //     setOccupiedDates(forloopoccupiedDates);
-    //   }
-    // }
-
-    //console.log(occupiedDates);
     fetchData();
   }, [resourceId]);
 
   useEffect(() => {
-    // Function to add days to a date
-    Date.prototype.addDays = function (days) {
-      const date = new Date(this.valueOf());
-      date.setDate(date.getDate() + days);
-      return date;
-    };
-
-    const forloopoccupiedDates = [];
+    const forloopOccupiedDates = [];
 
     for (let i = 0; i < datetasks.length; i++) {
-      let currentDate = new Date(datetasks[i].StartDate); // Create a new date object to avoid mutating the original date
+      const dueDate = new Date(datetasks[i].DueDate); // Use only DueDate
 
-      while (currentDate <= new Date(datetasks[i].DueDate)) {
-        forloopoccupiedDates.push(new Date(currentDate)); // Add the current date to the array
-        currentDate = currentDate.addDays(1); // Move to the next day
+      if (!isNaN(dueDate)) {
+        forloopOccupiedDates.push(dueDate); // Add only the DueDate to the array
       }
     }
 
-    setOccupiedDates(forloopoccupiedDates); // Update occupiedDates after processing all datetasks
-  }, [datetasks]); // Trigger this effect when datetasks changes
+    setOccupiedDates(forloopOccupiedDates); // Update occupiedDates after processing all datetasks
+  }, [datetasks]);
 
   const handleTaskChange = (taskId, field, value) => {
-    setTasks(
-      tasks.map((task) =>
-        task.TaskID === taskId ? { ...task, [field]: value } : task
-      )
-    );
+    setTasks((prevTasks) => {
+      const updatedTasks = prevTasks.map((task) => {
+        if (task.TaskID === taskId) {
+          let updatedTask = { ...task, [field]: value };
+
+          // Validate Hours
+          if (field === "Hours") {
+            const hoursValue = Number(value);
+            if (isNaN(hoursValue) || hoursValue < 0 || hoursValue > 8) {
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                [taskId]: {
+                  ...prevErrors[taskId],
+                  Hours: "Hours must be a number between 0 and 8.",
+                },
+              }));
+            } else {
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                [taskId]: { ...prevErrors[taskId], Hours: undefined }, // Clear error
+              }));
+              updatedTask.Hours = hoursValue; // Only update Hours if valid
+            }
+          }
+
+          // Validate Due Date
+          if (field === "DueDate") {
+            const dueDate = new Date(value);
+            if (dueDate < new Date()) {
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                [taskId]: {
+                  ...prevErrors[taskId],
+                  DueDate: "Due Date cannot be in the past.",
+                },
+              }));
+            } else {
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                [taskId]: { ...prevErrors[taskId], DueDate: undefined }, // Clear error
+              }));
+              updatedTask.DueDate = value; // Only update DueDate if valid
+            }
+          }
+
+          return updatedTask;
+        }
+        return task;
+      });
+
+      return updatedTasks;
+    });
   };
 
   const addTask = () => {
@@ -116,12 +151,12 @@ const ManageTasksPage = () => {
         TaskID: Date.now(), // Unique ID based on timestamp
         ResourceID: resourceId,
         Description: "",
-        Status: "To-Do",
+        Status: "",
         Hours: "",
         StartDate: null,
         DueDate: null, // Initialize with null or default date
         SystemRequired: "",
-        ProjectID: resource.Projectid ,
+        ProjectID: resource.Projectid,
         UserID: resource.UserID,
         isNew: true,
       },
@@ -129,9 +164,11 @@ const ManageTasksPage = () => {
   };
   const removeTask = async (taskId) => {
     try {
-      await fetch(`/api/task/${taskId}`, {
-        method: "DELETE",
-      });
+      if (window.confirm("Are you sure you want to delete this Task?")) {
+        await fetch(`/api/task/${taskId}`, {
+          method: "DELETE",
+        });
+      }
       setTasks(tasks.filter((task) => task.TaskID !== taskId));
     } catch (error) {
       console.error("Failed to remove task", error);
@@ -153,7 +190,7 @@ const ManageTasksPage = () => {
         StartDate: task.StartDate,
         SystemRequired: task.SystemRequired,
         ProjectID: task.ProjectID, // Ensure ProjectID is included
-        UserID: task.UserID, 
+        UserID: task.UserID,
       }));
 
       if (sanitizedUpdatedTasks.length > 0) {
@@ -172,7 +209,7 @@ const ManageTasksPage = () => {
           Hours: task.Hours,
           DueDate: task.DueDate,
           StartDate: task.StartDate,
-          
+
           SystemRequired: task.SystemRequired,
           ProjectID: task.ProjectID,
           UserID: task.UserID,
@@ -192,16 +229,11 @@ const ManageTasksPage = () => {
   };
 
   const sendNotification = async () => {
-    // Find the Partner/Director from the resources array
-    // const associateDirector = resources.find(
-    //   (resource) => resource.role === "Partner/Director"
-    // );
-
     if (resourceId) {
       try {
         const notificationData = {
           UserID: resource.UserID,
-          Message: `You have been assigned a task on project ${resource.Projectid} `,
+          Message: `You have been assigned a task on project ${projectCode} `,
           Type: "In-App",
           Priority: "High",
         };
@@ -228,8 +260,22 @@ const ManageTasksPage = () => {
     }
   };
 
+  //BACK BUTTON
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1); // Goes back to the previous page
+  };
+
   return (
     <div>
+      <div className="container m-auto py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
+        <button onClick={handleGoBack}>
+          {" "}
+          <FaArrowLeft className="mr-1" /> Back
+        </button>
+      </div>
+
       <h2 className="text-black text-3xl text-center font-semibold mb-6 pt-5">
         Manage Tasks
       </h2>
@@ -242,7 +288,6 @@ const ManageTasksPage = () => {
               <h3 className="text-xl font-semibold">Resource Details</h3>
               <div className="mb-2">
                 <strong>Name:</strong> {userName}{" "}
-                {/* Display the specific user name */}
               </div>
               <div className="mb-2">
                 <strong>Role:</strong> {resource.Role}
@@ -250,10 +295,14 @@ const ManageTasksPage = () => {
               <div className="mb-2">
                 <strong>Planned Hours:</strong> {resource.PlannedHours}
               </div>
+              <div className="mb-2">
+                <strong>Worked Hours:</strong> {resource.WorkedHours}
+              </div>
             </div>
           ) : (
             <p>Loading resource details...</p>
           )}
+
           <h3 className="text-xl font-semibold mb-2">Tasks</h3>
           {tasks.length > 0 ? (
             tasks.map((task) => (
@@ -325,7 +374,12 @@ const ManageTasksPage = () => {
                   placeholder="Task Hours"
                   className="border rounded w-full py-2 px-3 mb-2"
                 />
-                <label className="block mb-1 font-semibold">Due Date</label>
+                {errors[task.TaskID]?.Hours && (
+                  <span className="text-red-500">
+                    {errors[task.TaskID].Hours}
+                  </span>
+                )}
+                {/* <label className="block mb-1 font-semibold">Due Date</label>
                 <DatePicker
                   selected={task.StartDate ? new Date(task.StartDate) : null}
                   onChange={(date) =>
@@ -334,8 +388,9 @@ const ManageTasksPage = () => {
                   placeholderText="Select Start Date"
                   className="border rounded w-full py-2 px-3 mb-2"
                   dateFormat="yyyy-MM-dd"
-                />
-                <label className="block mb-1 font-semibold">Start Date</label>
+                /> */}
+
+                <label className="block mb-1 font-semibold">Due Date</label>
                 <DatePicker
                   selected={task.DueDate ? new Date(task.DueDate) : null}
                   onChange={(date) =>
@@ -345,6 +400,11 @@ const ManageTasksPage = () => {
                   className="border rounded w-full py-2 px-3 mb-2"
                   dateFormat="yyyy-MM-dd"
                 />
+                {errors[task.TaskID]?.DueDate && (
+                  <span className="text-red-500">
+                    {errors[task.TaskID].DueDate}
+                  </span>
+                )}
                 <button
                   type="button"
                   className="bg-red-500 ml-5 text-white rounded px-2 py-1"
@@ -376,7 +436,7 @@ const ManageTasksPage = () => {
           </button>
         </div>
         <div className="container  rounded-xl shadow-lg pl-20 justify-left h-screen">
-          <Calendar occupiedDates={occupiedDates} />
+          <Calendar tasks={datetasks} occupiedDates={occupiedDates} />
         </div>
       </div>
     </div>

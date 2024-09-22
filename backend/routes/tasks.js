@@ -10,7 +10,7 @@ router.get("/tasks/:resourceId", async (req, res) => {
     const resourceId = req.params.resourceId;
     const [rows] = await pool.query(
       `
-      SELECT r.ResourceID, r.UserID, r.Role, r.PlannedHours, r.ProjectID, 
+      SELECT r.ResourceID, r.UserID, r.Role, r.PlannedHours, r.WorkedHours, r.ProjectID, 
              t.TaskID, t.Description AS TaskDescription, t.Status, t.DueDate, t.Hours, t.SystemRequired, t.StartDate
       FROM resources r
       LEFT JOIN tasks t ON r.ResourceID = t.ResourceID
@@ -28,6 +28,7 @@ router.get("/tasks/:resourceId", async (req, res) => {
       UserID: rows[0].UserID,
       Role: rows[0].Role,
       PlannedHours: rows[0].PlannedHours,
+      WorkedHours: rows[0].WorkedHours,
       ProjectID: rows[0].ProjectID,
       Tasks: rows
         .filter((row) => row.TaskID !== null)
@@ -170,9 +171,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
     try {
       // Validate if the ResourceID exists in the resources table
       const [validateResult] = await connection.execute(
-        `
-        SELECT * FROM resources WHERE ResourceID = ?
-      `,
+        `SELECT * FROM resources WHERE ResourceID = ?`, 
         [resourceId]
       );
 
@@ -181,14 +180,14 @@ router.put("/tasks/:resourceId", async (req, res) => {
         return res.status(400).json({ error: "ResourceID does not exist" });
       }
 
+      let totalWorkedHours = 0; // Variable to accumulate worked hours
+
       // Loop through each task and update or insert
       for (const task of tasks) {
         if (task.TaskID) {
           // Check if the task exists
           const [existingTask] = await connection.execute(
-            `
-            SELECT * FROM tasks WHERE TaskID = ? AND ResourceID = ?
-          `,
+            `SELECT * FROM tasks WHERE TaskID = ? AND ResourceID = ?`, 
             [task.TaskID, resourceId]
           );
 
@@ -201,26 +200,28 @@ router.put("/tasks/:resourceId", async (req, res) => {
               WHERE TaskID = ? AND ResourceID = ?
             `,
               [
-                
                 task.Description,
                 task.Status,
                 task.Hours,
                 task.DueDate,
                 task.SystemRequired,
                 task.StartDate,
-                task.TaskID,
-                task.ProjectID,
                 task.UserID,
+                task.ProjectID,
+                task.TaskID,
                 resourceId,
               ]
             );
+
+            // If the task status was changed to "Completed", add the hours to totalWorkedHours
+            if (task.Status === "Completed") {
+              totalWorkedHours += task.Hours;
+            }
           } else {
             // If TaskID is provided but doesn't match an existing task, return an error
-            return res
-              .status(400)
-              .json({
-                error: `Task with TaskID ${task.TaskID} does not exist for this ResourceID`,
-              });
+            return res.status(400).json({
+              error: `Task with TaskID ${task.TaskID} does not exist for this ResourceID`,
+            });
           }
         } else {
           // Insert new task
@@ -229,11 +230,34 @@ router.put("/tasks/:resourceId", async (req, res) => {
             INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate, SystemRequirement, StartDate, UserID, ProjectID)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           `,
-            [resourceId, task.Description, task.Status, task.Hours, task.DueDate, task.SystemRequirement, task.StartDate, tasks.UserID, task.ProjectID]
+            [
+              resourceId,
+              task.Description,
+              task.Status,
+              task.Hours,
+              task.DueDate,
+              task.SystemRequirement,
+              task.StartDate,
+              task.UserID,
+              task.ProjectID,
+            ]
           );
+
+          // If the new task is "Completed", add the hours to totalWorkedHours
+          if (task.Status === "Completed") {
+            totalWorkedHours += task.Hours;
+          }
         }
       }
 
+      // Update workedHours in the resources table
+      if (totalWorkedHours > 0) {
+        await connection.execute(
+          `UPDATE resources SET WorkedHours = WorkedHours + ? WHERE ResourceID = ?`,
+          [totalWorkedHours, resourceId]
+        );
+      }
+      console.log(totalWorkedHours);
       await connection.commit();
       res.json({ message: "Tasks updated successfully" });
     } catch (err) {
