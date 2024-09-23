@@ -22,12 +22,15 @@ const AvailableResources = () => {
   return (
     <div className="container mx-auto p-4">
       {/* Increase margin-top to bring the heading further down */}
-      <h2 className="text-4xl font-bold text-center mb-6 text-black mt-24">AVAILABLE RESOURCES</h2>
+      <h2 className="text-2xl font-bold text-center mb-6 text-black">AVAILABLE RESOURCES</h2>
       <ul className="space-y-2">
         {users.map((user) => (
-          <li key={user.UserID} className="flex items-center p-2 bg-white shadow-md rounded-lg">
-            <div className="flex items-center w-1/6">
-              {/* Placeholder for face icon */}
+          <li
+            key={user.UserID}
+            className="flex items-center justify-between p-4 bg-white shadow-md rounded-lg"
+          >
+            {/* User Info */}
+            <div className="flex items-center w-1/2">
               <div className="w-8 h-8 flex items-center justify-center bg-black text-white rounded-full mr-4">
                 <span role="img" aria-label="face-icon">
                   <FontAwesomeIcon icon={faUser} />
@@ -38,39 +41,22 @@ const AvailableResources = () => {
                 <span className="block text-xs text-gray-500">{user.Role}</span>
               </div>
             </div>
-
-            {/* Start Date */}
-            <div className="w-1/6 text-sm text-gray-600">{user.projectStartDate}</div>
-
-            {/* Progress Bar */}
-            <div className="w-3/6 flex items-center">
-              <div className="relative flex-grow h-6 bg-white border border-black rounded-full overflow-hidden">
-                <div
-                  className={`absolute h-full ${
-                    user.hoursOver ? 'bg-black' : 'bg-green-600'
-                  } text-white text-center flex items-center justify-center`}
-                  style={{ width: `${(user.hoursWorked / user.totalHours) * 100}%` }}
-                >
-                  {user.hoursWorked > user.totalHours
-                    ? `${user.hoursWorked - user.totalHours}h over`
-                    : 'Full'}
-                </div>
-                <div
-                  className="absolute right-0 h-full bg-green-300 text-black text-center flex items-center justify-center"
-                  style={{ width: `${(user.hoursAvailable / user.totalHours) * 100}%` }}
-                >
-                  {user.hoursAvailable}h free
-                </div>
-              </div>
+  
+            {/* Buttons Aligned to the Right */}
+            <div className="flex space-x-2">
+              <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded-full">
+                Calendar
+              </button>
+              <button class="bg-transparent hover:bg-lime-500 text-lime-500 font-semibold hover:text-white py-2 px-4 border border-lime-500 hover:border-transparent rounded-full">
+                Add to Project
+              </button>
             </div>
-
-            {/* End Date */}
-            <div className="w-1/6 text-sm text-gray-600 text-right">{user.projectDueDate}</div>
           </li>
         ))}
       </ul>
     </div>
   );
+  
 };
 
 export default AvailableResources;

@@ -46,15 +46,15 @@ const BudgetUser = () => {
     };
 
     return (
-        <div className="flex flex-col items-center">
-            <h2 className="text-4xl font-bold text-center mb-6 text-black mt-24">
+        <div className="flex flex-col p-5 items-center">
+            <h2 className="text-2xl font-bold text-center mb-6 text-black ">
                 PROJECT BUDGET
             </h2>
             <ul className="space-y-2">
-                <div className="w-80 h-80"> {/* Chart size adjustment */}
+                <div className=" h-80"> {/* Chart size adjustment */}
                     <Pie data={data} options={options} />
                 </div>
-                <p className="mt-6 text-xl">Total Budget: R{total}</p> {/* Display total budget in Rands */}
+                <p className="mt-6 ">Total Budget: R{total}</p> {/* Display total budget in Rands */}
             </ul>
         </div>
     );

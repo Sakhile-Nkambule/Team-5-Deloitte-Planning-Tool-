@@ -71,24 +71,11 @@ export function SignIn() {
               />
             </label>
           </div>
-          <label className="flex items-center space-x-2 -ml-2.5">
-            <input type="checkbox" className="form-checkbox" />
-            <span className="text-sm text-gray-500 font-medium">
-              I agree to the&nbsp;
-              <a href="#" className="text-black underline hover:text-gray-900">Terms and Conditions</a>
-            </span>
-          </label>
           <button type="submit" className="mt-6 w-full py-2 bg-lime-500 text-white rounded-lg">
             Sign In
           </button>
 
           <div className="flex items-center justify-between gap-2 mt-6">
-            <label className="flex items-center space-x-2 -ml-2.5">
-              <input type="checkbox" className="form-checkbox" />
-              <span className="text-sm text-gray-500 font-medium">
-                Subscribe me to newsletter
-              </span>
-            </label>
             <a href="#" className="text-sm text-gray-900 font-medium underline">Forgot Password</a>
           </div>
           <p className="text-center text-gray-500 mt-4">
