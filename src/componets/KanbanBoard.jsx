@@ -5,12 +5,15 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+
 export default function Board() {
   const { resourceId } = useParams();
+  const navigate = useNavigate();
 
   const [completed, setCompleted] = useState([]);
   const [ToDo, setToDo] = useState([]);
   const [inReview, setInReview] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // New state for loading
 
   useEffect(() => {
     if (resourceId) {
@@ -107,7 +110,9 @@ export default function Board() {
   function removeItemById(id, array) {
     return array.filter((item) => item.TaskID != id);
   }
+
   const handleSave = async () => {
+    setIsLoading(true); // Show loading overlay
     const promises = [];
 
     if (ToDo.length > 0) {
@@ -140,49 +145,58 @@ export default function Board() {
       );
     }
 
-    // Execute all requests in parallel
-    const responses = await Promise.all(promises);
+    try {
+      // Execute all requests in parallel
+      const responses = await Promise.all(promises);
 
-    // Check if all responses are ok
-    const allSuccessful = responses.every((response) => response.ok);
+      // Check if all responses are ok
+      const allSuccessful = responses.every((response) => response.ok);
 
-    if (allSuccessful) {
-      toast.success("Tasks saved successfully");
-      // Re-fetch tasks or update the state manually after successful save
-      fetch(`/api/tasks/${resourceId}`)
-        .then((response) => response.json())
-        .then((json) => {
-          const completedTasks = json.Tasks.filter(
-            (task) => task.Status === "Completed"
-          );
-          const inProgressTasks = json.Tasks.filter(
-            (task) => task.Status === "In Progress"
-          );
-          const ToDoTasks = json.Tasks.filter(
-            (task) => task.Status === "To-Do"
-          );
+      if (allSuccessful) {
+        toast.success("Tasks saved successfully");
+        // Re-fetch tasks or update the state manually after successful save
+        const response = await fetch(`/api/tasks/${resourceId}`);
+        const json = await response.json();
+        const completedTasks = json.Tasks.filter(
+          (task) => task.Status === "Completed"
+        );
+        const inProgressTasks = json.Tasks.filter(
+          (task) => task.Status === "In Progress"
+        );
+        const ToDoTasks = json.Tasks.filter(
+          (task) => task.Status === "To-Do"
+        );
 
-          setCompleted(completedTasks);
-          setToDo(ToDoTasks);
-          setInReview(inProgressTasks);
-        });
-    } else {
-      toast.error("Failed to save some or all tasks");
+        setCompleted(completedTasks);
+        setToDo(ToDoTasks);
+        setInReview(inProgressTasks);
+      } else {
+        toast.error("Failed to save some or all tasks");
+      }
+    } catch (error) {
+      toast.error("An error occurred while saving tasks");
+      console.error("Error saving tasks:", error);
+    } finally {
+      setIsLoading(false); // Hide loading overlay
     }
   };
 
   //BACK BUTTON
-const navigate = useNavigate();
   const handleGoBack = () => {
     navigate(-1); // Goes back to the previous page
   };
 
   return (
     <div>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="text-white text-xl">Saving...</div>
+        </div>
+      )}
       <section>
         <div className="container m-auto py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
           <button onClick={handleGoBack}>
-            {" "}
             <FaArrowLeft className="mr-1" /> Back
           </button>
         </div>
@@ -191,16 +205,16 @@ const navigate = useNavigate();
         <h2 className="text-black text-3xl text-center font-semibold pb-4 pt-4">
           PROGRESS BOARD
         </h2>
-        <div class="text-center  pb-4">
+        <div className="text-center pb-4">
           <button
             onClick={handleSave}
-            class="bg-lime-500 hover:bg-lime-700 rounded-full text-white px-10  py-2 "
+            className="bg-lime-500 hover:bg-lime-700 rounded-full text-white px-10 py-2"
           >
             Save{" "}
           </button>
         </div>
 
-        <div className="flex justify-center space-x-4 rounded-md flex-row h-screen mx-auto ">
+        <div className="flex justify-center space-x-4 rounded-md flex-row h-screen mx-auto">
           <Column title={"TO DO"} tasks={ToDo} id={"1"} />
           <Column title={"IN PROGRESS"} tasks={inReview} id={"2"} />
           <Column title={"COMPLETED"} tasks={completed} id={"3"} />
