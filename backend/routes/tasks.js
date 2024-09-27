@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
+const { parseISO, format } = require("date-fns");
 
 //GET
 
@@ -11,7 +12,7 @@ router.get("/tasks/:resourceId", async (req, res) => {
     const [rows] = await pool.query(
       `
       SELECT r.ResourceID, r.UserID, r.Role, r.PlannedHours, r.WorkedHours, r.ProjectID, 
-             t.TaskID, t.Description AS TaskDescription, t.Status, t.DueDate, t.Hours, t.SystemRequired, t.StartDate
+             t.TaskID, t.Description AS TaskDescription, t.Status, t.DueDate, t.Hours, t.SystemRequired, t.StartDate, t.Priority, t.completed
       FROM resources r
       LEFT JOIN tasks t ON r.ResourceID = t.ResourceID
       WHERE r.ResourceID = ?
@@ -42,7 +43,8 @@ router.get("/tasks/:resourceId", async (req, res) => {
           DueDate: row.DueDate,
           ProjectID: row.ProjectID,
           UserID: row.UserID,
-          
+          Priority: row.Priority,
+          completed: row.completed,
         })),
     };
 
@@ -59,7 +61,7 @@ router.get("/tasks/project/:projectId", async (req, res) => {
     const projectId = req.params.projectId;
     const [rows] = await pool.query(
       `
-      SELECT t.TaskID, t.UserID, t.ResourceID, t.Description, t.Status, t.Hours, t.DueDate, t.SystemRequired, t.StartDate
+      SELECT t.TaskID, t.UserID, t.ResourceID, t.Description, t.Status, t.Hours, t.DueDate, t.SystemRequired, t.StartDate, t.Priority, t.completed
       FROM tasks t
       JOIN resources r ON t.ResourceID = r.ResourceID
       WHERE r.ProjectID = ?
@@ -80,7 +82,7 @@ router.get("/tasks/user/:userId", async (req, res) => {
     const userId = req.params.userId;
     const [rows] = await pool.query(
       `
-      SELECT t.TaskID, t.ProjectID, t.ResourceID, t.Description, t.Status, t.Hours, t.DueDate, t.SystemRequired, t.StartDate
+      SELECT t.TaskID, t.UserID, t.ResourceID, t.Description, t.Status, t.Hours, t.DueDate, t.SystemRequired, t.StartDate, t.Priority, t.completed
       FROM tasks t
       JOIN resources r ON t.ResourceID = r.ResourceID
       WHERE r.UserID = ?
@@ -95,32 +97,25 @@ router.get("/tasks/user/:userId", async (req, res) => {
   }
 });
 
+//POST
 
-  //POST
-
-  // POST: Endpoint to Add tasks
+// POST: Endpoint to Add tasks
 router.post("/tasks", async (req, res) => {
-  const newTasks = req.body; // Assuming body is an array of new tasks
+  const newTasks = req.body;
 
-  console.log("Request body:", req.body);
-
-  // Validate and filter the input to ensure it does not contain TaskID
-  const filteredTasks = newTasks.map((task) => ({
-    ResourceID: task.ResourceID,
-    Description: task.Description,
-    Status: task.Status,
-    Hours: task.Hours,
-    DueDate: task.DueDate,
-    SystemRequired: task.SystemRequired,
-    StartDate: task.StartDate,
-    UserID: task.UserID,
-    ProjectID: task.ProjectID,
-  }));
+  // Modify the DueDate to ensure the correct local date is stored
+  const filteredTasks = newTasks.map((task) => {
+    const localDueDate = new Date(task.DueDate); // Converts to local timezone date
+    return {
+      ...task,
+      DueDate: format(localDueDate, "yyyy-MM-dd"), // Format date back to 'YYYY-MM-DD'
+    };
+  });
 
   const tasksSql = `
-        INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate, SystemRequired, StartDate, UserID, ProjectID)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
+      INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate, SystemRequired, StartDate, UserID, ProjectID, Priority)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
   try {
     const connection = await pool.getConnection();
@@ -138,6 +133,7 @@ router.post("/tasks", async (req, res) => {
           task.StartDate,
           task.UserID,
           task.ProjectID,
+          task.Priority,
         ]);
       }
 
@@ -156,10 +152,9 @@ router.post("/tasks", async (req, res) => {
   }
 });
 
-  
 //UPDATE
 
- // PUT: Endpoint to Update tasks
+// PUT: Endpoint to Update tasks
 router.put("/tasks/:resourceId", async (req, res) => {
   const resourceId = req.params.resourceId;
   const tasks = req.body; // Assuming body is an array of tasks
@@ -171,7 +166,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
     try {
       // Validate if the ResourceID exists in the resources table
       const [validateResult] = await connection.execute(
-        `SELECT * FROM resources WHERE ResourceID = ?`, 
+        `SELECT * FROM resources WHERE ResourceID = ?`,
         [resourceId]
       );
 
@@ -180,14 +175,21 @@ router.put("/tasks/:resourceId", async (req, res) => {
         return res.status(400).json({ error: "ResourceID does not exist" });
       }
 
-      let totalWorkedHours = 0; // Variable to accumulate worked hours
+      // Adjust tasks DueDate to local timezone before updating/inserting
+      const adjustedTasks = tasks.map((task) => {
+        const localDueDate = new Date(task.DueDate); // Convert UTC to local timezone
+        return {
+          ...task,
+          DueDate: format(localDueDate, "yyyy-MM-dd"), // Format to 'YYYY-MM-DD'
+        };
+      });
 
       // Loop through each task and update or insert
-      for (const task of tasks) {
+      for (const task of adjustedTasks) {
         if (task.TaskID) {
           // Check if the task exists
           const [existingTask] = await connection.execute(
-            `SELECT * FROM tasks WHERE TaskID = ? AND ResourceID = ?`, 
+            `SELECT * FROM tasks WHERE TaskID = ? AND ResourceID = ?`,
             [task.TaskID, resourceId]
           );
 
@@ -196,27 +198,25 @@ router.put("/tasks/:resourceId", async (req, res) => {
             await connection.execute(
               `
               UPDATE tasks 
-              SET Description = ?, Status = ?, Hours = ?, DueDate = ?, SystemRequired = ?, StartDate = ?, UserID = ?, ProjectID = ?
+              SET Description = ?, Status = ?, Hours = ?, DueDate = ?, SystemRequired = ?, StartDate = ?, UserID = ?, ProjectID = ?, Priority = ?
               WHERE TaskID = ? AND ResourceID = ?
-            `,
+              `,
               [
                 task.Description,
                 task.Status,
                 task.Hours,
-                task.DueDate,
+                task.DueDate, // Local date is now correctly formatted
                 task.SystemRequired,
                 task.StartDate,
                 task.UserID,
                 task.ProjectID,
+                task.Priority,
                 task.TaskID,
                 resourceId,
               ]
             );
 
-            // If the task status was changed to "Completed", add the hours to totalWorkedHours
-            if (task.Status === "Completed") {
-              totalWorkedHours += task.Hours;
-            }
+            // If the task status was changed to "Completed", handle hours update here if needed
           } else {
             // If TaskID is provided but doesn't match an existing task, return an error
             return res.status(400).json({
@@ -227,37 +227,27 @@ router.put("/tasks/:resourceId", async (req, res) => {
           // Insert new task
           await connection.execute(
             `
-            INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate, SystemRequirement, StartDate, UserID, ProjectID)
+            INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate, SystemRequirement, StartDate, UserID, ProjectID, Priority)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `,
+            `,
             [
               resourceId,
               task.Description,
               task.Status,
               task.Hours,
-              task.DueDate,
+              task.DueDate, // Local date is now correctly formatted
               task.SystemRequirement,
               task.StartDate,
               task.UserID,
               task.ProjectID,
+              task.Priority,
             ]
           );
 
-          // If the new task is "Completed", add the hours to totalWorkedHours
-          if (task.Status === "Completed") {
-            totalWorkedHours += task.Hours;
-          }
+          // Handle hours for "Completed" tasks if needed
         }
       }
 
-      // Update workedHours in the resources table
-      if (totalWorkedHours > 0) {
-        await connection.execute(
-          `UPDATE resources SET WorkedHours = WorkedHours + ? WHERE ResourceID = ?`,
-          [totalWorkedHours, resourceId]
-        );
-      }
-      console.log(totalWorkedHours);
       await connection.commit();
       res.json({ message: "Tasks updated successfully" });
     } catch (err) {
@@ -272,11 +262,50 @@ router.put("/tasks/:resourceId", async (req, res) => {
     res.status(500).json({ error: "Error connecting to the database: " + err });
   }
 });
+// PUT: Endpoint to update the completion status of a task
+router.put("/tasks/completed/:taskId", async (req, res) => {
+  const taskId = req.params.taskId;
+  const { completed } = req.body; // Assuming the body contains the completed status as a boolean
 
-  
+  if (typeof completed !== "boolean") {
+    return res
+      .status(400)
+      .json({ error: "Completed status must be a boolean" });
+  }
+
+  try {
+    const connection = await pool.getConnection();
+
+    // Validate if the TaskID exists in the tasks table
+    const [existingTask] = await connection.execute(
+      `SELECT * FROM tasks WHERE TaskID = ?`,
+      [taskId]
+    );
+
+    if (existingTask.length === 0) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    // Update the task's completed status
+    await connection.execute(
+      `UPDATE tasks SET completed = ? WHERE TaskID = ?`,
+      [completed, taskId]
+    );
+
+    res.json({ message: "Task completion status updated successfully" });
+  } catch (err) {
+    console.error("Error updating task completion status:", err);
+    res
+      .status(500)
+      .json({ error: "Error updating task completion status: " + err });
+  } finally {
+    connection.release();
+  }
+});
+
 //DELETE
-  
-  // DELETE: Endpoint to Delete a Task
+
+// DELETE: Endpoint to Delete a Task
 router.delete("/task/:taskId", async (req, res) => {
   const taskId = req.params.taskId;
 
@@ -310,5 +339,4 @@ router.delete("/task/:taskId", async (req, res) => {
   }
 });
 
-  
-  module.exports = router;
+module.exports = router;

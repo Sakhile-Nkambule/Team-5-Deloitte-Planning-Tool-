@@ -41,6 +41,36 @@ router.get("/resources/:projectId", async (req, res) => {
       res.status(500).send("Database error");
     }
   });
+  //Update
+
+  // Endpoint to update worked hours
+router.put("/resources/:resourceId", async (req, res) => {
+  const resourceId = req.params.resourceId;
+  const { WorkedHours } = req.body; 
+
+  console.log(WorkedHours);
+
+  if (typeof WorkedHours !== "number") {
+    return res.status(400).json({ error: "Worked hours must be a number" });
+  }
+
+  try {
+    const [result] = await pool.query(
+      "UPDATE resources SET WorkedHours = WorkedHours + ? WHERE ResourceID = ?",
+      [WorkedHours, resourceId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+
+    res.json({ message: "Worked hours updated successfully" });
+  } catch (err) {
+    console.error("Error updating worked hours:", err);
+    res.status(500).json({ error: "Error updating worked hours: " + err });
+  }
+});
+
 
   //DELELE
 

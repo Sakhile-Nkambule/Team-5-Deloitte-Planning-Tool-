@@ -2,7 +2,8 @@ import dayjs from "dayjs";
 import React, { useState } from "react";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 
-export default function Calendar({ occupiedDates, tasks }) {
+export default function Calendar({ tasks }) {
+  console.log("Calendar component rendered with tasks:", tasks);
   const days = ["S", "M", "T", "W", "T", "F", "S"];
   const currentDate = dayjs();
   const [today, setToday] = useState(currentDate);
@@ -168,7 +169,7 @@ export default function Calendar({ occupiedDates, tasks }) {
           })}
         </div>
       </div>
-      <div className="h-96 w-96 sm:px-5 mt-5">
+      <div className=" w-96 sm:px-5">
         <h1 className="font-semibold">
           Schedule for {selectDate.toDate().toDateString()}
         </h1>
@@ -183,7 +184,7 @@ export default function Calendar({ occupiedDates, tasks }) {
         </p>
       </div>
        {/* Key for colors at the bottom */}
-       <div className="mt-5">
+       <div classname = "pl-20">
         <h2 className="font-semibold">Key:</h2>
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 bg-white-100"></div>
