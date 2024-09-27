@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
+import Calendar from './Calendar'; 
+import Modal from './modal';
+import Spinner from './Spinner';
 
 const AvailableResources = () => {
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [dateTasks, setDateTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Fetch users on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('/api/users'); // Adjust API endpoint as needed
+        const response = await fetch('/api/users');
         const usersData = await response.json();
         setUsers(usersData);
       } catch (error) {
@@ -19,9 +27,27 @@ const AvailableResources = () => {
     fetchUserData();
   }, []);
 
+
+  const handleCalendarClick = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true); // Open the modal
+    fetchUserTasks(user.UserID);
+  };
+
+  const fetchUserTasks = async (userId) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/tasks/user/${userId}`);
+      const data = await response.json();
+      setDateTasks(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch tasks', error);
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="container mx-auto p-4">
-      {/* Increase margin-top to bring the heading further down */}
       <h2 className="text-2xl font-bold text-center mb-6 text-black">AVAILABLE RESOURCES</h2>
       <ul className="space-y-2">
         {users.map((user) => (
@@ -42,23 +68,34 @@ const AvailableResources = () => {
               </div>
             </div>
   
-            {/* Buttons Aligned to the Right */}
+            {/* Buttons */}
             <div className="flex space-x-2">
-              <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded-full">
+              <button
+                onClick={() => handleCalendarClick(user)} // Open modal with calendar 
+                className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded-full"
+              >
                 Calendar
               </button>
-              <button class="bg-transparent hover:bg-lime-500 text-lime-500 font-semibold hover:text-white py-2 px-4 border border-lime-500 hover:border-transparent rounded-full">
+              <button className="bg-transparent hover:bg-lime-500 text-lime-500 font-semibold hover:text-white py-2 px-4 border border-lime-500 hover:border-transparent rounded-full">
                 Add to Project
               </button>
             </div>
           </li>
         ))}
       </ul>
+  
+      {/* Modal for Calendar */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h3 className="text-xl font-bold text-center mb-4">Calendar for {selectedUser?.UserName}</h3>
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <Calendar tasks={dateTasks} />
+        )}
+      </Modal>
     </div>
   );
   
 };
 
 export default AvailableResources;
-
-

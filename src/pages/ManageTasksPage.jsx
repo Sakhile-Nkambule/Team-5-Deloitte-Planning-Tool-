@@ -7,6 +7,7 @@ import Calendar from "../componets/Calendar";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import Spinner from "../componets/Spinner";
+import Modal from "../componets/modal";
 
 const ManageTasksPage = () => {
   const [errors, setErrors] = useState({});
@@ -19,6 +20,9 @@ const ManageTasksPage = () => {
   const [loading, setLoading] = useState(true);
   const [datetasks, setdatetasks] = useState([]);
   const [occupiedDates, setOccupiedDates] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [taskToComplete, setTaskToComplete] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,13 +50,14 @@ const ManageTasksPage = () => {
         }
 
         if (resourceData.ProjectID) {
-          const projectResponse = await fetch(`/api/project/${resourceData.ProjectID}`);
+          const projectResponse = await fetch(
+            `/api/project/${resourceData.ProjectID}`
+          );
           const project = await projectResponse.json();
           setProjectCode(project.ProjectCode || "Unknown Project Code");
         } else {
           setProjectCode("Unknown Project Code");
         }
-        
 
         //fetch all tasks based on userid only to get all tasks associeted to that user
         if (resourceData.UserID) {
@@ -138,10 +143,63 @@ const ManageTasksPage = () => {
           return updatedTask;
         }
         return task;
+       
       });
-
+     
       return updatedTasks;
     });
+  };
+
+  const handleCheckboxChange = (task) => {
+    setTaskToComplete(task);
+    setIsModalOpen(true); // Open the modal on checkbox click
+  };
+
+  const handleConfirmCompletion = async () => {
+    if (!taskToComplete) return;
+  
+    const updatedWorkedHours = parseFloat(resource.WorkedHours) + parseFloat(taskToComplete.Hours);
+    console.log("Updated Worked Hours:", updatedWorkedHours);
+  
+    try {
+      // Call the API to update resource's WorkedHours
+      await fetch(`/api/resources/${resource.ResourceID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ WorkedHours: updatedWorkedHours }),
+      });
+  
+      // Call the API to update the task's completion status
+      await fetch(`/api/tasks/completed/${taskToComplete.TaskID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: true }),
+      });
+  
+      // Update the task's completion status in the state
+      setTasks((prevTasks) =>
+        prevTasks.map((t) =>
+          t.TaskID === taskToComplete.TaskID ? { ...t, completed: true } : t
+        )
+      );
+  
+      // Update resource worked hours state
+      setResource((prevResource) => ({
+        ...prevResource,
+        WorkedHours: updatedWorkedHours,
+      }));
+  
+      // Close the modal after confirming
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Failed to update WorkedHours or task completion", error);
+    }
+  };
+  
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTaskToComplete(null); // Reset the selected task when modal is closed
   };
 
   const addTask = () => {
@@ -156,6 +214,7 @@ const ManageTasksPage = () => {
         StartDate: null,
         DueDate: null, // Initialize with null or default date
         SystemRequired: "",
+        Priority: "",
         ProjectID: resource.Projectid,
         UserID: resource.UserID,
         isNew: true,
@@ -189,6 +248,7 @@ const ManageTasksPage = () => {
         DueDate: task.DueDate,
         StartDate: task.StartDate,
         SystemRequired: task.SystemRequired,
+        Priority: task.Priority,
         ProjectID: task.ProjectID, // Ensure ProjectID is included
         UserID: task.UserID,
       }));
@@ -211,6 +271,7 @@ const ManageTasksPage = () => {
           StartDate: task.StartDate,
 
           SystemRequired: task.SystemRequired,
+          Priority: task.Priority,
           ProjectID: task.ProjectID,
           UserID: task.UserID,
         }));
@@ -310,6 +371,14 @@ const ManageTasksPage = () => {
                 key={task.TaskID}
                 className="mb-10 border-2 border-lime-500 rounded-xl shadow-lg shadow-t pl-5 pr-5 pb-5 pt-5"
               >
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={task.completed || false}
+                    onChange={() => handleCheckboxChange(task)}
+                  />
+                  Completed
+                </label>
                 <label className="block mb-1 font-semibold">
                   Task Description
                 </label>
@@ -326,7 +395,7 @@ const ManageTasksPage = () => {
                   System to be worked on
                 </label>
                 <select
-                  value={task.SystemRequired || "Choose System"}
+                  value={task.SystemRequired || ""}
                   onChange={(e) =>
                     handleTaskChange(
                       task.TaskID,
@@ -356,13 +425,28 @@ const ManageTasksPage = () => {
 
                 <label className="block mb-1 font-semibold">Status</label>
                 <select
-                  value={task.Status || "To-Do"}
+                  value={task.Status || ""}
                   onChange={(e) =>
                     handleTaskChange(task.TaskID, "Status", e.target.value)
                   }
                   className="border rounded w-full py-2 px-3 mb-2"
                 >
                   <option value="To-Do">To-Do</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+
+                <label className="block mb-1 font-semibold">Priority</label>
+                <select
+                  value={task.Priority || " "}
+                  onChange={(e) =>
+                    handleTaskChange(task.TaskID, "Priority", e.target.value)
+                  }
+                  className="border rounded w-full py-2 px-3 mb-2"
+                >
+                  <option value="High">High</option>
+                  <option value="Mid">Mid</option>
+                  <option value="Low">Low</option>
                 </select>
                 <label className="block mb-1 font-semibold">Hours</label>
                 <input
@@ -417,6 +501,30 @@ const ManageTasksPage = () => {
           ) : (
             <p>No tasks available.</p>
           )}
+
+          {/* Modal for confirming task completion */}
+          <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+            <h2>Confirm Completion</h2>
+            <p>
+              Are you sure you want to mark the task "
+              {taskToComplete?.Description}" as completed?
+            </p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={handleCloseModal}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmCompletion}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+              >
+                Confirm
+              </button>
+            </div>
+          </Modal>
+
           <button
             type="button"
             className="bg-blue-500 text-white rounded px-4 py-2 mt-4"
@@ -436,7 +544,7 @@ const ManageTasksPage = () => {
           </button>
         </div>
         <div className="container  rounded-xl shadow-lg pl-20 justify-left h-screen">
-          <Calendar tasks={datetasks} occupiedDates={occupiedDates} />
+          <Calendar tasks={datetasks} />
         </div>
       </div>
     </div>
