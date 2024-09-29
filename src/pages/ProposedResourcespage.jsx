@@ -10,6 +10,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const navigate = useNavigate();
 
   const { newProject } = location.state;
+  
 
   const [resources, setResources] = useState([]);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -146,6 +147,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
               UserID: user.UserID,
               role: user.Role,
               name: user.UserName,
+              HourlyRate:user.HourlyRate,
               hours: 20, // Default planned hours
             }));
 
@@ -161,35 +163,40 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   }, [availableUsers, newProject.complexity, newProject.selectedApplications]);
 
   useEffect(() => {
-    // Calculate the financials
     const calculateFinancials = () => {
-      let totalHours = resources.reduce(
-        (acc, resource) => acc + parseInt(resource.hours),
-        0
-      );
-      const calculatedExhaustedBudget = 300 * totalHours; // Assuming a rate of R300 per hour
-      setExhaustedBudget(calculatedExhaustedBudget);
-
-      const calculatedNetRevenue =
-        newProject.Budget - calculatedExhaustedBudget;
-      setNetRevenue(calculatedNetRevenue);
-
-      const calculatedProfitMargin =
-        (calculatedNetRevenue / newProject.Budget) * 100;
-      setProfitMargin(calculatedProfitMargin);
-
-      const calculatedRecoveryRate = calculatedProfitMargin; // Assuming recovery rate = profit margin
-      setRecoveryRate(calculatedRecoveryRate);
+      let totalHours = 0;
+      let totalCost = 0;
+  
+      resources.forEach((resource) => {
+        const hours = parseInt(resource.hours, 10);
+        const rate = resource.HourlyRate || 300; // Use the hourly rate from the user or a default
+        totalHours += hours;
+        totalCost += hours * rate;
+      });
+  
+      setExhaustedBudget(totalCost); // Set the total cost instead of using a fixed rate
+  
+      
+      setNetRevenue(newProject.NetRevenue);
+  
+      const calculatedProfitMargin = ((newProject.NetRevenue-totalCost) / newProject.NetRevenue) * 100;
+      setProfitMargin(calculatedProfitMargin.toFixed(2));
+  
+      const calculatedRecoveryRate = newProject.NetRevenue/newProject.Budget; // Assuming recovery rate = profit margin
+      setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
-
+  
     calculateFinancials();
   }, [resources, newProject.Budget]);
+
 
   const handleResourceChange = (index, field, value) => {
     const newResources = [...resources];
     newResources[index][field] = value;
     setResources(newResources);
   };
+
+
 
   const addNewResource = (userID) => {
     const selectedUser = availableUsers.find((user) => user.UserID === userID);
@@ -198,6 +205,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
         UserID: selectedUser.UserID,
         role: selectedUser.Role,
         name: selectedUser.UserName,
+        HourlyRate:selectedUser.HourlyRate,
         hours: 0,
       };
       setResources([...resources, newResource]);
@@ -287,7 +295,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             </div>
             <div className="mb-2 ">
               <p className="text-gray-700 font-semibold">Net Revenue:</p>
-              <p className="font-semibold">{`R${netRevenue}`}</p>
+              <p className="font-semibold">{`R${newProject.NetRevenue}`}</p>
             </div>
             <div className="mb-2 ">
               <p className="text-gray-700 font-semibold">Profit Margin:</p>
@@ -395,3 +403,4 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 };
 
 export default ProposedResourcesPage;
+

@@ -38,7 +38,8 @@ router.post("/login", async (req, res) => {
   try {
     const connection = await pool.getConnection();
 
-    const [result] = await connection.execute(
+    // Fetch user details
+    const [userResult] = await connection.execute(
       `
         SELECT * FROM users 
         WHERE email = ? AND password = ?
@@ -46,15 +47,27 @@ router.post("/login", async (req, res) => {
       [email, password]
     );
 
-    if (result.length > 0) {
+    if (userResult.length > 0) {
       // User found
-      const user = result[0];
+      const user = userResult[0];
+
+      // Fetch user notifications
+      const [notificationsResult] = await connection.execute(
+        `
+          SELECT * FROM notifications 
+          WHERE UserID = ?
+        `,
+        [user.UserID]
+      );
+
+      // Structure the response
       res.json({
         id: user.UserID,
         name: user.UserName,
         email: user.Email,
         role: user.Role,
         rate: user.HourlyRate,
+        notifications: notificationsResult // Include notifications in the response
       });
     } else {
       // User not found
