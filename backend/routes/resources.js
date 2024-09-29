@@ -41,6 +41,25 @@ router.get("/resources/:projectId", async (req, res) => {
       res.status(500).send("Database error");
     }
   });
+  //POST
+// POST: add resource to a project
+router.post('/projects/addResource', async (req, res) => {
+  const { UserID, ProjectID, Role, PlannedHours, WorkedHours } = req.body;
+
+  try {
+    await pool.query(
+      'INSERT INTO resources (UserID, ProjectID, Role, PlannedHours, WorkedHours) VALUES (?, ?, ?, ?, ?)',
+      [UserID, ProjectID, Role, PlannedHours, WorkedHours]
+    );
+    res.status(200).json({ message: 'Resource added successfully' });
+  } catch (error) {
+    console.error('Error adding resource to project:', error);  // Logs detailed error
+    res.status(500).json({ message: 'Failed to add resource', error: error.message });
+  }
+});
+
+
+
   //Update
 
   // Endpoint to update worked hours

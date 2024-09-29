@@ -16,13 +16,31 @@ const ProjectPage = ({ deleteProject }) => {
 
   const [resourceId, setResourceId] = useState(null);
   const [userMap, setUserMap] = useState({});
-
   useEffect(() => {
     if (user && projectId) {
       fetch(`/api/resource-id/${user.id}/${projectId}`)
-        .then((response) => response.json())
-        .then((data) => setResourceId(data.resourceId))
-        .catch((error) => console.error("Error fetching resourceId:", error));
+        .then(async (response) => {
+          if (!response.ok) {
+            // If response status is not OK, handle it without throwing an error
+            const errorText = await response.text(); // Get the text of the response (could be non-JSON)
+            if (response.status === 404) {
+              console.log("No resource found for this user in this project.");
+              return; // Exit the .then block if it's a normal case (resource not found)
+            }
+            throw new Error(`Unexpected response: ${errorText}`);
+          }
+          return response.json(); // Parse the JSON if the response is okay
+        })
+        .then((data) => {
+          if (data && data.resourceId) {
+            setResourceId(data.resourceId); // Only set resourceId if it exists
+          } else {
+            console.log("No resourceId in response data");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching resourceId:", error); // Handle unexpected errors only
+        });
     }
   }, [user, projectId]);
 

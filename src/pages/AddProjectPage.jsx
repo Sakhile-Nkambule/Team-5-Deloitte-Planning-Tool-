@@ -13,6 +13,7 @@ const AddProjectPage = () => {
   const [ContactEmail, setContactEmail] = useState("");
   const [complexity, setComplexity] = useState("High");
   const [checkedItems, setCheckedItems] = useState({});
+  const [NetRevenue, setNetRevenue] = useState("");
   const Status = 'pending';
   
 
@@ -60,6 +61,7 @@ const AddProjectPage = () => {
       ProjectCode,
       Status,
       Description,
+      NetRevenue,
       Budget,
       complexity,
       selectedApplications: selectedItems, // Pass the names of checked checkboxes
@@ -121,6 +123,19 @@ const AddProjectPage = () => {
                   placeholder="Add any project expectations, requirements, etc."
                   value={Description}
                   onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-bold mb-2">Net Revenue</label>
+                <input
+                  type="text"
+                  id="NetRevenue"
+                  name="NetRevenue"
+                  className="border rounded w-full py-2 px-3 mb-2"
+                  placeholder="Enter Net Revenue"
+                  required
+                  value={NetRevenue}
+                  onChange={(e) => setNetRevenue(e.target.value)}
                 />
               </div>
               <div className="mb-4">

@@ -636,10 +636,18 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                       </div>
                       {/* {DELETED} */}
                     </div>
-                  ))}
+                  ))}                 
 
                   <div className="mb-4">
-                    <label htmlFor="UserID" className="block font-bold mb-2">
+               
+                    <Link
+                      to={`/dashboard/${project.ProjectID}`}
+                      className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                    >
+                      Add More Resources
+                    </Link>
+
+                    {/* <label htmlFor="UserID" className="block font-bold mb-2">
                       Add Resource
                     </label>
                     <select
@@ -654,7 +662,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                           {user.UserName} ({user.Role})
                         </option>
                       ))}
-                    </select>
+                    </select> */}
                   </div>
                 </div>
                 <button
