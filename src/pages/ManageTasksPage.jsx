@@ -191,9 +191,14 @@ const ManageTasksPage = () => {
 
       // Close the modal after confirming
       setIsModalOpen(false);
+    
     } catch (error) {
       console.error("Failed to update WorkedHours or task completion", error);
     }
+
+      toast.success(
+        `Task Set to Complete successfully` );
+    
   };
 
   const handleCloseModal = () => {
