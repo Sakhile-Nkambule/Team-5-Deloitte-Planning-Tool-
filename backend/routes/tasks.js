@@ -268,13 +268,12 @@ router.put("/tasks/completed/:taskId", async (req, res) => {
   const { completed } = req.body; // Assuming the body contains the completed status as a boolean
 
   if (typeof completed !== "boolean") {
-    return res
-      .status(400)
-      .json({ error: "Completed status must be a boolean" });
+    return res.status(400).json({ error: "Completed status must be a boolean" });
   }
 
+  let connection; // Declare connection here to ensure it can be released later
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
     // Validate if the TaskID exists in the tasks table
     const [existingTask] = await connection.execute(
@@ -295,13 +294,12 @@ router.put("/tasks/completed/:taskId", async (req, res) => {
     res.json({ message: "Task completion status updated successfully" });
   } catch (err) {
     console.error("Error updating task completion status:", err);
-    res
-      .status(500)
-      .json({ error: "Error updating task completion status: " + err });
+    res.status(500).json({ error: "Error updating task completion status: " + err });
   } finally {
-    connection.release();
+    if (connection) connection.release(); // Only release connection if it was successfully acquired
   }
 });
+ 
 
 //DELETE
 

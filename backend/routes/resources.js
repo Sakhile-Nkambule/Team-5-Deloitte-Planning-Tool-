@@ -75,7 +75,7 @@ router.put("/resources/:resourceId", async (req, res) => {
 
   try {
     const [result] = await pool.query(
-      "UPDATE resources SET WorkedHours = WorkedHours + ? WHERE ResourceID = ?",
+      "UPDATE resources SET WorkedHours = ? WHERE ResourceID = ?",
       [WorkedHours, resourceId]
     );
 
