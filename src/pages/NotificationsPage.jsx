@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Notification from '../componets/Notification';
 import { useUser } from '../componets/UserContext';
 import { toast } from "react-toastify";
+import { data } from "autoprefixer";
 
 function NotificationsPage() {
     const [highPriorityNotifications, setHighPriority] = useState([]);
@@ -40,10 +41,6 @@ function NotificationsPage() {
 
     // Fetch notifications on mount
     useEffect(() => {
-        markAsRead();
-    }, []);
-
-    useEffect(() => {
         if (user) {
             console.log(`Fetching notifications for user: ${user.id}`);
             fetch(`/api/notifications/${user.id}`)
@@ -66,8 +63,15 @@ function NotificationsPage() {
                     console.error('Error fetching notifications:', error);
                 });
         } else {
-            console.log('Resource ID is missing:', user);
+            console.log('User ID is missing:', user);
         }
+
+        
+
+        // Mark notifications as read when the user leaves the page (component unmount)
+        return () => {
+            markAsRead();
+        };
     }, [user]);
 
     const deleteNotification = async (NotificationID) => {
@@ -116,6 +120,7 @@ function NotificationsPage() {
                             description={notification.Priority}
                             color="High"
                             createdAt={notification.CreatedAt}
+                            Read_={notification.Read_}
                             onDelete={onDelete}
                         />
                     ))}
@@ -127,6 +132,7 @@ function NotificationsPage() {
                             description={notification.Priority}
                             color="Mid"
                             createdAt={notification.CreatedAt}
+                            Read_={notification.Read_}
                             onDelete={onDelete}
                         />
                     ))}
@@ -138,6 +144,7 @@ function NotificationsPage() {
                             description={notification.Priority}
                             color="Low"
                             createdAt={notification.CreatedAt}
+                            Read_={notification.Read_}
                             onDelete={onDelete}
                         />
                     ))}

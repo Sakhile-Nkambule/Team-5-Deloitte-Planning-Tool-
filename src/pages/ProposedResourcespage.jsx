@@ -2,15 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import Spinner from "../componets/Spinner";
+import Calendar from "../componets/Calendar";
+import Modal from "../componets/modal";
 
 const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const { newProject } = location.state;
-  
+  console.log(newProject);
 
   const [resources, setResources] = useState([]);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -20,70 +23,110 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const [netRevenue, setNetRevenue] = useState(0);
   const [recoveryRate, setRecoveryRate] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [dateTasks, setDateTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedRole, setSelectedRole] = useState("Suggested Resources");
+  const [users, setUsers] = useState([]);
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
 
-  const removeResource = (index) => {
-    setResources(resources.filter((_, i) => i !== index));
-
-  }
- 
-    useEffect(() => {
-      // Fetch users from the backend
-      const fetchUsers = async () => {
-        setLoading(true); // Set loading to true when the fetch starts
-        try {
-          const response = await fetch('/api/users');
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          const allUsers = await response.json();
-    
-          // Fetch skills proficiency for each user
-          const usersWithSkills = await Promise.all(
-            allUsers.map(async (user) => {
-              try {
-                const skillsResponse = await fetch(`/api/skillsets/${user.UserID}`);
-                if (!skillsResponse.ok) {
-                  throw new Error(`Failed to fetch skills for user ${user.UserID}`);
-                }
-                const skillsProficiency = await skillsResponse.json();
-                return { ...user, SkillsProficiency: skillsProficiency };
-              } catch (error) {
-                console.error(`Error fetching skills for user ${user.UserID}:`, error);
-                return { ...user, SkillsProficiency: {} }; // Handle error by setting empty skills
-              }
-            })
-          );
-    
-          console.log('Fetched Users with Skills:', usersWithSkills); // Debug fetched users with skills
-          setAvailableUsers(usersWithSkills);
-        } catch (error) {
-          console.error('Error fetching users:', error);
-        } finally {
-          setLoading(false); // Set loading to false when the fetch completes, whether successful or failed
-        }
-      };
-    
-
-
-    fetchUsers();
-  }, []);
 
   useEffect(() => {
+  //Fetching all users from the backend
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/users");
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const allUsers = await response.json();
+
+        // Fetch tasks and skills proficiency for each user
+        const usersWithTasksAndSkills = await Promise.all(
+          allUsers.map(async (user) => {
+            try {
+              // Fetch skills
+              const skillsResponse = await fetch(
+                `/api/skillsets/${user.UserID}`
+              );
+              const skillsProficiency = skillsResponse.ok
+                ? await skillsResponse.json()
+                : {};
+
+              // Fetch tasks
+              const tasksResponse = await fetch(
+                `/api/tasks/user/${user.UserID}`
+              );
+              const tasks = tasksResponse.ok ? await tasksResponse.json() : [];
+
+              // Filter tasks based on project StartDate and EndDate
+              const filteredTasks = tasks.filter((task) => {
+                const dueDate = new Date(task.DueDate);
+                const projectStartDate = new Date(newProject.StartDate);
+                const projectEndDate = new Date(newProject.EndDate);
+
+                // Include only tasks with due dates inside the project range
+                return dueDate >= projectStartDate && dueDate <= projectEndDate;
+              });
+
+              return {
+                ...user,
+                SkillsProficiency: skillsProficiency,
+                TaskCount: filteredTasks.length, // Count tasks inside project range
+              };
+            } catch (error) {
+              console.error(
+                `Error fetching data for user ${user.UserID}:`,
+                error
+              );
+              return { ...user, SkillsProficiency: {}, TaskCount: 0 };
+            }
+          })
+        );
+
+        console.log(
+          "Fetched Users with Skills and Tasks:",
+          usersWithTasksAndSkills
+        );
+        //AvaileUsers is equal to users with tasks and skills
+        setAvailableUsers(usersWithTasksAndSkills);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [newProject.StartDate, newProject.EndDate]);
+
+  //Filtering availableUsers and set them to Users
+  useEffect(() => {
+    const filteredUsers = availableUsers.filter(
+      (user) => !resources.some((resource) => resource.UserID === user.UserID)
+    );
+    setUsers(filteredUsers);
+
+    console.log("CHECKKK :", availableUsers);
+      //Creating ML payload
     if (availableUsers.length > 0) {
-      // Prepare the payload for the ML API
       const mlPayload = {
         ProjectComplexity: newProject.complexity,
         SystemRequirement: newProject.selectedApplications,
         Users: availableUsers.map((user) => ({
           UserID: user.UserID,
           UserRole: user.Role,
-          UserSkillsProficiency: user.SkillsProficiency, // Adjust based on your backend data structure
+          UserSkillsProficiency: user.SkillsProficiency,
+          TaskCount: user.TaskCount, // Pass task count to ML model if needed
         })),
       };
 
-      console.log("ML Payload:", mlPayload); // Debug ML payload
+      console.log("ML Payload:", mlPayload);
 
-      // Send the payload to the ML API
+      //Making a call to the ML model
+
       const fetchMLPredictions = async () => {
         try {
           const response = await fetch("http://localhost:5051/predict", {
@@ -99,28 +142,30 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           }
 
           const predictionResult = await response.json();
-          console.log("ML Predictions:", predictionResult); // Debug ML predictions
+          console.log("ML Predictions:", predictionResult);
 
-
-          // Filter users with prediction of 1 and sort them by their probability
+          // Sort users with prediction 1 by fewer tasks and then by probability
           const usersWithPrediction1 = predictionResult.predictions
             .filter((prediction) => prediction.prediction === 1)
-            .sort((a, b) => b.probability - a.probability); // Assuming there's a probability field
+            .map((prediction) => ({
+              ...availableUsers.find((u) => u.UserID === prediction.UserID),
+              probability: prediction.prediction_probability,
+            }))
+            .sort(
+              (a, b) =>
+                a.TaskCount - b.TaskCount ||
+                b.prediction_probability - a.prediction_probability
+            ); // Prioritize by task count, then probability
 
-          // Create a map of roles to users
+          console.log("CHECK: ", usersWithPrediction1);
           const roleMap = new Map();
-          usersWithPrediction1.forEach((prediction) => {
-            const user = availableUsers.find(
-              (u) => u.UserID === prediction.UserID
-            );
-            if (user) {
-              if (!roleMap.has(user.Role)) {
-                roleMap.set(user.Role, user);
-              }
+          usersWithPrediction1.forEach((user) => {
+            if (!roleMap.has(user.Role)) {
+              roleMap.set(user.Role, user);
             }
           });
 
-          // Add users with the highest probability if some roles are missing
+          // Ensure roles are filled
           const missingRoles = new Set([
             "Director",
             "Associate Director",
@@ -131,28 +176,42 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             "Snr Consultant",
             "Consult",
             "Jnr Consultant",
-          ]); // Replace with actual role names
+          ]);
+
           availableUsers.forEach((user) => {
             if (!roleMap.has(user.Role) && missingRoles.has(user.Role)) {
               roleMap.set(user.Role, user);
               missingRoles.delete(user.Role);
             }
           });
-
-          // Convert the roleMap to an array and slice to get up to 9 users
+          //Array of selected resources to be proposed( Users with predictions of 1 and mostly available)
           const selectedResources = Array.from(roleMap.values())
             .slice(0, 9)
             .map((user) => ({
-
               UserID: user.UserID,
-              role: user.Role,
-              name: user.UserName,
-              HourlyRate:user.HourlyRate,
+              Role: user.Role,
+              UserName: user.UserName,
+              HourlyRate: user.HourlyRate,
               hours: 20, // Default planned hours
+              TaskCount: user.TaskCount,
             }));
 
           setResources(selectedResources);
-          console.log("Selected Resources:", selectedResources); // Debug selected resources
+          console.log("Selected Resources:", selectedResources);
+
+          // Create array of unselected resources from the ordered list in roleMap to create suggested list
+          const unselectedResources = Array.from(roleMap.values())
+            .slice(9) // Get users from index 6 onwards (those not selected)
+            .map((user) => ({
+              UserID: user.UserID,
+              Role: user.Role,
+              UserName: user.UserName,
+              HourlyRate: user.HourlyRate,
+              TaskCount: user.TaskCount, 
+            }));
+          setSuggestedUsers(unselectedResources);
+
+          console.log("Unselected Resources:", unselectedResources);
         } catch (error) {
           console.error("Error fetching ML predictions:", error);
         }
@@ -166,29 +225,28 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     const calculateFinancials = () => {
       let totalHours = 0;
       let totalCost = 0;
-  
+
       resources.forEach((resource) => {
         const hours = parseInt(resource.hours, 10);
         const rate = resource.HourlyRate || 300; // Use the hourly rate from the user or a default
         totalHours += hours;
         totalCost += hours * rate;
       });
-  
+
       setExhaustedBudget(totalCost); // Set the total cost instead of using a fixed rate
-  
-      
+
       setNetRevenue(newProject.NetRevenue);
-  
-      const calculatedProfitMargin = ((newProject.NetRevenue-totalCost) / newProject.NetRevenue) * 100;
+
+      const calculatedProfitMargin =
+        ((newProject.NetRevenue - totalCost) / newProject.NetRevenue) * 100;
       setProfitMargin(calculatedProfitMargin.toFixed(2));
-  
-      const calculatedRecoveryRate = newProject.NetRevenue/newProject.Budget; // Assuming recovery rate = profit margin
+
+      const calculatedRecoveryRate = newProject.NetRevenue / newProject.Budget; // Assuming recovery rate = profit margin
       setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
-  
+
     calculateFinancials();
   }, [resources, newProject.Budget]);
-
 
   const handleResourceChange = (index, field, value) => {
     const newResources = [...resources];
@@ -196,21 +254,45 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     setResources(newResources);
   };
 
-
-
+  //function to add a new resource
   const addNewResource = (userID) => {
     const selectedUser = availableUsers.find((user) => user.UserID === userID);
     if (selectedUser) {
       const newResource = {
         UserID: selectedUser.UserID,
-        role: selectedUser.Role,
-        name: selectedUser.UserName,
-        HourlyRate:selectedUser.HourlyRate,
+        Role: selectedUser.Role,
+        UserName: selectedUser.UserName,
+        HourlyRate: selectedUser.HourlyRate,
         hours: 0,
+        TaskCount: selectedUser.TaskCount,
       };
       setResources([...resources, newResource]);
+
+      // Remove the user from unselectedResources
+      setSuggestedUsers(
+        suggestedUsers.filter((user) => user.UserID !== userID)
+      );
     }
   };
+//Handle Add to project click event
+  const handleAddToProjectClick = (user) => {
+    addNewResource(user.UserID);
+    console.log("Final Check: ", resources);
+  };
+
+  //Function to Remove resources
+
+  const removeResource = (index) => {
+    // Get the resource being removed
+    const removedResource = resources[index];
+
+    // Update the selected resources by removing the selected resource
+    setResources(resources.filter((_, i) => i !== index));
+
+    // Add the removed resource back to unselected resources
+    setSuggestedUsers((prevUnselected) => [...prevUnselected, removedResource]);
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -269,6 +351,59 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     }
   };
 
+  
+//Fetching all user tasks
+  const fetchUserTasks = async (userId) => {
+    setIsLoading(true);//Spinner
+    try {
+      const response = await fetch(`/api/tasks/user/${userId}`);
+      const data = await response.json();
+      setDateTasks(data);//Set dateTasks to feed into calender component
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch tasks", error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleCalendarClick = (resource) => {
+    setSelectedUser(resource);
+    setIsCalendarModalOpen(true); // Open the calendar modal
+    fetchUserTasks(resource.UserID);
+  };
+//preparing date range to pass into calender
+  const projectStartDate = newProject.StartDate; 
+  const projectEndDate = newProject.EndDate; 
+
+  const projectDateRange = {
+    start: projectStartDate,
+    end: projectEndDate,
+  };
+
+  //Function for filter roles
+  const roles = [
+    "Director",
+    "Snr Associate Director",
+    "Associate Director",
+    "Senior Manager",
+    "Manager",
+    "Assistant Manager",
+    "Snr Consultant",
+    "Consultant",
+    "Jnr Consultant",
+    "Suggested Resources", // Added to handle suggested resources
+  ];
+
+  // Filter users based on selectedRole
+  const filteredUsers =
+    selectedRole === "All"
+      ? users
+      : selectedRole === "Suggested Resources"
+      ? suggestedUsers // Use unselectedResources directly
+      : users.filter((user) => user.Role === selectedRole);
+
+  console.log("Filtered Users:", filteredUsers);
+
   return (
     <section className="bg-lime-100">
       <div className="container m-auto py-24 relative">
@@ -281,9 +416,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             Budget Summary
           </h2>
 
-
           <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md rounded-full  w-100">
-
             <div className="mb-2 ">
               <p className="text-gray-700 font-semibold">Gross Revenue:</p>
               <p className="text-green-500 font-semibold">{`R${newProject.Budget}`}</p>
@@ -307,7 +440,6 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             </div>
           </div>
 
-
           <div>
             {loading ? (
               <Spinner />
@@ -323,12 +455,27 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
                       className="cursor-pointer text-gray-500 absolute top-2 right-2"
                       onClick={() => removeResource(index)}
                     />
+
+                    {/* Calendar Icon */}
+                    <FontAwesomeIcon
+                      icon={faCalendarAlt}
+                      className="cursor-pointer text-gray-500 absolute top-2 left-10"
+                      onClick={() => handleCalendarClick(resource)}
+                    />
+                    {/* Add Task Count */}
+                    <p className="mt-2 text-gray-600 font-semibold">
+                      Occupied Days:{" "}
+                      {resource.TaskCount !== undefined
+                        ? resource.TaskCount
+                        : ""}
+                    </p>
+
                     <label className="block text-gray-700 font-bold mb-2">
                       Role
                     </label>
                     <input
                       type="text"
-                      value={resource.role}
+                      value={resource.Role}
                       onChange={(e) =>
                         handleResourceChange(index, "role", e.target.value)
                       }
@@ -340,7 +487,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
                     </label>
                     <input
                       type="text"
-                      value={resource.name}
+                      value={resource.UserName}
                       onChange={(e) =>
                         handleResourceChange(index, "name", e.target.value)
                       }
@@ -379,28 +526,88 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             </button>
           </div>
 
-          {/* Dropdown to add new resource */}
-          <div className="flex flex-col mt-6">
-            <label className="block text-gray-700 font-bold mb-2">
-              Add a Resource
-            </label>
-            <select
-              onChange={(e) => addNewResource(parseInt(e.target.value))}
-              className="border rounded w-full py-2 px-3 mb-2"
-            >
-              <option value="">Select a Resource</option>
-              {availableUsers.map((user) => (
-                <option key={user.UserID} value={user.UserID}>
-                  {user.UserName} ({user.Role})
-                </option>
+          <div className="container mx-auto p-4">
+            <h2 className="text-2xl font-bold mb-6 text-black">
+              Add Resources
+            </h2>
+
+            {/* Role Filtering */}
+            <div className="mb-4">
+              <label className="mr-2">Filter by:</label>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="border rounded p-2"
+              >
+                {roles.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <ul className="space-y-2">
+              {filteredUsers.map((user) => (
+                <li
+                  key={user.UserID}
+                  className="flex items-center justify-between p-4 bg-white shadow-md rounded-lg"
+                >
+                  {/* User Info */}
+                  <div className="flex items-center w-1/2">
+                    <div className="w-8 h-8 flex items-center justify-center bg-black text-white rounded-full mr-4">
+                      <span role="img" aria-label="face-icon">
+                        <FontAwesomeIcon icon={faUser} />
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block font-bold text-sm">
+                        {user.UserName}
+                      </span>
+                      <span className="block text-xs text-gray-500">
+                        {user.Role}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleCalendarClick(user)} // Open modal with calendar
+                      className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded-full"
+                    >
+                      Calendar
+                    </button>
+                    <button
+                      onClick={() => handleAddToProjectClick(user)} // Open add to project modal
+                      className="bg-transparent hover:bg-lime-500 text-lime-500 font-semibold hover:text-white py-2 px-4 border border-lime-500 hover:border-transparent rounded-full"
+                    >
+                      Add to Project
+                    </button>
+                  </div>
+                </li>
               ))}
-            </select>
+            </ul>
           </div>
         </div>
       </div>
+
+      {/* Modal for Calendar */}
+      <Modal
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+      >
+        <h3 className="text-xl font-bold text-center mb-4">
+          Calendar for {selectedUser?.UserName}
+        </h3>
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <Calendar tasks={dateTasks} projectDateRange={projectDateRange} />
+        )}
+      </Modal>
     </section>
   );
 };
 
 export default ProposedResourcesPage;
-

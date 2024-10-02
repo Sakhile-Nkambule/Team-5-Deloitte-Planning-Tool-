@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import { faBell, faTimes } from '@fortawesome/free-solid-svg-icons';
 
-function Notification({ NotificationID, message, description, color, createdAt, onDelete }) {
+function Notification({ NotificationID, message, description, color, createdAt, Read_, onDelete }) {
     let bgColor = "";
     if (color === "High") bgColor = "bg-red-300";
     if (color === "Mid") bgColor = "bg-yellow-300";
@@ -11,13 +11,21 @@ function Notification({ NotificationID, message, description, color, createdAt, 
     // Format the date and time
     const formattedDate = new Date(createdAt).toLocaleString();
 
+    // Define dynamic styling for unread notifications (Read_ === 0)
+    console.log("Status: ", Read_)
+    const unreadStyles = !Read_ ? 'font-bold text-lg text-black' : 'font-normal text-sm text-black';
+    const unreadContainerStyles = !Read_ ? 'bg-gray-300' : '';
+
     return (
       <div className='mb-10 relative mx-auto w-full max-w-2xl'>
-        <div className={`${bgColor}  w-5/6 rounded-t-lg shadow-2xl p-2 text-black font-bold text-xl min-h-120`}>
+        <div className={`${bgColor} w-5/6 rounded-t-lg shadow-2xl p-2 text-black font-bold text-xl min-h-120`}>
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <FontAwesomeIcon icon={faBell} className="pr-2 pl-2" size="1x" />
-              {description}
+              {/* Apply dynamic styling based on Read_ status */}
+              <span className={unreadStyles}>
+                {description}
+              </span>
             </div>
             <FontAwesomeIcon 
               icon={faTimes} 
@@ -26,9 +34,13 @@ function Notification({ NotificationID, message, description, color, createdAt, 
             />
           </div>
         </div>
-        <div className='bg-white w-5/6 rounded-b-lg shadow-2xl p-2 mb-10'>
+        <div className={`${unreadContainerStyles} w-5/6 rounded-b-lg shadow-2xl p-2 mb-10`}>
           <div className="text-sm text-gray-600">Created At: {formattedDate}</div>
-          <div>{message}</div>
+          <div>
+          <span className={unreadStyles}>
+          {message}
+              </span>
+              </div>
         </div>
       </div>
     );

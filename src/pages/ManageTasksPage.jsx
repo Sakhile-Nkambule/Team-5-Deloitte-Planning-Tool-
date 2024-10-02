@@ -23,6 +23,10 @@ const ManageTasksPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskToComplete, setTaskToComplete] = useState(null);
   const [selectedTaskStatus, setSelectedTaskStatus] = useState("All");
+  const [isProficiencyModalOpen, setIsProficiencyModalOpen] = useState(false);
+  const [skillsetToUpdate, setSkillsetToUpdate] = useState(null);
+  const [newProficiency, setNewProficiency] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -159,7 +163,6 @@ const ManageTasksPage = () => {
 
     const updatedWorkedHours =
       parseFloat(resource.WorkedHours) + parseFloat(taskToComplete.Hours);
-    console.log("Updated Worked Hours:", updatedWorkedHours);
 
     try {
       // Call the API to update resource's WorkedHours
@@ -176,7 +179,7 @@ const ManageTasksPage = () => {
         body: JSON.stringify({ completed: true }),
       });
 
-      // Update the task's completion status in the state
+      // Update task completion status in the state
       setTasks((prevTasks) =>
         prevTasks.map((t) =>
           t.TaskID === taskToComplete.TaskID ? { ...t, completed: true } : t
@@ -189,16 +192,101 @@ const ManageTasksPage = () => {
         WorkedHours: updatedWorkedHours,
       }));
 
-      // Close the modal after confirming
+      // Fetch the user's skillsets to update the workedHours
+      const skillsetsResponse = await fetch(
+        `/api/skillsets/${resource.UserID}`
+      );
+      const skillsets = await skillsetsResponse.json();
+      console.log(skillsets);
+
+      // Find the specific skillset related to this task (by SkillsetRequired)
+      const skillsetToUpdate = skillsets.find(
+        (s) => s.skillset === taskToComplete.SystemRequired
+      );
+
+      if (skillsetToUpdate) {
+        const newSkillsetWorkedHours =
+          parseFloat(skillsetToUpdate.workedHours) +
+          parseFloat(taskToComplete.Hours);
+        console.log("Updated Worked Hours:", newSkillsetWorkedHours);
+
+        // Update the workedHours on the skillset
+        await fetch(`/api/skillset/${skillsetToUpdate.SkillID}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            workedHours: newSkillsetWorkedHours,
+            proficiency: skillsetToUpdate.proficiency,
+          }),
+        });
+
+        // Determine if proficiency needs to be updated
+        let newProficiency = skillsetToUpdate.proficiency;
+        console.log(newProficiency);
+
+        if (newSkillsetWorkedHours >= 30 && newSkillsetWorkedHours < 40)
+          newProficiency = 30;
+        else if (newSkillsetWorkedHours >= 40 && newSkillsetWorkedHours < 55)
+          newProficiency = 40;
+        else if (newSkillsetWorkedHours >= 55 && newSkillsetWorkedHours < 70)
+          newProficiency = 50;
+        else if (newSkillsetWorkedHours >= 70 && newSkillsetWorkedHours < 85)
+          newProficiency = 60;
+        else if (newSkillsetWorkedHours >= 85 && newSkillsetWorkedHours < 90)
+          newProficiency = 70;
+        else if (newSkillsetWorkedHours >= 90 && newSkillsetWorkedHours < 110)
+          newProficiency = 80;
+        else if (newSkillsetWorkedHours >= 110 && newSkillsetWorkedHours < 500)
+          newProficiency = 90;
+        else if (newSkillsetWorkedHours >= 500) newProficiency = 100;
+
+        // If proficiency increased, show confirmation modal
+        if (newProficiency > skillsetToUpdate.proficiency) {
+          setIsProficiencyModalOpen(true);
+          setSkillsetToUpdate({
+            ...skillsetToUpdate,
+            newProficiency,
+            newSkillsetWorkedHours,
+          });
+          console.log(skillsetToUpdate);
+        } else {
+          toast.success(`Task Set to Complete successfully`);
+        }
+      } else {
+        toast.success(`Task Set to Complete successfully`);
+      }
+
+      // Close the task completion modal
       setIsModalOpen(false);
-    
     } catch (error) {
       console.error("Failed to update WorkedHours or task completion", error);
     }
+  };
 
-      toast.success(
-        `Task Set to Complete successfully` );
-    
+  // Function to handle proficiency confirmation
+  const handleConfirmProficiencyIncrease = async () => {
+    try {
+      // Update the proficiency for the skillset
+      await fetch(`/api/skillsets/${skillsetToUpdate.SkillID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workedHours: skillsetToUpdate.newSkillsetWorkedHours,
+          proficiency: skillsetToUpdate.newProficiency,
+        }),
+      });
+
+      // Close the proficiency modal
+      setIsProficiencyModalOpen(false);
+      toast.success(`Proficiency updated successfully!`);
+    } catch (error) {
+      console.error("Failed to update proficiency", error);
+    }
+  };
+
+  // Function to close the proficiency modal
+  const handleCloseProficiencyModal = () => {
+    setIsProficiencyModalOpen(false);
   };
 
   const handleCloseModal = () => {
@@ -311,7 +399,6 @@ const ManageTasksPage = () => {
           Message: `You have been assigned a task on project ${projectCode} `,
           Type: "In-App",
           Priority: "High",
-          
         };
 
         const response = await fetch("http://localhost:8081/notifications", {
@@ -323,9 +410,7 @@ const ManageTasksPage = () => {
         });
 
         if (response.ok) {
-          toast.success(
-            `Task Notification sent to ${userName} successfully`
-          );
+          toast.success(`Task Notification sent to ${userName} successfully`);
         } else {
           toast.error("Failed to send Task Notification");
         }
@@ -570,6 +655,32 @@ const ManageTasksPage = () => {
               <button
                 onClick={handleConfirmCompletion}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+              >
+                Confirm
+              </button>
+            </div>
+          </Modal>
+          {/* Modal for confirming proficiency increase */}
+          <Modal
+            isOpen={isProficiencyModalOpen}
+            onClose={handleCloseProficiencyModal}
+          >
+            <h2>Proficiency Update</h2>
+            <p>
+              The proficiency for the skill "{skillsetToUpdate?.skillset}" has
+              increased.
+            </p>
+            <p>New Proficiency: {skillsetToUpdate?.newProficiency}%</p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={handleCloseProficiencyModal}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmProficiencyIncrease}
+                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
               >
                 Confirm
               </button>

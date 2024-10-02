@@ -2,8 +2,7 @@ import dayjs from "dayjs";
 import React, { useState } from "react";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 
-export default function Calendar({ tasks }) {
-  console.log("Calendar component rendered with tasks:", tasks);
+export default function Calendar({ tasks, projectDateRange }) {
   const days = ["S", "M", "T", "W", "T", "F", "S"];
   const currentDate = dayjs();
   const [today, setToday] = useState(currentDate);
@@ -29,13 +28,19 @@ export default function Calendar({ tasks }) {
       arrayOfDate.push({
         currentMonth: true,
         date: firstDateOfMonth.date(i),
-        today: firstDateOfMonth.date(i).toDate().toDateString() === dayjs().toDate().toDateString(),
+        today:
+          firstDateOfMonth.date(i).toDate().toDateString() ===
+          dayjs().toDate().toDateString(),
       });
     }
 
     // Fill remaining spaces with dates from the next month
     const remaining = 42 - arrayOfDate.length;
-    for (let i = lastDateOfMonth.date() + 1; i <= lastDateOfMonth.date() + remaining; i++) {
+    for (
+      let i = lastDateOfMonth.date() + 1;
+      i <= lastDateOfMonth.date() + remaining;
+      i++
+    ) {
       arrayOfDate.push({
         currentMonth: false,
         date: lastDateOfMonth.date(i),
@@ -48,6 +53,13 @@ export default function Calendar({ tasks }) {
   // Utility function to handle conditional class names
   const cn = (...classes) => {
     return classes.filter(Boolean).join(" ");
+  };
+
+  // Check if a date is within the project date range
+  const isDateInRange = (date) => {
+    const startDate = dayjs(projectDateRange?.start);
+    const endDate = dayjs(projectDateRange?.end);
+    return date.isAfter(startDate) && date.isBefore(endDate);
   };
 
   // Month names
@@ -72,15 +84,14 @@ export default function Calendar({ tasks }) {
     const tasksForSelectedDate = tasks.filter(
       (task) => new Date(task.DueDate).toDateString() === selectedDateString
     );
-  
+
     const totalHours = tasksForSelectedDate.reduce((acc, task) => {
       const hours = parseFloat(task.Hours); // Ensure hours are parsed as float
       return acc + (isNaN(hours) ? 0 : hours); // Add hours only if they are valid numbers
     }, 0);
-  
+
     return totalHours;
   };
-  
 
   // Calculate available hours (8 - total assigned hours)
   const getAvailableHours = (totalHours) => {
@@ -139,34 +150,44 @@ export default function Calendar({ tasks }) {
           ))}
         </div>
         <div className="grid grid-cols-7">
-          {generateDate(today.month(), today.year()).map(({ date, currentMonth, today }, index) => {
-            const totalHours = getTotalHoursForSelectedDate(date);
-            const availableHours = getAvailableHours(totalHours);
+          {generateDate(today.month(), today.year()).map(
+            ({ date, currentMonth, today }, index) => {
+              const totalHours = getTotalHoursForSelectedDate(date);
+              const availableHours = getAvailableHours(totalHours);
 
-            return (
-              <div
-                key={index}
-                className="p-2 text-center h-14 grid place-content-center text-sm border-t"
-              >
-                <h1
-                  className={cn(
-                    currentMonth ? "" : "text-gray-400",
-                    today ? "bg-lime-500 text-white" : "",
-                    getAvailabilityColor(availableHours),
-                    selectDate.toDate().toDateString() === date.toDate().toDateString()
-                      ? "bg-black text-white"
-                      : "",
-                    "h-10 w-10 rounded-full grid place-content-center hover:bg-black hover:text-white transition-all cursor-pointer select-none"
-                  )}
-                  onClick={() => {
-                    setSelectDate(date);
-                  }}
+              const hasTasks = tasks.some(
+                (task) =>
+                  new Date(task.DueDate).toDateString() ===
+                  date.toDate().toDateString()
+              );
+
+              return (
+                <div
+                  key={index}
+                  className="p-2 text-center h-14 grid place-content-center text-sm border-t"
                 >
-                  {date.date()}
-                </h1>
-              </div>
-            );
-          })}
+                  <h1
+                    className={cn(
+                      currentMonth ? "" : "text-gray-400",
+                      today ? "bg-lime-500 text-white" : "",
+                      getAvailabilityColor(availableHours), // Apply red or pink color if tasks exist
+                      !hasTasks && isDateInRange(date) ? "bg-yellow-300" : "", // Apply yellow only if no tasks exist for that day
+                      selectDate.toDate().toDateString() ===
+                        date.toDate().toDateString()
+                        ? "bg-black text-white"
+                        : "",
+                      "h-10 w-10 rounded-full grid place-content-center hover:bg-black hover:text-white transition-all cursor-pointer select-none"
+                    )}
+                    onClick={() => {
+                      setSelectDate(date);
+                    }}
+                  >
+                    {date.date()}
+                  </h1>
+                </div>
+              );
+            }
+          )}
         </div>
       </div>
       <div className=" w-96 sm:px-5">
@@ -174,17 +195,24 @@ export default function Calendar({ tasks }) {
           Schedule for {selectDate.toDate().toDateString()}
         </h1>
         <p className="text-gray-400">
-          {tasks.some(task => new Date(task.DueDate).toDateString() === selectDate.toDate().toDateString())
-            ? `Total Assigned hours: ${getTotalHoursForSelectedDate(selectDate)}`
-            : "No tasks for today."
-          }
+          {tasks.some(
+            (task) =>
+              new Date(task.DueDate).toDateString() ===
+              selectDate.toDate().toDateString()
+          )
+            ? `Total Assigned hours: ${getTotalHoursForSelectedDate(
+                selectDate
+              )}`
+            : "No tasks for today."}
         </p>
         <p className="text-gray-400">
-          {`Available hours: ${getAvailableHours(getTotalHoursForSelectedDate(selectDate))}`}
+          {`Available hours: ${getAvailableHours(
+            getTotalHoursForSelectedDate(selectDate)
+          )}`}
         </p>
       </div>
-       {/* Key for colors at the bottom */}
-       <div classname = "pl-20">
+      {/* Key for colors at the bottom */}
+      <div className="pl-20">
         <h2 className="font-semibold">Key:</h2>
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 bg-white-100"></div>
@@ -197,6 +225,10 @@ export default function Calendar({ tasks }) {
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 bg-red-500"></div>
           <p>Unavailable </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 bg-yellow-300"></div>
+          <p>Project Date Range</p>
         </div>
       </div>
     </div>
