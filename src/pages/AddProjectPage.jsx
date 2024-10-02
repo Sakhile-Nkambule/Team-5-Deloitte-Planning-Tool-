@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const AddProjectPage = () => {
   const [Title, setTitle] = useState("");
@@ -14,6 +16,13 @@ const AddProjectPage = () => {
   const [complexity, setComplexity] = useState("High");
   const [checkedItems, setCheckedItems] = useState({});
   const [NetRevenue, setNetRevenue] = useState("");
+  const [startDate, setStartDate] = useState(null
+  );
+  const [endDate, setEndDate] = useState(
+    null
+  );
+  const [errors, setErrors] = useState({});
+
   const Status = 'pending';
   
 
@@ -44,6 +53,69 @@ const AddProjectPage = () => {
     }));
   };
 
+   // DATE (Start and End)
+   const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
+
+   // Handle Start Date Change
+   const handleStartDateChange = (date) => {
+     const currentDate = new Date(); // Today's date
+ 
+     if (isValidDate(date)) {
+       if (date < currentDate) {
+         // Start date is in the past
+         setErrors((prevErrors) => ({
+           ...prevErrors,
+           startDate: "Start date cannot be in the past",
+         }));
+       } else if (endDate && date > endDate) {
+         // Start date is after end date
+         setErrors((prevErrors) => ({
+           ...prevErrors,
+           startDate: "Start date cannot be after the end date",
+         }));
+       } else {
+         // Clear any previous errors
+         setErrors((prevErrors) => ({
+           ...prevErrors,
+           startDate: null,
+         }));
+         setStartDate(date); // Set valid start date
+       }
+     } else {
+       setStartDate(null); // Reset if invalid
+     }
+   };
+
+   // Handle End Date Change
+  const handleEndDateChange = (date) => {
+    const currentDate = new Date(); // Today's date
+
+    if (isValidDate(date)) {
+      if (date < currentDate) {
+        // End date is in the past
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          endDate: "End date cannot be in the past",
+        }));
+      } else if (startDate && date < startDate) {
+        // End date is before start date
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          endDate: "End date cannot be before the start date",
+        }));
+      } else {
+        // Clear any previous errors
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          endDate: null,
+        }));
+        setEndDate(date); // Set valid end date
+      }
+    } else {
+      setEndDate(null); // Reset if invalid
+    }
+  };
+
   const status = "pending";
 
   const navigate = useNavigate();
@@ -63,6 +135,8 @@ const AddProjectPage = () => {
       Description,
       NetRevenue,
       Budget,
+      StartDate: startDate ? startDate.toISOString() : null,
+      EndDate: endDate ? endDate.toISOString() : null,
       complexity,
       selectedApplications: selectedItems, // Pass the names of checked checkboxes
   Client: {
@@ -125,6 +199,50 @@ const AddProjectPage = () => {
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
+               {/* Start & End Date */}
+               <div className="flex space-x-4 mb-4">
+                    <div className="w-1/2">
+                      <label
+                        htmlFor="startDate"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Start Date
+                      </label>
+                      <DatePicker
+                        selected={isValidDate(startDate) ? startDate : null}
+                        onChange={handleStartDateChange}
+                        dateFormat="yyyy/MM/dd"
+                        className="border rounded w-full py-2 px-3"
+                        placeholderText="Select Project Start Date"
+                      />
+                      {errors.startDate && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.startDate}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="w-1/2">
+                      <label
+                        htmlFor="endDate"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        End Date
+                      </label>
+                      <DatePicker
+                        selected={isValidDate(endDate) ? endDate : null}
+                        onChange={handleEndDateChange}
+                        dateFormat="yyyy/MM/dd"
+                        className="border rounded w-full py-2 px-3"
+                        placeholderText="Select Project End Date"
+                      />
+                      {errors.endDate && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.endDate}
+                        </p>
+                      )}
+                    </div>
+                  </div>
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold mb-2">Net Revenue</label>
                 <input

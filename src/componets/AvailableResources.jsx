@@ -47,8 +47,8 @@ const AvailableResources = ({ resources, project }) => {
   }, [resources]);
 
   // Handle calendar click to open modal
-  const handleCalendarClick = (user) => {
-    setSelectedUser(user);
+  const handleCalendarClick = (resource) => {
+    setSelectedUser(resource);
     setIsCalendarModalOpen(true); // Open the calendar modal
     fetchUserTasks(user.UserID);
   };
