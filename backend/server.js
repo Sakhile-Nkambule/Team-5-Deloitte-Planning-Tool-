@@ -24,9 +24,9 @@ app.get('/', (req, res) => {
 });
 
 // Import routes
-const projectsRoutes = require("./routes/Projects");
-const usersRoutes = require("./routes/Users");
-const notificationsRoutes = require("./routes/Notifications");
+//const projectsRoutes = require("./routes/projects");
+// const usersRoutes = require("./routes/users");
+// const notificationsRoutes = require("./routes/notifications");
 const resourcesRoutes = require("./routes/resources");
 const tasksRoutes = require("./routes/tasks");
 const financialsRoutes = require("./routes/financials");
@@ -36,9 +36,9 @@ const skillsetsRoutes = require("./routes/skillsets");
 
 
 // Use routes
-app.use("/", projectsRoutes);
-app.use("/", usersRoutes);
-app.use("/", notificationsRoutes); 
+// app.use("/", projectsRoutes);
+// app.use("/", usersRoutes);
+// app.use("/", notificationsRoutes); 
 app.use("/", resourcesRoutes);
 app.use("/", tasksRoutes);
 app.use("/", financialsRoutes);
