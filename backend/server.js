@@ -24,21 +24,22 @@ app.get('/', (req, res) => {
 });
 
 // Import routes
-//const projectsRoutes = require("./routes/projects");
-// const usersRoutes = require("./routes/users");
-// const notificationsRoutes = require("./routes/notifications");
+
+const usersRoutes = require("./routes/users");
+const notificationsRoutes = require("./routes/notifications");
 const resourcesRoutes = require("./routes/resources");
 const tasksRoutes = require("./routes/tasks");
 const financialsRoutes = require("./routes/financials");
 const companiesRoutes = require("./routes/clients");
 const skillsetsRoutes = require("./routes/skillsets");
+const projectsRoutes = require("./routes/projects");
 
 
 
 // Use routes
-// app.use("/", projectsRoutes);
-// app.use("/", usersRoutes);
-// app.use("/", notificationsRoutes); 
+app.use("/", projectsRoutes);
+app.use("/", usersRoutes);
+app.use("/", notificationsRoutes); 
 app.use("/", resourcesRoutes);
 app.use("/", tasksRoutes);
 app.use("/", financialsRoutes);
