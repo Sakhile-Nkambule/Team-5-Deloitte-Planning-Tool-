@@ -2,11 +2,26 @@ const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
 require("dotenv").config();
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json()); // For parsing application/json
 
+
+const buildPath = path.join(__dirname, '../dist');
+
+// Serve static files from the "dist" directory
+app.use(express.static(buildPath));
+
+// Send the index.html file on the root request
+app.get('/', (req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
+});
 
 // Import routes
 const projectsRoutes = require("./routes/Projects");
