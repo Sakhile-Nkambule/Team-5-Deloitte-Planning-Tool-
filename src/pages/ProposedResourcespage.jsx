@@ -26,10 +26,14 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const [dateTasks, setDateTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [isNotificationModalOpen, setNotificationModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedRole, setSelectedRole] = useState("Suggested Resources");
   const [users, setUsers] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [permissionreason, setpermissionreason] = useState(null);
+  
 
 
   useEffect(() => {
@@ -294,41 +298,81 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   };
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const projectWithResources = {
-      ...newProject,
-      resources,
-      financials: {
-        Budget,
-        exhaustedBudget,
-        profitMargin,
-        netRevenue,
-        recoveryRate,
-      },
-    };
-    console.log("Project with Resources Payload:", projectWithResources); // Debug project with resources payload
-    await addProjectSubmit(projectWithResources);
-    toast.success("Project Added Successfully");
-    navigate("/projects");
+  
+
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // If conditions for showing the modal are met
+  if (profitMargin < 57 || recoveryRate < 50) {
+    if (profitMargin < 57) {
+      setpermissionreason("*Profit margin is below 57%");
+    }
+    if (recoveryRate < 50) {
+      setpermissionreason("*Recovery rate is below 50%");
+    }
+    setNotificationModalOpen(true);
+    return; // Stop further submission until notification is handled
+  }
+
+  // If no permission is required, proceed with form submission
+  await submitProject();
+};
+
+const handleNotificationSubmit = async () => {
+  if (!notificationMessage.trim()) {
+    toast.error("Notification message cannot be empty.");
+    return;
+  }
+
+  // Send the notification
+  await sendNotification(notificationMessage);
+
+  // Close the notification modal
+  setNotificationModalOpen(false);
+
+  // Proceed with form submission after notification is sent
+  await submitProject();
+};
+
+const submitProject = async () => {
+  const projectWithResources = {
+    ...newProject,
+    resources,
+    financials: {
+      Budget,
+      exhaustedBudget,
+      profitMargin,
+      netRevenue,
+      recoveryRate,
+    },
   };
 
-  // Function to send a notification to the Associate Director
-  const sendNotification = async () => {
-    // Find the Director from the resources array
-    const associateDirector = resources.find(
-      (resource) => resource.role === "Director"
-    );
+  console.log("Project with Resources Payload:", projectWithResources); // Debugging
+  await addProjectSubmit(projectWithResources);
+  toast.success("Project Added Successfully");
+  navigate("/projects");
+};
 
+
+
+  // Function to send a notification to the Associate Director
+  const sendNotification = async (message) => { // Accept the message as a parameter
+    console.log("Sending notification with message:", message); 
+    const associateDirector = resources.find(
+      (resource) => resource.Role === "Director"
+    );
     if (associateDirector) {
       try {
         const notificationData = {
           UserID: associateDirector.UserID,
-          Message: "Permission requested for a project involving you.",
+          Message: `Permission requested for project "${newProject.Title}" involving you.Reason ${message}`, // Use the passed message here
           Type: "In-App",
           Priority: "High",
         };
-
+  
         const response = await fetch("http://localhost:8081/notifications", {
           method: "POST",
           headers: {
@@ -336,7 +380,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           },
           body: JSON.stringify(notificationData),
         });
-
+  
         if (response.ok) {
           toast.success("Permission request sent successfully");
         } else {
@@ -350,7 +394,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
       toast.error("No Director found in the resources");
     }
   };
-
+  
   
 //Fetching all user tasks
   const fetchUserTasks = async (userId) => {
@@ -518,12 +562,12 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             >
               Accept Resources
             </button>
-            <button
+            {/* <button
               onClick={sendNotification}
               className="bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
             >
               Request Permission
-            </button>
+            </button> */}
           </div>
 
           <div className="container mx-auto p-4">
@@ -606,6 +650,39 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           <Calendar tasks={dateTasks} projectDateRange={projectDateRange} />
         )}
       </Modal>
+
+      {/* Modal for Notification */}
+      <Modal
+  isOpen={isNotificationModalOpen}
+  onClose={() => setNotificationModalOpen(false)}
+ 
+>
+  <h3 className="text-xl font-bold text-center mb-4">Permission Request</h3>
+  <div className="mb-4">
+    <p className="text-center text-red-500 ">
+      {`${permissionreason} . The project's financials are not within the acceptable range.`}
+    </p>
+    <label className="block text-gray-700 font-bold mb-2">
+      Permission Message
+    </label>
+    <textarea
+      id="NotificationMessage"
+      name="NotificationMessage"
+      className="border rounded w-full py-2 px-3"
+      rows="4"
+      placeholder="What is the reason for this permission request?"
+      value={notificationMessage}
+      onChange={(e) => setNotificationMessage(e.target.value)}
+    />
+    <button
+      onClick={handleNotificationSubmit}
+      className="bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+    >
+      Request Permission
+    </button>
+  </div>
+</Modal>
+
     </section>
   );
 };

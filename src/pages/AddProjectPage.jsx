@@ -120,36 +120,96 @@ const AddProjectPage = () => {
 
   const navigate = useNavigate();
 
+
+  const validateForm = () => {
+    let formErrors = {};
+
+    // Ensure end date is after start date
+    if (startDate && endDate && endDate <= startDate) {
+      formErrors.endDate = "*End date must be after start date.";
+    }
+
+    // Net Revenue validation (must be a number)
+    if (!/^\d+(\.\d{1,2})?$/.test(NetRevenue)) {
+      formErrors.NetRevenue = "*Net Revenue must be a valid number.";
+    }
+
+    // Budget validation (must be a number)
+    if (!/^\d+(\.\d{1,2})?$/.test(Budget)) {
+      formErrors.Budget = "*Budget must be a valid number.";
+    }
+
+    // Email validation
+    if (!/\S+@\S+\.\S+/.test(ContactEmail)) {
+      formErrors.ContactEmail = "*Please enter a valid email.";
+    }
+
+    if (!/^\+?[0-9\s\-()]{7,15}$/.test(ContactPhone)) {
+      formErrors.ContactPhone = "*Please enter a valid phone number.";
+    }
+
+    const selectedItems = Object.keys(checkedItems).filter(
+      (key) => checkedItems[key] === true
+    );
+
+    if (selectedItems.length === 0) {
+      formErrors.selectedApplications = "*Select at least one application.";
+    }
+
+
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+
+
+
+
+
+
+
+
   const submitForm = (e) => {
     e.preventDefault();
 
-    // Get the names of only the checked checkboxes
-    const selectedItems = Object.keys(checkedItems).filter(
-    (key) => checkedItems[key] === true
-  );
-    const newProject = {
+    if (validateForm()) {
+      // Proceed with form submission (e.g., API call)
+       // Get the names of only the checked checkboxes
+      const selectedItems = Object.keys(checkedItems).filter(
+        (key) => checkedItems[key] === true
+      );
 
-      Title,
-      ProjectCode,
-      Status,
-      Description,
-      NetRevenue,
-      Budget,
-      StartDate: startDate ? startDate.toISOString() : null,
-      EndDate: endDate ? endDate.toISOString() : null,
-      complexity,
-      selectedApplications: selectedItems, // Pass the names of checked checkboxes
-  Client: {
-        CompanyName,
-        CompanyDescription,
-        ContactEmail,
-        ContactPhone,
-        CompanyLocation,},
+      const newProject = {
 
+        Title,
+        ProjectCode,
+        Status,
+        Description,
+        NetRevenue,
+        Budget,
+        StartDate: startDate ? startDate.toISOString() : null,
+        EndDate: endDate ? endDate.toISOString() : null,
+        complexity,
+        selectedApplications: selectedItems, // Pass the names of checked checkboxes
+    Client: {
+          CompanyName,
+          CompanyDescription,
+          ContactEmail,
+          ContactPhone,
+          CompanyLocation,},
+  
+      
+      };
+      console.log("Form submitted successfully!");
+      navigate("/proposed-resources", { state: { newProject } });
+
+
+      
+    }
+
+   
     
-    };
-    
-    navigate("/proposed-resources", { state: { newProject } });
   };
 
   return (
@@ -243,7 +303,7 @@ const AddProjectPage = () => {
                       )}
                     </div>
                   </div>
-              <div className="mb-4">
+                  <div className="mb-4">
                 <label className="block text-gray-700 font-bold mb-2">Net Revenue</label>
                 <input
                   type="text"
@@ -255,6 +315,7 @@ const AddProjectPage = () => {
                   value={NetRevenue}
                   onChange={(e) => setNetRevenue(e.target.value)}
                 />
+                {errors.NetRevenue && <p className="text-red-500 text-xs mt-1">{errors.NetRevenue}</p>}
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold mb-2">Project Budget</label>
@@ -268,6 +329,7 @@ const AddProjectPage = () => {
                   value={Budget}
                   onChange={(e) => setBudget(e.target.value)}
                 />
+                {errors.Budget && <p className="text-red-500 text-xs mt-1">{errors.Budget}</p>}
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold mb-2">Project Complexity</label>
@@ -293,6 +355,7 @@ const AddProjectPage = () => {
                   name="CompanyName"
                   className="border rounded w-full py-2 px-3"
                   placeholder="Company Name"
+                  required
                   value={CompanyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                 />
@@ -345,7 +408,9 @@ const AddProjectPage = () => {
                   placeholder="Optional phone for client"
                   value={ContactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
+                  
                 />
+                {errors.ContactPhone && <p className="text-red-500 text-xs mt-1">{errors.ContactPhone}</p>}
               </div>
             </div>
 
@@ -368,9 +433,12 @@ const AddProjectPage = () => {
                     >
                       {item}
                     </span>
+                    
                   </label>
+                  
                 ))}
               </div>
+              {errors.selectedApplications && <p className="text-red-500 text-md mt-1">{errors.selectedApplications}</p>}
             </div>
 
             <div className="col-span-3">
