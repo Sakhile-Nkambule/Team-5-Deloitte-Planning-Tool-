@@ -18,32 +18,38 @@ const ProjectPage = ({ deleteProject }) => {
   const [userMap, setUserMap] = useState({});
   useEffect(() => {
     if (user && projectId) {
-      fetch(`/api/resource-id/${user.id}/${projectId}`)
-        .then(async (response) => {
-          if (!response.ok) {
-            // If response status is not OK, handle it without throwing an error
-            const errorText = await response.text(); // Get the text of the response (could be non-JSON)
-            if (response.status === 404) {
-              console.log("No resource found for this user in this project.");
-              return; // Exit the .then block if it's a normal case (resource not found)
+      // Check if the user has an allowed role
+      const allowedRoles = ['consultant', 'Junior Consultant', 'Senior Consultant'];
+      if (allowedRoles.includes(userRole)) { 
+        fetch(`/api/resource-id/${user.id}/${projectId}`)
+          .then(async (response) => {
+            if (!response.ok) {
+              // If response status is not OK, handle it without throwing an error
+              const errorText = await response.text(); // Get the text of the response (could be non-JSON)
+              if (response.status === 404) {
+                console.log("No resource found for this user in this project.");
+                return; // Exit the .then block if it's a normal case (resource not found)
+              }
+              throw new Error(`Unexpected response: ${errorText}`);
             }
-            throw new Error(`Unexpected response: ${errorText}`);
-          }
-          return response.json(); // Parse the JSON if the response is okay
-        })
-        .then((data) => {
-          if (data && data.resourceId) {
-            setResourceId(data.resourceId); // Only set resourceId if it exists
-          } else {
-            console.log("No resourceId in response data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching resourceId:", error); // Handle unexpected errors only
-        });
+            return response.json(); // Parse the JSON if the response is okay
+          })
+          .then((data) => {
+            if (data && data.resourceId) {
+              setResourceId(data.resourceId); // Only set resourceId if it exists
+            } else {
+              console.log("No resourceId in response data");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching resourceId:", error); // Handle unexpected errors only
+          });
+      } else {
+        console.log("User does not have access to this resource.");
+      }
     }
   }, [user, projectId]);
-
+  
   // Fetch user data to create a map of UserID to UserName
   useEffect(() => {
     setLoading(true);

@@ -77,7 +77,7 @@ const UserProfilePage = () => {
         setSkills(updatedSkills);
       })
       .catch(error => console.error('Error fetching skills:', error));
-  }
+  } 
 }, [user]);
 
   const handleSkillChange = (skill, value) => {
@@ -119,7 +119,13 @@ const UserProfilePage = () => {
                 className={`w-6 h-6 cursor-pointer ${getColorClass(percent)} ${
                   proficiency >= percent ? 'bg-opacity-100' : 'bg-opacity-5'
                 }`}
-                onClick={() => handleSkillChange(skill, percent)}
+                onClick={() => {
+                  if (role === "Manager" || role === "Director") {
+                    handleSkillChange(skill, percent);
+                  } else {
+                    toast.error("Only Managers or Directors can edit skills.");
+                  }
+                }}
               />
             ))}
           </div>
