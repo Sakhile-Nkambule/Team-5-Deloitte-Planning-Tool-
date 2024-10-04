@@ -115,7 +115,7 @@ router.post("/newprojects", async (req, res) => {
           await connection.query(insertResourceQuery, [
             projectId,
             resource.UserID,
-            resource.role,
+            resource.Role,
             resource.hours,
           ]);
         }
