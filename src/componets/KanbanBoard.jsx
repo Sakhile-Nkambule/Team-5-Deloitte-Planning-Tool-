@@ -13,7 +13,7 @@ export default function Board() {
   const [completed, setCompleted] = useState([]);
   const [ToDo, setToDo] = useState([]);
   const [inReview, setInReview] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // New state for loading
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (resourceId) {
@@ -112,7 +112,7 @@ export default function Board() {
   }
 
   const handleSave = async () => {
-    setIsLoading(true); // Show loading overlay
+    setIsLoading(true);
     const promises = [];
 
     if (ToDo.length > 0) {
@@ -146,15 +146,11 @@ export default function Board() {
     }
 
     try {
-      // Execute all requests in parallel
       const responses = await Promise.all(promises);
-
-      // Check if all responses are ok
       const allSuccessful = responses.every((response) => response.ok);
 
       if (allSuccessful) {
         toast.success("Tasks saved successfully");
-        // Re-fetch tasks or update the state manually after successful save
         const response = await fetch(`/api/tasks/${resourceId}`);
         const json = await response.json();
         const completedTasks = json.Tasks.filter(
@@ -177,18 +173,16 @@ export default function Board() {
       toast.error("An error occurred while saving tasks");
       console.error("Error saving tasks:", error);
     } finally {
-      setIsLoading(false); // Hide loading overlay
+      setIsLoading(false);
     }
   };
 
-  //BACK BUTTON
   const handleGoBack = () => {
     navigate(-1); // Goes back to the previous page
   };
 
   return (
     <div>
-      {/* Loading Overlay */}
       {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="text-white text-xl">Saving...</div>
