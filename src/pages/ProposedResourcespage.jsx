@@ -245,7 +245,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
         ((newProject.NetRevenue - totalCost) / newProject.NetRevenue) * 100;
       setProfitMargin(calculatedProfitMargin.toFixed(2));
 
-      const calculatedRecoveryRate = newProject.NetRevenue / newProject.Budget; // Assuming recovery rate = profit margin
+      const calculatedRecoveryRate = (newProject.NetRevenue / newProject.Budget)* 100; // Assuming recovery rate = profit margin
       setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
 
@@ -508,7 +508,7 @@ const submitProject = async () => {
                     />
                     {/* Add Task Count */}
                     <p className="mt-2 text-gray-600 font-semibold">
-                      Occupied Days:{" "}
+                      Engagements:{" "}
                       {resource.TaskCount !== undefined
                         ? resource.TaskCount
                         : ""}

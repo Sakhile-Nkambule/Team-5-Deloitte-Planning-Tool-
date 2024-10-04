@@ -58,37 +58,49 @@ const AddProjectPage = () => {
 
    // Handle Start Date Change
    const handleStartDateChange = (date) => {
-     const currentDate = new Date(); // Today's date
- 
-     if (isValidDate(date)) {
-       if (date < currentDate) {
-         // Start date is in the past
-         setErrors((prevErrors) => ({
-           ...prevErrors,
-           startDate: "Start date cannot be in the past",
-         }));
-       } else if (endDate && date > endDate) {
-         // Start date is after end date
-         setErrors((prevErrors) => ({
-           ...prevErrors,
-           startDate: "Start date cannot be after the end date",
-         }));
-       } else {
-         // Clear any previous errors
-         setErrors((prevErrors) => ({
-           ...prevErrors,
-           startDate: null,
-         }));
-         setStartDate(date); // Set valid start date
-       }
-     } else {
-       setStartDate(null); // Reset if invalid
-     }
-   };
+    // Get today's date at midnight
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Set to midnight
+  
+    // Optionally log the modified currentDate
+    console.log("TODAY IS: ", currentDate);
+  
+    if (isValidDate(date)) {
+      // Set the selected date to midnight as well
+      const selectedDate = new Date(date);
+      selectedDate.setHours(0, 0, 0, 0); // Set to midnight
+  
+      if (selectedDate < currentDate) {
+        // Start date is in the past
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          startDate: "Start date cannot be in the past",
+        }));
+      } else if (endDate && selectedDate > new Date(endDate)) {
+        // Start date is after end date
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          startDate: "Start date cannot be after the end date",
+        }));
+      } else {
+        // Clear any previous errors
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          startDate: null,
+        }));
+        setStartDate(selectedDate); // Set valid start date
+      }
+    } else {
+      setStartDate(null); // Reset if invalid
+    }
+  };
+  
 
    // Handle End Date Change
   const handleEndDateChange = (date) => {
     const currentDate = new Date(); // Today's date
+
+    
 
     if (isValidDate(date)) {
       if (date < currentDate) {

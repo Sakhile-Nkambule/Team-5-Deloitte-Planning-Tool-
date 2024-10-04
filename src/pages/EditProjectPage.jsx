@@ -34,12 +34,15 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   );
   const [ContactPhone, setContactPhone] = useState(client.ContactPhone);
   const [ContactEmail, setContactEmail] = useState(client.ContactEmail);
-  const [exhaustedBudget, setExhaustedBudget] = useState(0);
+  const [exhaustedBudget, setExhaustedBudget] = useState(
+    financials.exhaustedBudget
+  );
   const [profitMargin, setProfitMargin] = useState(0);
-  const [netRevenue, setNetRevenue] = useState(0);
-  const [recoveryRate, setRecoveryRate] = useState(0);
+  const [netRevenue, setNetRevenue] = useState(financials.netRevenue);
+  const [recoveryRate, setRecoveryRate] = useState(financials.recoveryRate);
 
   const [projectResources, setProjectResources] = useState(resources || []);
+  const [projectFinancials, setProjectFinancials] = useState(financials || []);
   const [userMap, setUserMap] = useState({});
   const [users, setUsers] = useState([]);
   const [errors, setErrors] = useState({});
@@ -47,66 +50,93 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   // Fetching user data to get name of resource using UserID
 
   useEffect(() => {
-    // Fetch user data when the component mounts
+    // Fetch user data when the component mounts (run only once)
     const fetchUserData = async () => {
       try {
         setLoading(true);
         const response = await fetch("/api/users");
         if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
+
+        // Create userMap with additional HourlyRate field
         const userMapping = usersData.reduce((acc, user) => {
-          acc[user.UserID] = { UserName: user.UserName, Role: user.Role };
+          acc[user.UserID] = {
+            UserName: user.UserName,
+            Role: user.Role,
+            HourlyRate: user.HourlyRate,
+          };
           return acc;
         }, {});
+
         setUserMap(userMapping);
         setUsers(usersData);
       } catch (error) {
         toast.error("Failed to fetch user data");
         console.error(error);
-      }finally{
+      } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-    
-  }, []);
+  }, []); // Empty dependency array to ensure it only runs once
 
   useEffect(() => {
     // Calculate financial metrics whenever resources or budget changes
     const calculateFinancials = () => {
-      let totalHours = resources.reduce(
-        (acc, resource) => acc + parseInt(resource.PlannedHours || 0),
-        0
-      );
-      const calculatedExhaustedBudget = 300 * totalHours; // Adjust the rate if necessary
-      setExhaustedBudget(calculatedExhaustedBudget);
+      // Map resources to include user names and hourly rates before financial calculations
+      const mappedResources = projectResources.map((resource) => ({
+        ...resource,
+        name:
+          (userMap[resource.UserID] && userMap[resource.UserID].UserName) ||
+          "Unknown User",
+        hourlyRate:
+          (userMap[resource.UserID] && userMap[resource.UserID].HourlyRate) ||
+          "Unknown Rate",
+      }));
 
-      const formattedBudget = Math.round(Budget);
-      const calculatedNetRevenue = formattedBudget - calculatedExhaustedBudget;
-      setNetRevenue(calculatedNetRevenue);
+      // Only set projectResources if mappedResources has actually changed
+      const resourcesChanged =
+        JSON.stringify(projectResources) !== JSON.stringify(mappedResources);
+      if (resourcesChanged) {
+        setProjectResources(mappedResources);
+      }
 
-      const calculatedProfitMargin = formattedBudget
-        ? (calculatedNetRevenue / formattedBudget) * 100
-        : 0;
-      const formattedProfitMargin = Math.round(calculatedProfitMargin);
-      setProfitMargin(formattedProfitMargin);
+      let totalHours = 0;
+      let totalCost = 0;
 
-      const calculatedRecoveryRate = calculatedProfitMargin;
-      const formattedRecoveryRate = Math.round(calculatedRecoveryRate);
-      setRecoveryRate(formattedRecoveryRate);
+      mappedResources.forEach((resource) => {
+        const hours = parseInt(resource.PlannedHours, 10);
+        const rate = resource.hourlyRate || 300; // Use the hourly rate from the user or a default
+        totalHours += hours;
+        totalCost += hours * rate;
+      });
+
+      setExhaustedBudget(totalCost); // Set the total cost instead of using a fixed rate
+
+      setNetRevenue(financials.NetRevenue);
+
+      const calculatedProfitMargin =
+        ((financials.NetRevenue - totalCost) / financials.NetRevenue) * 100;
+      setProfitMargin(calculatedProfitMargin.toFixed(2));
+
+      const calculatedRecoveryRate = (financials.NetRevenue / Budget) * 100; // Assuming recovery rate = profit margin
+      setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
 
-    calculateFinancials();
-
-
-  }, [resources, Budget]);
+    // Check if userMap and projectResources are loaded before calculating financials
+    if (projectResources.length > 0 && Object.keys(userMap).length > 0) {
+      calculateFinancials();
+    }
+  }, [projectResources, userMap, Budget]); // Dependencies: projectResources, userMap, and Budget
 
   const handleResourceChange = (index, field, value) => {
     const newResources = [...projectResources];
     newResources[index][field] = value;
     setProjectResources(newResources);
   };
+
+  console.log("CHECK: ", projectResources);
 
   const removeResource = async (resourceId) => {
     try {
@@ -250,6 +280,13 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
         CompanyLocation,
       },
       resources: projectResources,
+      financials: {
+        Budget,
+        exhaustedBudget,
+        profitMargin,
+        netRevenue,
+        recoveryRate,
+      },
     };
     updateProjectSubmit(updatedProject);
 
@@ -258,35 +295,27 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   };
   console.log(project.startDate);
 
-  // Map resources to include user names
-  const mappedResources = projectResources.map((resource) => ({
-    ...resource,
-    name:
-      (userMap[resource.UserID] && userMap[resource.UserID].UserName) ||
-      "Unknown User",
-  }));
-
-  // Filter users to exclude those already assigned
-  const unassignedUsers = users.filter(
-    (user) =>
-      !projectResources.some((resource) => resource.UserID === user.UserID)
-  );
-  const handleSelectChange = (e) => {
-    const selectedUserID = e.target.value;
-    if (selectedUserID) {
-      const selectedUser = userMap[selectedUserID];
-      setProjectResources([
-        ...projectResources,
-        {
-          UserID: selectedUserID,
-          Role: selectedUser.Role || "", // Use role from user data
-          name: selectedUser.UserName || "Unknown User", // Use name from user data
-          PlannedHours: "0", // Set initial planned hours to 0
-          tasks: [""],
-        },
-      ]);
-    }
-  };
+  // // Filter users to exclude those already assigned
+  // const unassignedUsers = users.filter(
+  //   (user) =>
+  //     !projectResources.some((resource) => resource.UserID === user.UserID)
+  // );
+  // const handleSelectChange = (e) => {
+  //   const selectedUserID = e.target.value;
+  //   if (selectedUserID) {
+  //     const selectedUser = userMap[selectedUserID];
+  //     setProjectResources([
+  //       ...projectResources,
+  //       {
+  //         UserID: selectedUserID,
+  //         Role: selectedUser.Role || "", // Use role from user data
+  //         name: selectedUser.UserName || "Unknown User", // Use name from user data
+  //         PlannedHours: "0", // Set initial planned hours to 0
+  //         tasks: [""],
+  //       },
+  //     ]);
+  //   }
+  // };
 
   //BACK BUTTON
 
@@ -311,7 +340,6 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
             <h2 className="text-black text-3xl text-center font-semibold mb-6">
               Edit Project
             </h2>
-            
 
             {/* Budget summary in the top right corner */}
 
@@ -344,310 +372,311 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
             </div>
 
             <form onSubmit={submitForm}>
-            {loading ? (
-          <Spinner />
-        ) : (
-              <div className="grid grid-cols-2 gap-2 col-span-1 py-4 ">
-                {/* Project details section */}
-                <div className="pr-6 border-r-1">
-                  <div className="mb-4">
-                    <label
-                      htmlFor="type"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Project
-                    </label>
-                    <input
-                      type="text"
-                      id="type"
-                      name="type"
-                      className="border rounded w-full py-2 px-3"
-                      readOnly
-                      value={ProjectCode}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-bold mb-2">
-                      Project Name
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      className="border rounded w-full py-2 px-3 mb-2"
-                      placeholder="eg. Planning Tool"
-                      required
-                      value={Title}
-                      onChange={(e) => setTitle(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="description"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Description
-                    </label>
-                    <textarea
-                      id="Description"
-                      name="Description"
-                      className="border rounded w-full py-2 px-3"
-                      rows="4"
-                      placeholder="Add any Project expectations, requirements, etc"
-                      value={Description}
-                      onChange={(e) => setDescription(e.target.value)}
-                    ></textarea>
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="budget"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Budget
-                    </label>
-                    <textarea
-                      id="budget"
-                      name="budget"
-                      className="border rounded w-full py-2 px-3"
-                      required
-                      value={Budget}
-                      onChange={(e) => handleBudgetChange(e)}
-                    ></textarea>
-                    {errors.budget && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.budget}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Start & End Date */}
-                  <div className="flex space-x-4 mb-4">
-                    <div className="w-1/2">
+              {loading ? (
+                <Spinner />
+              ) : (
+                <div className="grid grid-cols-2 gap-2 col-span-1 py-4 ">
+                  {/* Project details section */}
+                  <div className="pr-6 border-r-1">
+                    <div className="mb-4">
                       <label
-                        htmlFor="startDate"
+                        htmlFor="type"
                         className="block text-gray-700 font-bold mb-2"
                       >
-                        Start Date
+                        Project
                       </label>
-                      <DatePicker
-                        selected={isValidDate(startDate) ? startDate : null}
-                        onChange={handleStartDateChange}
-                        dateFormat="yyyy/MM/dd"
+                      <input
+                        type="text"
+                        id="type"
+                        name="type"
                         className="border rounded w-full py-2 px-3"
-                        placeholderText="Select Project Start Date"
+                        readOnly
+                        value={ProjectCode}
                       />
-                      {errors.startDate && (
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-gray-700 font-bold mb-2">
+                        Project Name
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        className="border rounded w-full py-2 px-3 mb-2"
+                        placeholder="eg. Planning Tool"
+                        required
+                        value={Title}
+                        onChange={(e) => setTitle(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="description"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Description
+                      </label>
+                      <textarea
+                        id="Description"
+                        name="Description"
+                        className="border rounded w-full py-2 px-3"
+                        rows="4"
+                        placeholder="Add any Project expectations, requirements, etc"
+                        value={Description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      ></textarea>
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="budget"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Budget
+                      </label>
+                      <textarea
+                        id="budget"
+                        name="budget"
+                        className="border rounded w-full py-2 px-3"
+                        required
+                        value={Budget}
+                        onChange={(e) => handleBudgetChange(e)}
+                      ></textarea>
+                      {errors.budget && (
                         <p className="text-red-500 text-xs mt-1">
-                          {errors.startDate}
+                          {errors.budget}
                         </p>
                       )}
                     </div>
 
-                    <div className="w-1/2">
+                    {/* Start & End Date */}
+                    <div className="flex space-x-4 mb-4">
+                      <div className="w-1/2">
+                        <label
+                          htmlFor="startDate"
+                          className="block text-gray-700 font-bold mb-2"
+                        >
+                          Start Date
+                        </label>
+                        <DatePicker
+                          selected={isValidDate(startDate) ? startDate : null}
+                          onChange={handleStartDateChange}
+                          dateFormat="yyyy/MM/dd"
+                          className="border rounded w-full py-2 px-3"
+                          placeholderText="Select Project Start Date"
+                        />
+                        {errors.startDate && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.startDate}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="w-1/2">
+                        <label
+                          htmlFor="endDate"
+                          className="block text-gray-700 font-bold mb-2"
+                        >
+                          End Date
+                        </label>
+                        <DatePicker
+                          selected={isValidDate(endDate) ? endDate : null}
+                          onChange={handleEndDateChange}
+                          dateFormat="yyyy/MM/dd"
+                          className="border rounded w-full py-2 px-3"
+                          placeholderText="Select Project End Date"
+                        />
+                        {errors.endDate && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.endDate}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
                       <label
-                        htmlFor="endDate"
+                        htmlFor="status"
                         className="block text-gray-700 font-bold mb-2"
                       >
-                        End Date
+                        Project Status
                       </label>
-                      <DatePicker
-                        selected={isValidDate(endDate) ? endDate : null}
-                        onChange={handleEndDateChange}
-                        dateFormat="yyyy/MM/dd"
+                      <select
+                        id="status"
+                        name="status"
                         className="border rounded w-full py-2 px-3"
-                        placeholderText="Select Project End Date"
+                        value={Status}
+                        onChange={(e) => setStatus(e.target.value)}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Complete">Complete</option>
+                      </select>
+                    </div>
+
+                    <h3 className="text-lime-500 text-2xl mb-5">
+                      Company Info
+                    </h3>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="company"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Company Name
+                      </label>
+                      <input
+                        type="text"
+                        id="company"
+                        name="company"
+                        className="border rounded w-full py-2 px-3"
+                        placeholder="Company Name"
+                        value={CompanyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
                       />
-                      {errors.endDate && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.endDate}
-                        </p>
-                      )}
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="company_description"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Company Description
+                      </label>
+                      <textarea
+                        id="company_description"
+                        name="company_description"
+                        className="border rounded w-full py-2 px-3"
+                        rows="4"
+                        placeholder="What does the company do?"
+                        value={CompanyDescription}
+                        onChange={(e) => setCompanyDescription(e.target.value)}
+                      ></textarea>
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700 font-bold mb-2">
+                        Location
+                      </label>
+                      <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        className="border rounded w-full py-2 px-3 mb-2"
+                        placeholder="Company Location"
+                        required
+                        value={CompanyLocation}
+                        onChange={(e) => setCompanyLocation(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="contact_email"
+                        className="block text-gray-700 font-bold mb-2"
+                      >
+                        Contact Email
+                      </label>
+                      <input
+                        type="email"
+                        id="contact_email"
+                        name="contact_email"
+                        className="border rounded w-full py-2 px-3"
+                        placeholder="Email address for applicants"
+                        required
+                        value={ContactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        htmlFor="contact_phone"
+                        className="block font-bold mb-2"
+                      >
+                        Contact Phone
+                      </label>
+                      <input
+                        type="tel"
+                        id="contact_phone"
+                        name="contact_phone"
+                        className="border rounded w-full py-2 px-3"
+                        placeholder="Optional phone for applicants"
+                        value={ContactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                      />
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    <label
-                      htmlFor="status"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Project Status
-                    </label>
-                    <select
-                      id="status"
-                      name="status"
-                      className="border rounded w-full py-2 px-3"
-                      value={Status}
-                      onChange={(e) => setStatus(e.target.value)}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Complete">Complete</option>
-                    </select>
-                  </div>
-
-                  <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="company"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      className="border rounded w-full py-2 px-3"
-                      placeholder="Company Name"
-                      value={CompanyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="company_description"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Company Description
-                    </label>
-                    <textarea
-                      id="company_description"
-                      name="company_description"
-                      className="border rounded w-full py-2 px-3"
-                      rows="4"
-                      placeholder="What does the company do?"
-                      value={CompanyDescription}
-                      onChange={(e) => setCompanyDescription(e.target.value)}
-                    ></textarea>
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-gray-700 font-bold mb-2">
-                      Location
-                    </label>
-                    <input
-                      type="text"
-                      id="location"
-                      name="location"
-                      className="border rounded w-full py-2 px-3 mb-2"
-                      placeholder="Company Location"
-                      required
-                      value={CompanyLocation}
-                      onChange={(e) => setCompanyLocation(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="contact_email"
-                      className="block text-gray-700 font-bold mb-2"
-                    >
-                      Contact Email
-                    </label>
-                    <input
-                      type="email"
-                      id="contact_email"
-                      name="contact_email"
-                      className="border rounded w-full py-2 px-3"
-                      placeholder="Email address for applicants"
-                      required
-                      value={ContactEmail}
-                      onChange={(e) => setContactEmail(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label
-                      htmlFor="contact_phone"
-                      className="block font-bold mb-2"
-                    >
-                      Contact Phone
-                    </label>
-                    <input
-                      type="tel"
-                      id="contact_phone"
-                      name="contact_phone"
-                      className="border rounded w-full py-2 px-3"
-                      placeholder="Optional phone for applicants"
-                      value={ContactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Project Resources Section */}
-                <div className="border-l-10 pl-2">
-                  <h3 className="text-lime-500 text-2xl mb-5">
-                    Allocated Resources
-                  </h3>
-                  {mappedResources.map((resource, resourceIndex) => (
-                    <div key={resourceIndex} className="mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <h4 className="text-lime-500 font-bold">
-                          Resource #{resourceIndex + 1}
-                        </h4>
-                        <button
-                          type="button"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => removeResource(resource.ResourceID)}
-                        >
-                          Remove Resource
-                        </button>
+                  {/* Project Resources Section */}
+                  <div className="border-l-10 pl-2">
+                    <h3 className="text-lime-500 text-2xl mb-5">
+                      Allocated Resources
+                    </h3>
+                    {projectResources.map((resource, resourceIndex) => (
+                      <div key={resourceIndex} className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="text-lime-500 font-bold">
+                            Resource #{resourceIndex + 1}
+                          </h4>
+                          <button
+                            type="button"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => removeResource(resource.ResourceID)}
+                          >
+                            Remove Resource
+                          </button>
+                        </div>
+                        <div className="flex mb-2 items-center">
+                          <input
+                            type="text"
+                            name="Role"
+                            className="border rounded py-2 px-3 w-1/4 mr-2"
+                            value={resource.Role}
+                            readOnly
+                          />
+                          <input
+                            type="text"
+                            name="name"
+                            className="border rounded py-2 px-3 w-1/4 mr-2"
+                            value={resource.name}
+                            readOnly
+                          />
+                          <input
+                            type="number"
+                            name="Planned Hours"
+                            className="border rounded py-2 px-3 w-1/4 mr-2"
+                            value={resource.PlannedHours}
+                            onChange={(e) =>
+                              handleResourceChange(
+                                resourceIndex,
+                                "PlannedHours",
+                                e.target.value
+                              )
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="bg-blue-600 text-white rounded px-2 py-1"
+                            onClick={() => addTask(resourceIndex)}
+                          >
+                            Manage Tasks
+                          </button>
+                        </div>
+                        {/* {DELETED} */}
                       </div>
-                      <div className="flex mb-2 items-center">
-                        <input
-                          type="text"
-                          name="Role"
-                          className="border rounded py-2 px-3 w-1/4 mr-2"
-                          value={resource.Role}
-                          readOnly
-                        />
-                        <input
-                          type="text"
-                          name="name"
-                          className="border rounded py-2 px-3 w-1/4 mr-2"
-                          value={resource.name}
-                          readOnly
-                        />
-                        <input
-                          type="number"
-                          name="Planned Hours"
-                          className="border rounded py-2 px-3 w-1/4 mr-2"
-                          value={resource.PlannedHours}
-                          onChange={(e) =>
-                            handleResourceChange(
-                              resourceIndex,
-                              "PlannedHours",
-                              e.target.value
-                            )
-                          }
-                        />
-                        <button
-                          type="button"
-                          className="bg-blue-600 text-white rounded px-2 py-1"
-                          onClick={() => addTask(resourceIndex)}
-                        >
-                          Manage Tasks
-                        </button>
-                      </div>
-                      {/* {DELETED} */}
-                    </div>
-                  ))}                 
+                    ))}
 
-                  <div className="mb-4">
-               
-                    <Link
-                      to={`/dashboard/${project.ProjectID}`}
-                      className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
-                    >
-                      Add More Resources
-                    </Link>
+                    <div className="mb-4">
+                      <Link
+                        to={`/dashboard/${project.ProjectID}`}
+                        className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                      >
+                        Add More Resources
+                      </Link>
 
-                    {/* <label htmlFor="UserID" className="block font-bold mb-2">
+                      {/* <label htmlFor="UserID" className="block font-bold mb-2">
                       Add Resource
                     </label>
                     <select
@@ -663,16 +692,16 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                         </option>
                       ))}
                     </select> */}
+                    </div>
                   </div>
+                  <button
+                    type="submit"
+                    className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Update Project
+                  </button>
                 </div>
-                <button
-                  type="submit"
-                  className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Update Project
-                </button>
-              </div>
-                 )}
+              )}
             </form>
           </div>
         </div>

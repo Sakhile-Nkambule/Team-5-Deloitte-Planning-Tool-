@@ -194,16 +194,19 @@ const ManageTasksPage = () => {
 
       // Fetch the user's skillsets to update the workedHours
       const skillsetsResponse = await fetch(
-        `/api/skillsets/${resource.UserID}`
+        `/api/skillset/${resource.UserID}`
       );
       const skillsets = await skillsetsResponse.json();
-      console.log(skillsets);
+      console.log("User SKILLS: ",skillsets);
+      console.log("System Required: ", taskToComplete.SystemRequired);
 
       // Find the specific skillset related to this task (by SkillsetRequired)
-      const skillsetToUpdate = skillsets.find(
-        (s) => s.skillset === taskToComplete.SystemRequired
-      );
+     // Find the specific skillset related to this task (by SkillsetRequired)
+     const skillsetToUpdate = skillsets.find(
+      (s) => s.skillset === taskToComplete.SystemRequired
+    );
 
+      console.log("Skill to update: ", skillsetToUpdate );
       if (skillsetToUpdate) {
         const newSkillsetWorkedHours =
           parseFloat(skillsetToUpdate.workedHours) +
@@ -211,7 +214,7 @@ const ManageTasksPage = () => {
         console.log("Updated Worked Hours:", newSkillsetWorkedHours);
 
         // Update the workedHours on the skillset
-        await fetch(`/api/skillset/${skillsetToUpdate.SkillID}`, {
+        await fetch(`/api/skillsets/${skillsetToUpdate.SkillID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -224,22 +227,25 @@ const ManageTasksPage = () => {
         let newProficiency = skillsetToUpdate.proficiency;
         console.log(newProficiency);
 
-        if (newSkillsetWorkedHours >= 30 && newSkillsetWorkedHours < 40)
+        if (newSkillsetWorkedHours >= 80 && newSkillsetWorkedHours < 160)
+          newProficiency = 10;
+        else if (newSkillsetWorkedHours >= 160 && newSkillsetWorkedHours < 240)
+          newProficiency = 20;
+        else if (newSkillsetWorkedHours >= 240 && newSkillsetWorkedHours < 320)
           newProficiency = 30;
-        else if (newSkillsetWorkedHours >= 40 && newSkillsetWorkedHours < 55)
+        else if (newSkillsetWorkedHours >= 320 && newSkillsetWorkedHours < 400)
           newProficiency = 40;
-        else if (newSkillsetWorkedHours >= 55 && newSkillsetWorkedHours < 70)
+        else if (newSkillsetWorkedHours >= 400 && newSkillsetWorkedHours < 480)
           newProficiency = 50;
-        else if (newSkillsetWorkedHours >= 70 && newSkillsetWorkedHours < 85)
+        else if (newSkillsetWorkedHours >= 480 && newSkillsetWorkedHours < 560)
           newProficiency = 60;
-        else if (newSkillsetWorkedHours >= 85 && newSkillsetWorkedHours < 90)
+        else if (newSkillsetWorkedHours >= 560 && newSkillsetWorkedHours < 640)
           newProficiency = 70;
-        else if (newSkillsetWorkedHours >= 90 && newSkillsetWorkedHours < 110)
+        else if (newSkillsetWorkedHours >= 640 && newSkillsetWorkedHours < 720)
           newProficiency = 80;
-        else if (newSkillsetWorkedHours >= 110 && newSkillsetWorkedHours < 500)
+        else if (newSkillsetWorkedHours >= 720 && newSkillsetWorkedHours < 800)
           newProficiency = 90;
-        else if (newSkillsetWorkedHours >= 500) newProficiency = 100;
-
+        else if (newSkillsetWorkedHours >= 800) newProficiency = 100;
         // If proficiency increased, show confirmation modal
         if (newProficiency > skillsetToUpdate.proficiency) {
           setIsProficiencyModalOpen(true);
