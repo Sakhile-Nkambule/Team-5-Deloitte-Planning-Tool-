@@ -95,4 +95,52 @@ router.put("/skillsets/:skillsetId", async (req, res) => {
   }
 });
 
+//Endpoint to update all skillsets
+
+router.put("/allskillsets/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const { skills } = req.body; // Expecting skills to be an object with skill names and worked hours values
+
+  try {
+    await pool.query("START TRANSACTION"); // Begin transaction
+
+    const skillEntries = Object.entries(skills);
+    
+    for (const [skill, workedHours] of skillEntries) {
+      // Calculate the new proficiency based on the worked hours
+      let newProficiency = 0;
+      
+      if (workedHours >= 80 && workedHours < 160) newProficiency = 10;
+      else if (workedHours >= 160 && workedHours < 240) newProficiency = 20;
+      else if (workedHours >= 240 && workedHours < 320) newProficiency = 30;
+      else if (workedHours >= 320 && workedHours < 400) newProficiency = 40;
+      else if (workedHours >= 400 && workedHours < 480) newProficiency = 50;
+      else if (workedHours >= 480 && workedHours < 560) newProficiency = 60;
+      else if (workedHours >= 560 && workedHours < 640) newProficiency = 70;
+      else if (workedHours >= 640 && workedHours < 720) newProficiency = 80;
+      else if (workedHours >= 720 && workedHours < 800) newProficiency = 90;
+      else if (workedHours >= 800) newProficiency = 100;
+
+      // Update existing skillset or insert new one if it doesn't exist, including worked hours and proficiency
+      await pool.query(
+        `
+        INSERT INTO Skillsets (UserID, Skillset, WorkedHours, Proficiency)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE workedHours = ?, Proficiency = ?
+        `,
+        [userId, skill, workedHours, newProficiency, workedHours, newProficiency]
+      );
+    }
+
+    await pool.query("COMMIT"); // Commit transaction
+
+    res.status(200).json({ message: "Skills updated successfully" });
+  } catch (err) {
+    await pool.query("ROLLBACK"); // Rollback transaction on error
+    console.error("Transaction error:", err);
+    res.status(500).json("Error executing query: " + err);
+  }
+});
+
+
   module.exports = router;

@@ -25,6 +25,9 @@ const Navbar = () => {
   const handleUserProfile = () => {
     navigate("/userProfile");
   };
+  const handleAllUsers = () => {
+    navigate("/all-Users");
+  };
 
   const linkClass = ({ isActive }) =>
     isActive
@@ -127,6 +130,17 @@ const Navbar = () => {
                       >
                         Profile
                       </button>
+                      
+                      {["Planning Team", "Director", "Senior Manager"].includes(
+                  userRole
+                ) && (
+                  <button
+                  onClick={handleAllUsers}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Users
+                </button>
+                )}
                     </div>
                   )}
                 </div>

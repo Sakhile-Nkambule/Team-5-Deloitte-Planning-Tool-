@@ -53,7 +53,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     // Fetch user data when the component mounts (run only once)
     const fetchUserData = async () => {
       try {
-        setLoading(true);
+      
         const response = await fetch("http://localhost:8081/users");
         if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
@@ -295,28 +295,6 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   };
   console.log(project.startDate);
 
-  // // Filter users to exclude those already assigned
-  // const unassignedUsers = users.filter(
-  //   (user) =>
-  //     !projectResources.some((resource) => resource.UserID === user.UserID)
-  // );
-  // const handleSelectChange = (e) => {
-  //   const selectedUserID = e.target.value;
-  //   if (selectedUserID) {
-  //     const selectedUser = userMap[selectedUserID];
-  //     setProjectResources([
-  //       ...projectResources,
-  //       {
-  //         UserID: selectedUserID,
-  //         Role: selectedUser.Role || "", // Use role from user data
-  //         name: selectedUser.UserName || "Unknown User", // Use name from user data
-  //         PlannedHours: "0", // Set initial planned hours to 0
-  //         tasks: [""],
-  //       },
-  //     ]);
-  //   }
-  // };
-
   //BACK BUTTON
 
   const handleGoBack = () => {
@@ -373,7 +351,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
 
             <form onSubmit={submitForm}>
               {loading ? (
-                <Spinner />
+                <Spinner loading={ loading} />
               ) : (
                 <div className="grid grid-cols-2 gap-2 col-span-1 py-4 ">
                   {/* Project details section */}
