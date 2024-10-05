@@ -19,7 +19,7 @@ function NotificationsPage() {
             }));
 
             try {
-                const response = await fetch(`/api/notifications/markAsRead`, {
+                const response = await fetch(`http://localhost:8081/notifications/markAsRead`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ function NotificationsPage() {
     useEffect(() => {
         if (user) {
             console.log(`Fetching notifications for user: ${user.id}`);
-            fetch(`/api/notifications/${user.id}`)
+            fetch(`http://localhost:8081/notifications/${user.id}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -76,7 +76,7 @@ function NotificationsPage() {
 
     const deleteNotification = async (NotificationID) => {
         try {
-            const response = await fetch(`/api/notifications/${NotificationID}`, {
+            const response = await fetch(`http://localhost:8081notifications/${NotificationID}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {

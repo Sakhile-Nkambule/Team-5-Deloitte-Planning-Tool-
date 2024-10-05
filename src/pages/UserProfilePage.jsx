@@ -63,7 +63,7 @@ const UserProfilePage = () => {
       setHourlyRate(user.rate);
 
       // Fetch user skills from the API
-      fetch(`/api/SkillSets/${user.id}`)
+      fetch(`http://localhost:8081/SkillSets/${user.id}`)
       .then(response => {
         if (response.status === 204) {
           // No content, so return an empty object
@@ -92,7 +92,7 @@ const UserProfilePage = () => {
     toast.success("Profile updated Successfully");
     
     // Send updated skills to the API
-    fetch(`/api/Skillsets/${user.id}`, {
+    fetch(`http://localhost:8081/Skillsets/${user.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const UserProfilePage = () => {
   const renderSkillBar = (skill) => {
     const proficiency = skills[skill] || 0;
 
-    return (
+    return ( 
       <div key={skill} className="mb-4">
         <div className="flex items-center">
           <span className="block text-gray-700 font-bold w-32">{skill}</span>

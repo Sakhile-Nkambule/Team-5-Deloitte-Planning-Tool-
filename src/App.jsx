@@ -48,7 +48,7 @@ const App = () => {
 //Delete a project
 const deleteProject = async (id) => {
   try {
-    const response = await fetch(`/api/projects/${id}`, {
+    const response = await fetch(`http://localhost:8081/projects/${id}`, {
       method: "DELETE",
     });
     if (response.ok) {
@@ -64,7 +64,7 @@ const deleteProject = async (id) => {
 
   //Update a project
   const updateProject = async (updatedProject) => {
-    const res = await fetch(`/api/projects/${updatedProject.id}`, {
+    const res = await fetch(`http://localhost:8081/projects/${updatedProject.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
