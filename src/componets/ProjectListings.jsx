@@ -9,7 +9,9 @@ const ProjectListings = ({ isHome = false }) => {
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const apiUrl = isHome ? '/api/projects?_limit=3' : '/api/projects';
+      const apiUrl = isHome 
+  ? 'http://localhost:8081/projects?_limit=3' 
+  : 'http://localhost:8081/projects';
       try {
         const res = await axios.get(apiUrl);
         setProjects(res.data);
