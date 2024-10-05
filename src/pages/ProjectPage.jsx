@@ -19,7 +19,7 @@ const ProjectPage = ({ deleteProject }) => {
   useEffect(() => {
     if (user && projectId) {
       // Check if the user has an allowed role
-      const allowedRoles = ['consultant', 'Junior Consultant', 'Senior Consultant'];
+      const allowedRoles = ['consultant', 'Jnr Consultant', 'Snr Consultant'];
       if (allowedRoles.includes(userRole)) { 
         fetch(`http://localhost:8081/resource-id/${user.id}/${projectId}`)
           .then(async (response) => {
