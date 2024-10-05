@@ -10,7 +10,7 @@ const UserProjectListings = ({ userId, isUserHome = false }) => {
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const apiUrl = isUserHome ? `/http://localhost:8081/user-projects/${userId}?_limit=3` : `/http://localhost:8081/user-projects/${userId}`;
+      const apiUrl = isUserHome ? `http://localhost:8081/user-projects/${userId}?_limit=3` : `http://localhost:8081/user-projects/${userId}`;
       try {
         const res = await axios.get(apiUrl);
         console.log('API response:', res.data); // Debugging line

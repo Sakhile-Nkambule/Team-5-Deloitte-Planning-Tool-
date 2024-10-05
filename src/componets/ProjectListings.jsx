@@ -10,8 +10,8 @@ const ProjectListings = ({ isHome = false }) => {
   useEffect(() => {
     const fetchProjects = async () => {
       const apiUrl = isHome 
-  ? 'http://localhost:8081/projects?_limit=3' 
-  : 'http://localhost:8081/projects';
+      ? 'http://3.80.71.14:8081/projects?_limit=3' 
+      : 'http://3.80.71.14:8081/projects';
       try {
         const res = await axios.get(apiUrl);
         setProjects(res.data);
