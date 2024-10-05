@@ -52,7 +52,7 @@ const ProjectPage = ({ deleteProject }) => {
   
   // Fetch user data to create a map of UserID to UserName
   useEffect(() => {
-    setLoading(true);
+   
     const fetchUserData = async () => {
       try {
         const response = await fetch("http://localhost:8081/users");
@@ -105,7 +105,7 @@ const ProjectPage = ({ deleteProject }) => {
       <section className="bg-lime-100">
         <div className="container m-auto py-10 px-6">
           {loading ? (
-            <Spinner />
+            <Spinner loading = {loading} />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-70/30 w-full gap-6">
               <main>

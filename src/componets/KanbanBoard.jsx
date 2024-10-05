@@ -18,7 +18,7 @@ export default function Board() {
   useEffect(() => {
     if (resourceId) {
       console.log(`Fetching tasks for resourceId: ${resourceId}`);
-      fetch(`/api/tasks/${resourceId}`)
+      fetch(`http://localhost:8081/tasks/${resourceId}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");

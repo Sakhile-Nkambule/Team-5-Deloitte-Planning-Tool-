@@ -97,133 +97,163 @@ router.get("/tasks/user/:userId", async (req, res) => {
   }
 });
 
+//POST
 
-// Endpoint to update a project
-router.put("/projects/:id", async (req, res) => {
-  const projectId = req.params.id;
-  const {
-    ProjectCode,
-    Title,
-    Description,
-    Budget,
-    Status,
-    Client,
-    resources,
-    StartDate,
-    EndDate,
-    financials,
-  } = req.body;
+// POST: Endpoint to Add tasks
+router.post("/tasks", async (req, res) => {
+  const newTasks = req.body;
+
+  // Modify the DueDate to ensure the correct local date is stored
+  const filteredTasks = newTasks.map((task) => {
+    const localDueDate = new Date(task.DueDate); // Converts to local timezone date
+    return {
+      ...task,
+      DueDate: format(localDueDate, "yyyy-MM-dd"), // Format date back to 'YYYY-MM-DD'
+    };
+  });
+
+  const tasksSql = `
+      INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate, SystemRequired, StartDate, UserID, ProjectID, Priority)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
   try {
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     try {
-      // Convert StartDate and EndDate to local time and format
-      const localStartDate = new Date(StartDate); // Converts to local timezone date
-      const localEndDate = new Date(EndDate); // Converts to local timezone date
-      
-      // Format dates back to 'YYYY-MM-DD'
-      const formattedStartDate = format(localStartDate, "yyyy-MM-dd");
-      const formattedEndDate = format(localEndDate, "yyyy-MM-dd");
+      for (const task of filteredTasks) {
+        await connection.execute(tasksSql, [
+          task.ResourceID,
+          task.Description,
+          task.Status,
+          task.Hours,
+          task.DueDate,
+          task.SystemRequired,
+          task.StartDate,
+          task.UserID,
+          task.ProjectID,
+          task.Priority,
+        ]);
+      }
 
-      // Update project data
-      await connection.query(
-        `
-          UPDATE projects 
-          SET ProjectCode = ?, Title = ?, Description = ?, Budget = ?, Status = ?, StartDate = ?, EndDate = ?
-          WHERE ProjectID = ?
-        `,
-        [
-          ProjectCode,
-          Title,
-          Description,
-          Budget,
-          Status,
-          formattedStartDate, // Use the formatted local start date
-          formattedEndDate, // Use the formatted local end date
-          projectId,
-        ]
+      await connection.commit();
+      res.json({ message: "Tasks added successfully" });
+    } catch (err) {
+      await connection.rollback();
+      console.error("Error inserting tasks:", err);
+      res.status(500).json({ error: "Error inserting tasks: " + err });
+    } finally {
+      connection.release();
+    }
+  } catch (err) {
+    console.error("Error connecting to the database:", err);
+    res.status(500).json({ error: "Error connecting to the database: " + err });
+  }
+});
+
+//UPDATE
+
+// PUT: Endpoint to Update tasks
+router.put("/tasks/:resourceId", async (req, res) => {
+  const resourceId = req.params.resourceId;
+  const tasks = req.body; // Assuming body is an array of tasks
+
+  try {
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // Validate if the ResourceID exists in the resources table
+      const [validateResult] = await connection.execute(
+        `SELECT * FROM resources WHERE ResourceID = ?`,
+        [resourceId]
       );
 
-      // Update client data
-      await connection.query(
-        `
-          UPDATE clients 
-          SET CompanyName = ?, CompanyDescription = ?, ContactEmail = ?, ContactPhone = ?, CompanyLocation = ?
-          WHERE ClientID = (SELECT ClientID FROM projects WHERE ProjectID = ?)
-        `,
-        [
-          Client.CompanyName,
-          Client.CompanyDescription,
-          Client.ContactEmail,
-          Client.ContactPhone,
-          Client.CompanyLocation,
-          projectId,
-        ]
-      );
+      if (validateResult.length === 0) {
+        await connection.rollback();
+        return res.status(400).json({ error: "ResourceID does not exist" });
+      }
 
-      // Update financials
-      await connection.query(
-        `
-          UPDATE financials 
-          SET 
-            ProjectID = ?, 
-            GrossRevenue = ?, 
-            NetRevenue = ?, 
-            RecoveryRate = ?, 
-            ProfitMargin = ? 
-          WHERE 
-            FinancialID = ? AND ProjectID = ?
-        `,
-        [
-          projectId, // 1. ProjectID
-          financials.Budget, // 2. GrossRevenue (you may want to use exhaustedBudget instead)
-          financials.netRevenue, // 3. NetRevenue
-          financials.recoveryRate, // 4. RecoveryRate
-          financials.profitMargin, // 5. ProfitMargin
-          financials.FinancialID, // 6. FinancialID
-          projectId, // 7. ProjectID for the WHERE clause
-        ]
-      );
+      // Adjust tasks DueDate to local timezone before updating/inserting
+      const adjustedTasks = tasks.map((task) => {
+        const localDueDate = new Date(task.DueDate); // Convert UTC to local timezone
+        return {
+          ...task,
+          DueDate: format(localDueDate, "yyyy-MM-dd"), // Format to 'YYYY-MM-DD'
+        };
+      });
 
-      // Update existing resources and insert new resources if they don't exist
-      for (const resource of resources) {
-        if (resource.ResourceID) {
-          // Update existing resource
-          await connection.query(
+      // Loop through each task and update or insert
+      for (const task of adjustedTasks) {
+        if (task.TaskID) {
+          // Check if the task exists
+          const [existingTask] = await connection.execute(
+            `SELECT * FROM tasks WHERE TaskID = ? AND ResourceID = ?`,
+            [task.TaskID, resourceId]
+          );
+
+          if (existingTask.length > 0) {
+            // Update existing task
+            await connection.execute(
+              `
+              UPDATE tasks 
+              SET Description = ?, Status = ?, Hours = ?, DueDate = ?, SystemRequired = ?, StartDate = ?, UserID = ?, ProjectID = ?, Priority = ?
+              WHERE TaskID = ? AND ResourceID = ?
+              `,
+              [
+                task.Description,
+                task.Status,
+                task.Hours,
+                task.DueDate, // Local date is now correctly formatted
+                task.SystemRequired,
+                task.StartDate,
+                task.UserID,
+                task.ProjectID,
+                task.Priority,
+                task.TaskID,
+                resourceId,
+              ]
+            );
+
+            // If the task status was changed to "Completed", handle hours update here if needed
+          } else {
+            // If TaskID is provided but doesn't match an existing task, return an error
+            return res.status(400).json({
+              error: `Task with TaskID ${task.TaskID} does not exist for this ResourceID`,
+            });
+          }
+        } else {
+          // Insert new task
+          await connection.execute(
             `
-              UPDATE resources 
-              SET Role = ?, PlannedHours = ?
-              WHERE ResourceID = ? AND ProjectID = ?
+            INSERT INTO tasks (ResourceID, Description, Status, Hours, DueDate, SystemRequirement, StartDate, UserID, ProjectID, Priority)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
-              resource.Role,
-              resource.PlannedHours,
-              resource.ResourceID,
-              projectId,
+              resourceId,
+              task.Description,
+              task.Status,
+              task.Hours,
+              task.DueDate, // Local date is now correctly formatted
+              task.SystemRequirement,
+              task.StartDate,
+              task.UserID,
+              task.ProjectID,
+              task.Priority,
             ]
           );
-        } else {
-          // Insert new resource
-          await connection.query(
-            `
-              INSERT INTO resources (ProjectID, UserID, Role, PlannedHours) 
-              VALUES (?, ?, ?, ?)
-            `,
-            [projectId, resource.UserID, resource.Role, resource.PlannedHours]
-          );
+
+          // Handle hours for "Completed" tasks if needed
         }
       }
 
       await connection.commit();
-      res.json({
-        message: "Project, client, and resources updated successfully",
-      });
+      res.json({ message: "Tasks updated successfully" });
     } catch (err) {
       await connection.rollback();
-      console.error("Error updating project:", err);
-      res.status(500).json({ error: "Error updating project: " + err });
+      console.error("Error updating tasks:", err);
+      res.status(500).json({ error: "Error updating tasks: " + err });
     } finally {
       connection.release();
     }

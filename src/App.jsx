@@ -22,7 +22,8 @@ import TaskBoard from "./pages/TaskBoard";
 import NotificationsPage from "./pages/NotificationsPage";
 import CreateUserAccount from "./pages/CreateUserAccount";
 import UserProfile from "./pages/UserProfilePage";
-//import VerifyEmail from "./pages/VerificationPage";
+import ProfilePage from "./pages/ProfilePage";
+import AllUsersPage from "./pages/AllUsersPage";
 const App = () => {
 
 
@@ -94,6 +95,8 @@ const deleteProject = async (id) => {
           <Route path="/user-projects/:id" element={<Projectspage />} />
           <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
           <Route path="/userProfile" element={<UserProfile/>}/>
+          <Route path="/Profile/:id" element={<ProfilePage />} />
+          <Route path="/all-Users" element={<AllUsersPage />} />
           <Route path="/notifications" element={<NotificationsPage/>}/>
           <Route
             path="/add-project"

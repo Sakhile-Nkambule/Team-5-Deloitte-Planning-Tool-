@@ -176,6 +176,14 @@ router.put("/projects/:id", async (req, res) => {
     await connection.beginTransaction();
 
     try {
+      // Convert StartDate and EndDate to local time and format
+      const localStartDate = new Date(StartDate); // Converts to local timezone date
+      const localEndDate = new Date(EndDate); // Converts to local timezone date
+      
+      // Format dates back to 'YYYY-MM-DD'
+      const formattedStartDate = format(localStartDate, "yyyy-MM-dd");
+      const formattedEndDate = format(localEndDate, "yyyy-MM-dd");
+
       // Update project data
       await connection.query(
         `
@@ -189,8 +197,8 @@ router.put("/projects/:id", async (req, res) => {
           Description,
           Budget,
           Status,
-          StartDate,
-          EndDate,
+          formattedStartDate, // Use the formatted local start date
+          formattedEndDate, // Use the formatted local end date
           projectId,
         ]
       );
@@ -212,28 +220,26 @@ router.put("/projects/:id", async (req, res) => {
         ]
       );
 
-      //Update Financials
-
-      // Update client data
+      // Update financials
       await connection.query(
         `
-  UPDATE financials 
-  SET 
-    ProjectID = ?, 
-    GrossRevenue = ?, 
-    NetRevenue = ?, 
-    RecoveryRate = ?, 
-    ProfitMargin = ? 
-  WHERE 
-    FinancialID = ? AND ProjectID = ?
-  `,
+          UPDATE financials 
+          SET 
+            ProjectID = ?, 
+            GrossRevenue = ?, 
+            NetRevenue = ?, 
+            RecoveryRate = ?, 
+            ProfitMargin = ? 
+          WHERE 
+            FinancialID = ? AND ProjectID = ?
+        `,
         [
           projectId, // 1. ProjectID
           financials.Budget, // 2. GrossRevenue (you may want to use exhaustedBudget instead)
           financials.netRevenue, // 3. NetRevenue
           financials.recoveryRate, // 4. RecoveryRate
           financials.profitMargin, // 5. ProfitMargin
-          financials.FinancialID, // 6. FinancialID (assuming it's in the financials object)
+          financials.FinancialID, // 6. FinancialID
           projectId, // 7. ProjectID for the WHERE clause
         ]
       );
@@ -283,6 +289,7 @@ router.put("/projects/:id", async (req, res) => {
     res.status(500).json({ error: "Error connecting to the database: " + err });
   }
 });
+
 
 //DELETE
 

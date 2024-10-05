@@ -26,6 +26,8 @@ const ManageTasksPage = () => {
   const [isProficiencyModalOpen, setIsProficiencyModalOpen] = useState(false);
   const [skillsetToUpdate, setSkillsetToUpdate] = useState(null);
   const [newProficiency, setNewProficiency] = useState(null);
+  const [warnings, setWarnings] = useState({});
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,46 +86,44 @@ const ManageTasksPage = () => {
     fetchData();
   }, [resourceId]);
 
-  useEffect(() => {
-    const forloopOccupiedDates = [];
-
-    for (let i = 0; i < datetasks.length; i++) {
-      const dueDate = new Date(datetasks[i].DueDate); // Use only DueDate
-
-      if (!isNaN(dueDate)) {
-        forloopOccupiedDates.push(dueDate); // Add only the DueDate to the array
-      }
-    }
-
-    setOccupiedDates(forloopOccupiedDates); // Update occupiedDates after processing all datetasks
-  }, [datetasks]);
-
+  
   const handleTaskChange = (taskId, field, value) => {
     setTasks((prevTasks) => {
       const updatedTasks = prevTasks.map((task) => {
         if (task.TaskID === taskId) {
           let updatedTask = { ...task, [field]: value };
-
+  
           // Validate Hours
           if (field === "Hours") {
             const hoursValue = Number(value);
-            if (isNaN(hoursValue) || hoursValue < 0 || hoursValue > 8) {
+            if (isNaN(hoursValue) || hoursValue < 0) {
+              // If input is not a number or is negative
               setErrors((prevErrors) => ({
                 ...prevErrors,
                 [taskId]: {
                   ...prevErrors[taskId],
-                  Hours: "Hours must be a number between 0 and 8.",
+                  Hours: "Hours must be a non-negative number.",
+                },
+              }));
+            } else if (hoursValue > 8) {
+              // If hours exceed 8
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                [taskId]: {
+                  ...prevErrors[taskId],
+                  Hours: "Warning: Hours exceed the limit of 8.",
                 },
               }));
             } else {
+              // Valid hours
               setErrors((prevErrors) => ({
                 ...prevErrors,
                 [taskId]: { ...prevErrors[taskId], Hours: undefined }, // Clear error
               }));
-              updatedTask.Hours = hoursValue; // Only update Hours if valid
+              updatedTask.Hours = hoursValue; // Update Hours if valid
             }
           }
-
+  
           // Validate Due Date
           if (field === "DueDate") {
             const dueDate = new Date(value);
@@ -140,19 +140,21 @@ const ManageTasksPage = () => {
                 ...prevErrors,
                 [taskId]: { ...prevErrors[taskId], DueDate: undefined }, // Clear error
               }));
-              updatedTask.DueDate = value; // Only update DueDate if valid
+              updatedTask.DueDate = value; // Update DueDate if valid
             }
           }
-
+  
           return updatedTask;
         }
         return task;
       });
-
+  
       return updatedTasks;
     });
   };
+  
 
+  
   const handleCheckboxChange = (task) => {
     setTaskToComplete(task);
     setIsModalOpen(true); // Open the modal on checkbox click
@@ -327,7 +329,7 @@ const ManageTasksPage = () => {
       if (window.confirm("Are you sure you want to delete this Task?")) {
         if (taskId) {
           // If the task exists in the database (has a TaskID), make the DELETE request
-          await fetch(`/api/task/${taskId}`, {
+          await fetch(`http://localhost:8081/task/${taskId}`, {
             method: "DELETE",
           });
         }
@@ -509,136 +511,132 @@ const ManageTasksPage = () => {
                 ? "border-red-500"
                 : "border-red-500"; // Default color for "To-Do"
 
-              return (
-                <div
-                  key={task.TaskID}
-                  className={`mb-10 border-2 ${borderColor} rounded-xl shadow-lg p-5`}
-                >
-                  <label>
+                return (
+                  <div
+                    key={task.TaskID}
+                    className={`mb-10 border-2 ${borderColor} rounded-xl shadow-lg p-5`}
+                  >
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={task.completed || false}
+                        onChange={() => handleCheckboxChange(task)}
+                      />
+                      Completed
+                    </label>
+                    <label className="block mb-1 font-semibold">
+                      Task Description
+                    </label>
                     <input
-                      type="checkbox"
-                      checked={task.completed || false}
-                      onChange={() => handleCheckboxChange(task)}
+                      type="text"
+                      value={task.Description || ""}
+                      onChange={(e) =>
+                        handleTaskChange(task.TaskID, "Description", e.target.value)
+                      }
+                      placeholder="Task Description"
+                      className="border rounded w-full py-2 px-3 mb-2"
                     />
-                    Completed
-                  </label>
-                  <label className="block mb-1 font-semibold">
-                    Task Description
-                  </label>
-                  <input
-                    type="text"
-                    value={task.Description || ""}
-                    onChange={(e) =>
-                      handleTaskChange(
-                        task.TaskID,
-                        "Description",
-                        e.target.value
-                      )
-                    }
-                    placeholder="Task Description"
-                    className="border rounded w-full py-2 px-3 mb-2"
-                  />
-                  <label className="block mb-1 font-semibold">
-                    System to be worked on
-                  </label>
-                  <select
-                    value={task.SystemRequired || ""}
-                    onChange={(e) =>
-                      handleTaskChange(
-                        task.TaskID,
-                        "SystemRequired",
-                        e.target.value
-                      )
-                    }
-                    className="border rounded w-full py-2 px-3 mb-2"
-                  >
-                    <option value="SAP">SAP</option>
-                    <option value="JDE">JDE</option>
-                    <option value="Oracle">Oracle</option>
-                    <option value="Genric Application">
-                      Genric Application
-                    </option>
-                    <option value="Microsoft SQL">Microsoft SQL</option>
-                    <option value="Oracle DB">Oracle DB</option>
-                    <option value="Linux">Linux</option>
-                    <option value="Microsoft OS">Microsoft OS</option>
-                    <option value="Active Directory">Active Directory</option>
-                    <option value="Cyber memo">Cyber memo</option>
-                    <option value="CTRA">CTRA</option>
-                    <option value="DCNO">DCNO</option>
-                    <option value="SAP-AUTO">SAP-AUTO</option>
-                    <option value="AUTO">AUTO</option>
-                    <option value="REVIEW">REVIEW</option>
-                    <option value="Project Management">
-                      Project Management
-                    </option>
-                  </select>
-
-                  <label className="block mb-1 font-semibold">Status</label>
-                  <select
-                    value={task.Status || ""}
-                    onChange={(e) =>
-                      handleTaskChange(task.TaskID, "Status", e.target.value)
-                    }
-                    className="border rounded w-full py-2 px-3 mb-2"
-                  >
-                    <option value="To-Do">To-Do</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-
-                  <label className="block mb-1 font-semibold">Priority</label>
-                  <select
-                    value={task.Priority || " "}
-                    onChange={(e) =>
-                      handleTaskChange(task.TaskID, "Priority", e.target.value)
-                    }
-                    className="border rounded w-full py-2 px-3 mb-2"
-                  >
-                    <option value="High">High</option>
-                    <option value="Mid">Mid</option>
-                    <option value="Low">Low</option>
-                  </select>
-                  <label className="block mb-1 font-semibold">Hours</label>
-                  <input
-                    type="text"
-                    value={task.Hours || ""}
-                    onChange={(e) =>
-                      handleTaskChange(task.TaskID, "Hours", e.target.value)
-                    }
-                    placeholder="Task Hours"
-                    className="border rounded w-full py-2 px-3 mb-2"
-                  />
-                  {errors[task.TaskID]?.Hours && (
-                    <span className="text-red-500">
-                      {errors[task.TaskID].Hours}
-                    </span>
-                  )}
-
-                  <label className="block mb-1 font-semibold">Due Date</label>
-                  <DatePicker
-                    selected={task.DueDate ? new Date(task.DueDate) : null}
-                    onChange={(date) =>
-                      handleTaskChange(task.TaskID, "DueDate", date)
-                    }
-                    placeholderText="Select Due Date"
-                    className="border rounded w-full py-2 px-3 mb-2"
-                    dateFormat="yyyy-MM-dd"
-                  />
-                  {errors[task.TaskID]?.DueDate && (
-                    <span className="text-red-500">
-                      {errors[task.TaskID].DueDate}
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    className="bg-red-500 ml-5 text-white rounded px-2 py-1"
-                    onClick={() => removeTask(task.TaskID)}
-                  >
-                    Remove Task
-                  </button>
-                </div>
-              );
+                    <label className="block mb-1 font-semibold">
+                      System to be worked on
+                    </label>
+                    <select
+                      value={task.SystemRequired || ""}
+                      onChange={(e) =>
+                        handleTaskChange(task.TaskID, "SystemRequired", e.target.value)
+                      }
+                      className="border rounded w-full py-2 px-3 mb-2"
+                    >
+                      <option value="SAP">SAP</option>
+                      <option value="JDE">JDE</option>
+                      <option value="Oracle">Oracle</option>
+                      <option value="Genric Application">Genric Application</option>
+                      <option value="Microsoft SQL">Microsoft SQL</option>
+                      <option value="Oracle DB">Oracle DB</option>
+                      <option value="Linux">Linux</option>
+                      <option value="Microsoft OS">Microsoft OS</option>
+                      <option value="Active Directory">Active Directory</option>
+                      <option value="Cyber memo">Cyber memo</option>
+                      <option value="CTRA">CTRA</option>
+                      <option value="DCNO">DCNO</option>
+                      <option value="SAP-AUTO">SAP-AUTO</option>
+                      <option value="AUTO">AUTO</option>
+                      <option value="REVIEW">REVIEW</option>
+                      <option value="Project Management">Project Management</option>
+                    </select>
+                
+                    <label className="block mb-1 font-semibold">Status</label>
+                    <select
+                      value={task.Status || ""}
+                      onChange={(e) =>
+                        handleTaskChange(task.TaskID, "Status", e.target.value)
+                      }
+                      className="border rounded w-full py-2 px-3 mb-2"
+                    >
+                      <option value="To-Do">To-Do</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                
+                    <label className="block mb-1 font-semibold">Priority</label>
+                    <select
+                      value={task.Priority || " "}
+                      onChange={(e) =>
+                        handleTaskChange(task.TaskID, "Priority", e.target.value)
+                      }
+                      className="border rounded w-full py-2 px-3 mb-2"
+                    >
+                      <option value="High">High</option>
+                      <option value="Mid">Mid</option>
+                      <option value="Low">Low</option>
+                    </select>
+                    
+                    <label className="block mb-1 font-semibold">Hours</label>
+                    <input
+                      type="text"
+                      value={task.Hours || ""}
+                      onChange={(e) =>
+                        handleTaskChange(task.TaskID, "Hours", e.target.value)
+                      }
+                      placeholder="Task Hours"
+                      className="border rounded w-full py-2 px-3 mb-2"
+                    />
+                    {errors[task.TaskID]?.Hours && (
+                      <span className="text-red-500">
+                        {errors[task.TaskID].Hours}
+                      </span>
+                    )}
+                    {/* Warning for total hours exceeding 8 */}
+                    {warnings[task.TaskID] && (
+                      <span className="text-yellow-500">
+                        {warnings[task.TaskID]}
+                      </span>
+                    )}
+                
+                    <label className="block mb-1 font-semibold">Due Date</label>
+                    <DatePicker
+                      selected={task.DueDate ? new Date(task.DueDate) : null}
+                      onChange={(date) =>
+                        handleTaskChange(task.TaskID, "DueDate", date)
+                      }
+                      placeholderText="Select Due Date"
+                      className="border rounded w-full py-2 px-3 mb-2"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                    {errors[task.TaskID]?.DueDate && (
+                      <span className="text-red-500">
+                        {errors[task.TaskID].DueDate}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      className="bg-red-500 ml-5 text-white rounded px-2 py-1"
+                      onClick={() => removeTask(task.TaskID)}
+                    >
+                      Remove Task
+                    </button>
+                  </div>
+                );
+                
             })
           ) : (
             <p>No tasks available.</p>
