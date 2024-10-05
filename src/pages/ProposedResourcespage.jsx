@@ -41,7 +41,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await fetch("/api/users");
+        const response = await fetch("http://localhost:8081/users");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -53,7 +53,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             try {
               // Fetch skills
               const skillsResponse = await fetch(
-                `/api/skillsets/${user.UserID}`
+                `http://localhost:8081/skillsets/${user.UserID}`
               );
               const skillsProficiency = skillsResponse.ok
                 ? await skillsResponse.json()
@@ -61,7 +61,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
               // Fetch tasks
               const tasksResponse = await fetch(
-                `/api/tasks/user/${user.UserID}`
+                `http://localhost:8081/tasks/user/${user.UserID}`
               );
               const tasks = tasksResponse.ok ? await tasksResponse.json() : [];
 
@@ -400,7 +400,7 @@ const submitProject = async () => {
   const fetchUserTasks = async (userId) => {
     setIsLoading(true);//Spinner
     try {
-      const response = await fetch(`/api/tasks/user/${userId}`);
+      const response = await fetch(`http://localhost:8081/tasks/user/${userId}`);
       const data = await response.json();
       setDateTasks(data);//Set dateTasks to feed into calender component
       setIsLoading(false);

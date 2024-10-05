@@ -54,7 +54,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/users");
+        const response = await fetch("http://localhost:8081/users");
         if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
 
@@ -146,7 +146,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
         )
       ) {
         // Send a DELETE request to the server to remove the resource
-        await fetch(`/api/resources/${resourceId}`, {
+        await fetch(`http://localhost:8081/resources/${resourceId}`, {
           method: "DELETE",
         });
       }

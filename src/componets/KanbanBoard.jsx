@@ -117,7 +117,7 @@ export default function Board() {
 
     if (ToDo.length > 0) {
       promises.push(
-        fetch(`/api/tasks/${resourceId}`, {
+        fetch(`http://localhost:8081/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(ToDo),
@@ -127,7 +127,7 @@ export default function Board() {
 
     if (inReview.length > 0) {
       promises.push(
-        fetch(`/api/tasks/${resourceId}`, {
+        fetch(`http://localhost:8081/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(inReview),
@@ -137,7 +137,7 @@ export default function Board() {
 
     if (completed.length > 0) {
       promises.push(
-        fetch(`/api/tasks/${resourceId}`, {
+        fetch(`http://localhost:8081/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(completed),
@@ -151,7 +151,7 @@ export default function Board() {
 
       if (allSuccessful) {
         toast.success("Tasks saved successfully");
-        const response = await fetch(`/api/tasks/${resourceId}`);
+        const response = await fetch(`http://localhost:8081/tasks/${resourceId}`);
         const json = await response.json();
         const completedTasks = json.Tasks.filter(
           (task) => task.Status === "Completed"

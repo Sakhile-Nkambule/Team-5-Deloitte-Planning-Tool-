@@ -15,7 +15,7 @@ const ProjectDashboard = () => {
   useEffect(() => {
     if (user && id) {
       console.log(`Fetching resourceId for userId: ${user.id} and projectId: ${id}`);
-      fetch(`/api/resource-id/${user.id}/${id}`)
+      fetch(`http://localhost:8081/resource-id/${user.id}/${id}`)
         .then((response) => {
           console.log('Fetch response:', response);
           return response.json();

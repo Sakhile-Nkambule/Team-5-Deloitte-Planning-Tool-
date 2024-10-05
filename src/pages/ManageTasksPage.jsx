@@ -31,7 +31,7 @@ const ManageTasksPage = () => {
     const fetchData = async () => {
       try {
         // Fetch resource details and tasks
-        const resourceResponse = await fetch(`/api/tasks/${resourceId}`);
+        const resourceResponse = await fetch(`http://localhost:8081/tasks/${resourceId}`);
         const resourceData = await resourceResponse.json();
         console.log(resourceData);
         setResource({
@@ -46,7 +46,7 @@ const ManageTasksPage = () => {
 
         // Check if UserID exists before fetching user data
         if (resourceData.UserID) {
-          const userResponse = await fetch(`/api/user/${resourceData.UserID}`);
+          const userResponse = await fetch(`http://localhost:8081/user/${resourceData.UserID}`);
           const user = await userResponse.json();
           setUserName(user.UserName || "Unknown User");
         } else {
@@ -55,7 +55,7 @@ const ManageTasksPage = () => {
 
         if (resourceData.ProjectID) {
           const projectResponse = await fetch(
-            `/api/project/${resourceData.ProjectID}`
+            `http://localhost:8081/project/${resourceData.ProjectID}`
           );
           const project = await projectResponse.json();
           setProjectCode(project.ProjectCode || "Unknown Project Code");
@@ -66,7 +66,7 @@ const ManageTasksPage = () => {
         //fetch all tasks based on userid only to get all tasks associeted to that user
         if (resourceData.UserID) {
           const taskdates = await fetch(
-            `/api/tasks/user/${resourceData.UserID}`
+            `http://localhost:8081/tasks/user/${resourceData.UserID}`
           );
           const data = await taskdates.json();
           setdatetasks(data);
@@ -166,14 +166,14 @@ const ManageTasksPage = () => {
 
     try {
       // Call the API to update resource's WorkedHours
-      await fetch(`/api/resources/${resource.ResourceID}`, {
+      await fetch(`http://localhost:8081/resources/${resource.ResourceID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ WorkedHours: updatedWorkedHours }),
       });
 
       // Call the API to update the task's completion status
-      await fetch(`/api/tasks/completed/${taskToComplete.TaskID}`, {
+      await fetch(`http://localhost:8081/tasks/completed/${taskToComplete.TaskID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed: true }),
@@ -194,7 +194,7 @@ const ManageTasksPage = () => {
 
       // Fetch the user's skillsets to update the workedHours
       const skillsetsResponse = await fetch(
-        `/api/skillset/${resource.UserID}`
+        `http://localhost:8081/skillset/${resource.UserID}`
       );
       const skillsets = await skillsetsResponse.json();
       console.log("User SKILLS: ",skillsets);
@@ -214,7 +214,7 @@ const ManageTasksPage = () => {
         console.log("Updated Worked Hours:", newSkillsetWorkedHours);
 
         // Update the workedHours on the skillset
-        await fetch(`/api/skillsets/${skillsetToUpdate.SkillID}`, {
+        await fetch(`http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -273,7 +273,7 @@ const ManageTasksPage = () => {
   const handleConfirmProficiencyIncrease = async () => {
     try {
       // Update the proficiency for the skillset
-      await fetch(`/api/skillsets/${skillsetToUpdate.SkillID}`, {
+      await fetch(`http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -362,7 +362,7 @@ const ManageTasksPage = () => {
       }));
 
       if (sanitizedUpdatedTasks.length > 0) {
-        await fetch(`/api/tasks/${resourceId}`, {
+        await fetch(`http://localhost:8081/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(sanitizedUpdatedTasks),
@@ -384,7 +384,7 @@ const ManageTasksPage = () => {
           UserID: task.UserID,
         }));
 
-        await fetch(`/api/tasks`, {
+        await fetch(`http://localhost:8081/tasks`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(sanitizedNewTasks),

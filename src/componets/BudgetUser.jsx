@@ -32,12 +32,12 @@ const BudgetUser = () => {
         const fetchFinancialsAndCalculateCosts = async () => {
             try {
                 // Fetch project financials
-                const financialResponse = await fetch(`/api/financials/${project.ProjectID}`);
+                const financialResponse = await fetch(`http://localhost:8081/financials/${project.ProjectID}`);
                 const financialData = await financialResponse.json();
                 const netRevenue = financialData.NetRevenue || 0; // Get Net Revenue
 
                 // Fetch users to get their hourly rates
-                const usersResponse = await fetch('/api/users');
+                const usersResponse = await fetch('http://localhost:8081/users');
                 const usersData = await usersResponse.json();
 
                 // Create a map for hourly rates by UserID

@@ -31,7 +31,7 @@ const AvailableResources = ({ resources, project }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('/api/users');
+        const response = await fetch('http://localhost:8081/users');
         const usersData = await response.json();
         
         const filteredUsers = usersData.filter(user => 
@@ -57,7 +57,7 @@ const AvailableResources = ({ resources, project }) => {
   const fetchUserTasks = async (userId) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/tasks/user/${userId}`);
+      const response = await fetch(`http://localhost:8081/tasks/user/${userId}`);
       const data = await response.json();
       setDateTasks(data);
       setIsLoading(false);
@@ -77,7 +77,7 @@ const AvailableResources = ({ resources, project }) => {
   const confirmAddToProject = async () => {
     if (selectedUser) {
       try {
-        const response = await fetch('/api/projects/addResource', {
+        const response = await fetch('http://localhost:8081/projects/addResource', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

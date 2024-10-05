@@ -21,7 +21,7 @@ const ProjectPage = ({ deleteProject }) => {
       // Check if the user has an allowed role
       const allowedRoles = ['consultant', 'Junior Consultant', 'Senior Consultant'];
       if (allowedRoles.includes(userRole)) { 
-        fetch(`/api/resource-id/${user.id}/${projectId}`)
+        fetch(`http://localhost:8081/resource-id/${user.id}/${projectId}`)
           .then(async (response) => {
             if (!response.ok) {
               // If response status is not OK, handle it without throwing an error
@@ -55,7 +55,7 @@ const ProjectPage = ({ deleteProject }) => {
     setLoading(true);
     const fetchUserData = async () => {
       try {
-        const response = await fetch("/api/users");
+        const response = await fetch("http://localhost:8081/users");
         if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
         const userMapping = usersData.reduce((acc, user) => {
@@ -231,21 +231,21 @@ const ProjectPage = ({ deleteProject }) => {
 };
 
 const projectLoader = async ({ params }) => {
-  const projectRes = await fetch(`/api/project/${params.id}`);
+  const projectRes = await fetch(`http://localhost:8081/project/${params.id}`);
   const projectData = await projectRes.json();
 
-  const clientRes = await fetch(`/api/company/${params.id}`);
+  const clientRes = await fetch(`http://localhost:8081/company/${params.id}`);
   const clientData = await clientRes.json();
 
-  const financialsRes = await fetch(`/api/financials/${params.id}`);
+  const financialsRes = await fetch(`http://localhost:8081/financials/${params.id}`);
   const financialsData = await financialsRes.json();
 
-  const resourcesRes = await fetch(`/api/resources/${params.id}`);
+  const resourcesRes = await fetch(`http://localhost:8081/resources/${params.id}`);
   const resourcesData = await resourcesRes.json();
 
   // Fetch user details for each resource
   const userPromises = resourcesData.map(async (resource) => {
-    const userRes = await fetch(`/api/user/${resource.UserID}`);
+    const userRes = await fetch(`http://localhost:8081/user/${resource.UserID}`);
     const userData = await userRes.json();
     return { ...resource, UserName: userData.name };
   });
