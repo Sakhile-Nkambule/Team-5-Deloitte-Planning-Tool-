@@ -27,7 +27,7 @@ export function SignIn() {
         login(user);
 
         // Check the role and navigate accordingly
-        if (['Planning Team', 'Director', 'Senior Manager'].includes(user.role)) {
+        if (["Associate Director", "Director","Snr Associate Director","Senior Manager", "Assistant Manager", "Manager"].includes(user.role)) {
           navigate('/homepage');
         } else {
           navigate('/userhomepage');
