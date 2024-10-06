@@ -1,45 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import Calendar from './Calendar'; 
-import Modal from './modal';
-import Spinner from './Spinner';
+import Calendar from "./Calendar";
+import Modal from "./modal";
+import Spinner from "./Spinner";
 
-const AvailableResources = ({ resources, project }) => { 
+const AvailableResources = ({ resources, project }) => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [dateTasks, setDateTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('Director'); // Default to Director
+  const [selectedRole, setSelectedRole] = useState("Director"); // Default to Director
 
   const roles = [
-    'Director',
-    'Snr Associate Director',
-    'Associate Director',
-    'Senior Manager',
-    'Manager',
-    'Assistant Manager',  
-    'Snr Consultant',
-    'Consultant',
-    'Jnr Consultant',
+    "Director",
+    "Snr Associate Director",
+    "Associate Director",
+    "Senior Manager",
+    "Manager",
+    "Assistant Manager",
+    "Snr Consultant",
+    "Consultant",
+    "Jnr Consultant",
   ];
 
   // Fetch users on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('http://localhost:8081/users');
+        const response = await fetch("http://localhost:8081/users");
         const usersData = await response.json();
-        
-        const filteredUsers = usersData.filter(user => 
-          !resources.some(resource => resource.UserID === user.UserID)
+
+        const filteredUsers = usersData.filter(
+          (user) =>
+            !resources.some((resource) => resource.UserID === user.UserID)
         );
         setUsers(filteredUsers);
       } catch (error) {
-        console.error('Failed to fetch user data', error);
+        console.error("Failed to fetch user data", error);
       }
     };
 
@@ -57,12 +58,14 @@ const AvailableResources = ({ resources, project }) => {
   const fetchUserTasks = async (userId) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:8081/tasks/user/${userId}`);
+      const response = await fetch(
+        `http://localhost:8081/tasks/user/${userId}`
+      );
       const data = await response.json();
       setDateTasks(data);
       setIsLoading(false);
     } catch (error) {
-      console.error('Failed to fetch tasks', error);
+      console.error("Failed to fetch tasks", error);
       setIsLoading(false);
     }
   };
@@ -77,47 +80,55 @@ const AvailableResources = ({ resources, project }) => {
   const confirmAddToProject = async () => {
     if (selectedUser) {
       try {
-        const response = await fetch('http://localhost:8081/projects/addResource', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            UserID: selectedUser.UserID,
-            ProjectID: project.ProjectID, // Access ProjectID from project prop
-            Role: selectedUser.Role,
-            PlannedHours: 0,
-            WorkedHours: 0
-          }),
-        });
-        
+        const response = await fetch(
+          "http://localhost:8081/projects/addResource",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              UserID: selectedUser.UserID,
+              ProjectID: project.ProjectID, // Access ProjectID from project prop
+              Role: selectedUser.Role,
+              PlannedHours: 0,
+              WorkedHours: 0,
+            }),
+          }
+        );
+
         if (response.ok) {
-          toast.success(`${selectedUser.UserName} has been successfully added to project ${project.ProjectCode}`);
+          toast.success(
+            `${selectedUser.UserName} has been successfully added to project ${project.ProjectCode}`
+          );
         } else {
           const result = await response.json();
           toast.error(`Failed to add resource: ${result.message}`);
         }
       } catch (error) {
-        console.error('Error adding resource:', error);
-        toast.error('An error occurred while adding the resource.');
+        console.error("Error adding resource:", error);
+        toast.error("An error occurred while adding the resource.");
       }
     }
     setIsAddModalOpen(false);
   };
 
   // Filter users by selected role
-  const filteredUsers = selectedRole === 'All' 
-    ? users 
-    : users.filter(user => user.Role === selectedRole);
+  const filteredUsers =
+    selectedRole === "All"
+      ? users
+      : users.filter((user) => user.Role === selectedRole);
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold text-center mb-6 text-black">AVAILABLE RESOURCES</h2>
+      <h2 className="text-2xl font-bold text-center mb-6 text-black">
+        AVAILABLE RESOURCES
+      </h2>
 
       {/* Role Filtering */}
       <div className="mb-4">
         <label className="mr-2">Filter by Role:</label>
-        <select 
+        <select
           value={selectedRole}
-          onChange={(e) => setSelectedRole(e.target.value)} 
+          onChange={(e) => setSelectedRole(e.target.value)}
           className="border rounded p-2"
         >
           {roles.map((role) => (
@@ -150,7 +161,7 @@ const AvailableResources = ({ resources, project }) => {
             {/* Buttons */}
             <div className="flex space-x-2">
               <button
-                onClick={() => handleCalendarClick(user)} // Open modal with calendar 
+                onClick={() => handleCalendarClick(user)} // Open modal with calendar
                 className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded-full"
               >
                 Calendar
@@ -167,19 +178,21 @@ const AvailableResources = ({ resources, project }) => {
       </ul>
 
       {/* Modal for Calendar */}
-      <Modal isOpen={isCalendarModalOpen} onClose={() => setIsCalendarModalOpen(false)}>
-        <h3 className="text-xl font-bold text-center mb-4">Calendar for {selectedUser?.UserName}</h3>
-        {isLoading ? (
-          <Spinner />
-        ) : (
-          <Calendar tasks={dateTasks} />
-        )}
+      <Modal
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+      >
+        <h3 className="text-xl font-bold text-center mb-4">
+          Calendar for {selectedUser?.UserName}
+        </h3>
+        {isLoading ? <Spinner /> : <Calendar tasks={dateTasks} />}
       </Modal>
 
       {/* Modal for Add to Project Confirmation */}
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)}>
         <h3 className="text-xl font-bold text-center mb-4">
-          Confirm Addition of {selectedUser?.UserName} to Project {project.ProjectCode}?
+          Confirm Addition of {selectedUser?.UserName} to Project{" "}
+          {project.ProjectCode}?
         </h3>
         <div className="flex justify-center space-x-4">
           <button

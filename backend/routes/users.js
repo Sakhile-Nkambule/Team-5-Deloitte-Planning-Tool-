@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
         email: user.Email,
         role: user.Role,
         rate: user.HourlyRate,
-        notifications: notificationsResult // Include notifications in the response
+        notifications: notificationsResult, // Include notifications in the response
       });
     } else {
       // User not found
@@ -138,6 +138,58 @@ router.post("/register", async (req, res) => {
     }
   );
   console.log(HourlyRate);
+});
+
+//DELETE
+
+// DELETE user by ID
+// Delete a user and related entries from projects, resources, tasks, skillsets, and notifications
+router.delete("/user/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // Delete skillsets associated with the user (this needs to be done first due to foreign key constraints)
+      await connection.query("DELETE FROM Skillsets WHERE UserID = ?", [
+        userId,
+      ]);
+
+      // Delete tasks associated with the user
+      await connection.query(
+        `DELETE FROM tasks WHERE ResourceID IN (SELECT ResourceID FROM resources WHERE UserID = ?)`,
+        [userId]
+      );
+
+      // Delete resources associated with the user
+      await connection.query("DELETE FROM resources WHERE UserID = ?", [
+        userId,
+      ]);
+
+      // Delete notifications associated with the user
+      await connection.query("DELETE FROM notifications WHERE UserID = ?", [
+        userId,
+      ]);
+
+      // Finally, delete the user
+      await connection.query("DELETE FROM users WHERE UserID = ?", [userId]);
+
+      // Commit the transaction
+      await connection.commit();
+      res.status(204).send(); // Success - No Content
+    } catch (err) {
+      // Rollback if any of the above queries fail
+      await connection.rollback();
+      res.status(500).send("Error deleting user: " + err);
+    } finally {
+      // Release the connection back to the pool
+      connection.release();
+    }
+  } catch (err) {
+    res.status(500).send("Database error: " + err);
+  }
 });
 
 module.exports = router;

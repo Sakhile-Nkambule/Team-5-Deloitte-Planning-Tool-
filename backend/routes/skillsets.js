@@ -10,11 +10,9 @@ router.get("/skillsets/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
     const [rows] = await pool.query(
-      
       `SELECT Skillset, Proficiency
       FROM Skillsets
-      WHERE UserID = ?`
-    ,
+      WHERE UserID = ?`,
       [userId]
     );
 
@@ -54,12 +52,14 @@ router.get("/skillset/:userId", async (req, res) => {
     }
 
     // Transform rows into an object, including SkillID
-    const skills = rows.map(({ SkillID, Skillset, Proficiency, workedHours }) => ({
-      SkillID: SkillID, // Add this line to include SkillID
-      skillset: Skillset,
-      proficiency: Proficiency,
-      workedHours: workedHours,
-    }));
+    const skills = rows.map(
+      ({ SkillID, Skillset, Proficiency, workedHours }) => ({
+        SkillID: SkillID, // Add this line to include SkillID
+        skillset: Skillset,
+        proficiency: Proficiency,
+        workedHours: workedHours,
+      })
+    );
 
     res.json(skills);
   } catch (err) {
@@ -67,13 +67,13 @@ router.get("/skillset/:userId", async (req, res) => {
   }
 });
 
-  //UPDATE
-  // Endpoint to update user skills
+//UPDATE
+// Endpoint to update user skills
 // UPDATE workedHours and proficiency for a user's skillset
 router.put("/skillsets/:skillsetId", async (req, res) => {
   const SkillID = req.params.skillsetId;
   const { workedHours, proficiency } = req.body;
-  console.log( "SkillID is: ",SkillID);
+  console.log("SkillID is: ", SkillID);
   console.log("worked hours is: ", workedHours);
   console.log("Request Body:", req.body); // Log the request body
   console.log("Skillset ID from URL:", req.params.skillsetId); // Log the Skillset ID from URL
@@ -105,11 +105,11 @@ router.put("/allskillsets/:userId", async (req, res) => {
     await pool.query("START TRANSACTION"); // Begin transaction
 
     const skillEntries = Object.entries(skills);
-    
+
     for (const [skill, workedHours] of skillEntries) {
       // Calculate the new proficiency based on the worked hours
       let newProficiency = 0;
-      
+
       if (workedHours >= 80 && workedHours < 160) newProficiency = 10;
       else if (workedHours >= 160 && workedHours < 240) newProficiency = 20;
       else if (workedHours >= 240 && workedHours < 320) newProficiency = 30;
@@ -128,7 +128,14 @@ router.put("/allskillsets/:userId", async (req, res) => {
         VALUES (?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE workedHours = ?, Proficiency = ?
         `,
-        [userId, skill, workedHours, newProficiency, workedHours, newProficiency]
+        [
+          userId,
+          skill,
+          workedHours,
+          newProficiency,
+          workedHours,
+          newProficiency,
+        ]
       );
     }
 
@@ -142,5 +149,4 @@ router.put("/allskillsets/:userId", async (req, res) => {
   }
 });
 
-
-  module.exports = router;
+module.exports = router;

@@ -4,68 +4,68 @@ const pool = require("../db");
 
 // Endpoint to get project resources
 router.get("/resources/:projectId", async (req, res) => {
-    try {
-      const projectId = req.params.projectId;
-      const [rows] = await pool.query(
-        "SELECT * FROM resources WHERE ProjectID = ?",
-        [projectId]
-      );
-      res.json(rows);
-    } catch (err) {
-      res.status(500).json("Error executing query: " + err);
-    }
-  });
-
-  // Endpoint to get resourceId
-  router.get("/resource-id/:userId/:projectId", async (req, res) => {
-    const userId = req.params.userId;
+  try {
     const projectId = req.params.projectId;
-  
-    try {
-      const [rows] = await pool.query(
-        `
+    const [rows] = await pool.query(
+      "SELECT * FROM resources WHERE ProjectID = ?",
+      [projectId]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json("Error executing query: " + err);
+  }
+});
+
+// Endpoint to get resourceId
+router.get("/resource-id/:userId/:projectId", async (req, res) => {
+  const userId = req.params.userId;
+  const projectId = req.params.projectId;
+
+  try {
+    const [rows] = await pool.query(
+      `
         SELECT r.ResourceID
         FROM resources r
         WHERE r.UserID = ? AND r.ProjectID = ?
       `,
-        [userId, projectId]
-      );
-  
-      if (rows.length > 0) {
-        const resourceId = rows[0].ResourceID;
-        res.json({ resourceId });
-      } else {
-        res.status(404).send("Resource not found");
-      }
-    } catch (err) {
-      res.status(500).send("Database error");
+      [userId, projectId]
+    );
+
+    if (rows.length > 0) {
+      const resourceId = rows[0].ResourceID;
+      res.json({ resourceId });
+    } else {
+      res.status(404).send("Resource not found");
     }
-  });
-  //POST
+  } catch (err) {
+    res.status(500).send("Database error");
+  }
+});
+//POST
 // POST: add resource to a project
-router.post('/projects/addResource', async (req, res) => {
+router.post("/projects/addResource", async (req, res) => {
   const { UserID, ProjectID, Role, PlannedHours, WorkedHours } = req.body;
 
   try {
     await pool.query(
-      'INSERT INTO resources (UserID, ProjectID, Role, PlannedHours, WorkedHours) VALUES (?, ?, ?, ?, ?)',
+      "INSERT INTO resources (UserID, ProjectID, Role, PlannedHours, WorkedHours) VALUES (?, ?, ?, ?, ?)",
       [UserID, ProjectID, Role, PlannedHours, WorkedHours]
     );
-    res.status(200).json({ message: 'Resource added successfully' });
+    res.status(200).json({ message: "Resource added successfully" });
   } catch (error) {
-    console.error('Error adding resource to project:', error);  // Logs detailed error
-    res.status(500).json({ message: 'Failed to add resource', error: error.message });
+    console.error("Error adding resource to project:", error); // Logs detailed error
+    res
+      .status(500)
+      .json({ message: "Failed to add resource", error: error.message });
   }
 });
 
+//Update
 
-
-  //Update
-
-  // Endpoint to update worked hours
+// Endpoint to update worked hours
 router.put("/resources/:resourceId", async (req, res) => {
   const resourceId = req.params.resourceId;
-  const { WorkedHours } = req.body; 
+  const { WorkedHours } = req.body;
 
   console.log(WorkedHours);
 
@@ -90,46 +90,48 @@ router.put("/resources/:resourceId", async (req, res) => {
   }
 });
 
+//DELELE
 
-  //DELELE
+//Endpoint to delete project resource
 
-  //Endpoint to delete project resource
+router.delete("/resources/:resourceId", async (req, res) => {
+  const resourceId = req.params.resourceId;
 
-  router.delete("/resources/:resourceId", async (req, res) => {
-    const resourceId = req.params.resourceId;
-  
+  try {
+    // Get a connection from the pool
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
     try {
-      // Get a connection from the pool
-      const connection = await pool.getConnection();
-      await connection.beginTransaction();
-  
-      try {
-        // Prepare and execute the SQL query to delete the resource
-        const [result] = await connection.query('DELETE FROM resources WHERE ResourceID = ?', [resourceId]);
-  
-        // Commit the transaction
-        await connection.commit();
-  
-        // Check if any rows were affected (resource was found and deleted)
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ message: "Resource not found" });
-        }
-  
-        // Send success response
-        res.json({ message: "Resource deleted successfully" });
-      } catch (err) {
-        // Rollback the transaction in case of an error
-        await connection.rollback();
-        console.error("Error deleting resource:", err);
-        res.status(500).json({ error: "Error deleting resource: " + err });
-      } finally {
-        // Release the connection back to the pool
-        connection.release();
+      // Prepare and execute the SQL query to delete the resource
+      const [result] = await connection.query(
+        "DELETE FROM resources WHERE ResourceID = ?",
+        [resourceId]
+      );
+
+      // Commit the transaction
+      await connection.commit();
+
+      // Check if any rows were affected (resource was found and deleted)
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Resource not found" });
       }
+
+      // Send success response
+      res.json({ message: "Resource deleted successfully" });
     } catch (err) {
-      console.error("Database error:", err);
-      res.status(500).send("Database error: " + err);
+      // Rollback the transaction in case of an error
+      await connection.rollback();
+      console.error("Error deleting resource:", err);
+      res.status(500).json({ error: "Error deleting resource: " + err });
+    } finally {
+      // Release the connection back to the pool
+      connection.release();
     }
-  });
-  
-  module.exports = router;
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).send("Database error: " + err);
+  }
+});
+
+module.exports = router;

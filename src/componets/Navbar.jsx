@@ -78,7 +78,7 @@ const Navbar = () => {
                 <NavLink to={projectsLink} className={linkClass}>
                   Projects
                 </NavLink>
-                {["Planning Team", "Director", "Senior Manager"].includes(
+                {["Associate Director", "Director","Snr Associate Director","Senior Manager", "Assistant Manager", "Manager"].includes(
                   userRole
                 ) && (
                   <NavLink to="/add-project" className={linkClass}>
@@ -131,7 +131,7 @@ const Navbar = () => {
                         Profile
                       </button>
                       
-                      {["Planning Team", "Director", "Senior Manager"].includes(
+                      {["Associate Director", "Director","Snr Associate Director","Senior Manager", "Assistant Manager", "Manager"].includes(
                   userRole
                 ) && (
                   <button

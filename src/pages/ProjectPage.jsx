@@ -2,7 +2,7 @@ import { useParams, useLoaderData } from "react-router-dom";
 import { FaArrowLeft, FaMapMarker } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useUser } from "../componets/UserContext"; // Corrected typo in components
+import { useUser } from "../componets/UserContext"; 
 import { useEffect, useState } from "react";
 import Spinner from "../componets/Spinner";
 
@@ -160,7 +160,7 @@ const ProjectPage = ({ deleteProject }) => {
 
                 {/* Dashboard Link */}
                 <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left mt-6">
-                  {["Planning Team", "Director", "Senior Manager"].includes(
+                  {["Associate Director", "Director","Snr Associate Director","Senior Manager", "Assistant Manager", "Manager"].includes(
                     userRole
                   ) ? (
                     <Link
@@ -202,7 +202,7 @@ const ProjectPage = ({ deleteProject }) => {
                 </div>
 
                 {/* Manage */}
-                {["Planning Team", "Director", "Senior Manager"].includes(
+                {["Associate Director", "Director","Snr Associate Director","Senior Manager", "Assistant Manager", "Manager"].includes(
                   userRole
                 ) && (
                   <div className="bg-white p-6 rounded-lg shadow-md mt-6">

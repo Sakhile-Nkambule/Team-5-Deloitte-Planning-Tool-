@@ -101,7 +101,16 @@ router.post("/newprojects", async (req, res) => {
           INSERT INTO projects (ProjectCode, Title, Description, Budget, ClientID, Status, StartDate, EndDate) 
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `,
-        [ProjectCode, Title, Description, Budget, clientId, Status, StartDate, EndDate,]
+        [
+          ProjectCode,
+          Title,
+          Description,
+          Budget,
+          clientId,
+          Status,
+          StartDate,
+          EndDate,
+        ]
       );
 
       const projectId = projectResult.insertId;
@@ -179,7 +188,7 @@ router.put("/projects/:id", async (req, res) => {
       // Convert StartDate and EndDate to local time and format
       const localStartDate = new Date(StartDate); // Converts to local timezone date
       const localEndDate = new Date(EndDate); // Converts to local timezone date
-      
+
       // Format dates back to 'YYYY-MM-DD'
       const formattedStartDate = format(localStartDate, "yyyy-MM-dd");
       const formattedEndDate = format(localEndDate, "yyyy-MM-dd");
@@ -289,7 +298,6 @@ router.put("/projects/:id", async (req, res) => {
     res.status(500).json({ error: "Error connecting to the database: " + err });
   }
 });
-
 
 //DELETE
 
