@@ -266,10 +266,12 @@ router.put("/tasks/:resourceId", async (req, res) => {
 // PUT: Endpoint to update the completion status of a task
 router.put("/tasks/completed/:taskId", async (req, res) => {
   const taskId = req.params.taskId;
-  const { completed } = req.body
+  const { completed } = req.body;
 
   if (typeof completed !== "boolean") {
-    return res.status(400).json({ error: "Completed status must be a boolean" });
+    return res
+      .status(400)
+      .json({ error: "Completed status must be a boolean" });
   }
 
   let connection; // Declare connection here to ensure it can be released later
@@ -295,12 +297,13 @@ router.put("/tasks/completed/:taskId", async (req, res) => {
     res.json({ message: "Task completion status updated successfully" });
   } catch (err) {
     console.error("Error updating task completion status:", err);
-    res.status(500).json({ error: "Error updating task completion status: " + err });
+    res
+      .status(500)
+      .json({ error: "Error updating task completion status: " + err });
   } finally {
     if (connection) connection.release(); // Only release connection if it was successfully acquired
   }
 });
- 
 
 //DELETE
 

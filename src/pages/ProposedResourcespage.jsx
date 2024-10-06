@@ -174,7 +174,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             "Director",
             "Associate Director",
             "Snr Associate Director",
-            "Snr Manager",
+            "Senior Manager",
             "Manager",
             "Assistant Manager",
             "Snr Consultant",

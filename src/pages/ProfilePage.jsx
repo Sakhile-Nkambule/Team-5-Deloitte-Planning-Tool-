@@ -220,6 +220,7 @@ const ProfilePage = () => {
                 <option value="Associate Director">Associate Director</option>
                 <option value="Senior Manager">Senior Manager</option>
                 <option value="Manager">Manager</option>
+                <option value="Manager"> Junior Manager</option>
                 <option value="Snr Consultant">Snr Consultant</option>
                 <option value="Consultant">Consultant</option>
                 <option value="Jnr Consultant">Jnr Consultant</option>

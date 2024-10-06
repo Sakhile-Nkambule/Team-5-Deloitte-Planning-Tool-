@@ -53,6 +53,29 @@ const AllUsers = () => {
     navigate(`/Profile/${user.UserID}`); // Navigate to the user profile page
   };
 
+  const handleRemoveClick = async (user) => {
+    try {
+      // Confirm with the user before removing the user
+      if (window.confirm("Are you sure you want to delete this User from the planning Tool?")) {
+        const response = await fetch(`http://localhost:8081/user/${user.UserID}`, {
+          method: "DELETE",
+        });
+  
+        if (response.ok) {
+          // Remove the user from the state if the request was successful
+          setUsers(users.filter((u) => u.UserID !== user.UserID));
+          toast.success("User removed successfully.");
+        } else {
+          toast.error("Failed to remove user.");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to remove user", error);
+      toast.error("An error occurred while removing the user.");
+    }
+  };
+  
+
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold text-center mb-6 text-black">ALL USERS</h2>
@@ -103,7 +126,16 @@ const AllUsers = () => {
                   >
                     Profile
                   </button>
-                </div>
+
+                  <button
+                    onClick={() => handleRemoveClick(user)} // Go to user profile
+                    className="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded-full"
+                  >
+                    Remove
+                  </button>
+                   </div>
+
+                   
               </li>
             ))}
           </ul>
