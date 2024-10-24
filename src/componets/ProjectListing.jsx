@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaMapMarker } from 'react-icons/fa';
+import { FaMapMarker, FaAngleDown } from 'react-icons/fa'; // Import dropdown arrow icon
 import { Link } from 'react-router-dom';
 
 const ProjectListing = ({ project }) => {
@@ -7,12 +7,14 @@ const ProjectListing = ({ project }) => {
 
   // Ensure description is a string and provide a default value if undefined
   let description = project.Description ? project.Description : 'No description available';
-  if (!showFullDescription && description.length > 90) {
-    description = description.substring(0, 90) + '...';
+  if (!showFullDescription && description.length > 0) {
+    description = description.substring(0, 0) + '';
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md relative">
+    <div
+      className="bg-white rounded-xl shadow-md transition-transform transform hover:scale-105 hover:border-lime-500 hover:shadow-lg relative border-2 border-transparent"
+    >
       <div className="p-4">
         <div className="mb-6">
           <div className="text-gray-600 my-2">{project.ProjectCode}</div>
@@ -23,10 +25,11 @@ const ProjectListing = ({ project }) => {
           {description}
         </div>
         <button
-          onClick={() => setShowFullDescription(prevState => !prevState)}
-          className="text-lime-500 mb-5 hover:text-lime-700"
+          onClick={() => setShowFullDescription((prevState) => !prevState)}
+          className="text-lime-500 mb-5 hover:text-lime-700 flex gap-2 items-center"
         >
-          {showFullDescription ? 'Less' : 'More'}
+          {showFullDescription ? 'Less' : 'Description'}
+          <FaAngleDown className={`transition-transform ${showFullDescription ? 'rotate-180' : ''}`} />
         </button>
 
         <h3 className="text-lime-500 mb-2">{project.Budget}</h3>
@@ -35,14 +38,14 @@ const ProjectListing = ({ project }) => {
 
         <div className="flex flex-col lg:flex-row justify-between mb-4">
           <div className="text-orange-700 mb-3">
-            <FaMapMarker className='inline text-lg mb-1 mr-1' />
+            <FaMapMarker className="inline text-lg mb-1 mr-1" />
             {project.Status}
           </div>
           <Link
             to={`/project/${project.ProjectID}`}
             className="h-[36px] bg-lime-500 hover:bg-lime-600 text-white px-4 py-2 rounded-lg text-center text-sm"
           >
-            Read More
+            Select
           </Link>
         </div>
       </div>

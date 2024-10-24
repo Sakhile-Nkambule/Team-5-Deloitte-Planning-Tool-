@@ -14,6 +14,8 @@ const ManageTasksPage = () => {
   const { resourceId } = useParams(); // Get resourceId from URL params
   const [resource, setResource] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [projectStartDate, setProjectStartDate] = useState(null);
+  const [projectEndDate, setProjectEndDate] = useState(null);
   const [projectCode, setProjectCode] = useState(null);
   const [userName, setUserName] = useState(""); // Store specific user name
   const [isLoading, setIsLoading] = useState(true);
@@ -28,14 +30,15 @@ const ManageTasksPage = () => {
   const [newProficiency, setNewProficiency] = useState(null);
   const [warnings, setWarnings] = useState({});
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch resource details and tasks
-        const resourceResponse = await fetch(`http://localhost:8081/tasks/${resourceId}`);
+        const resourceResponse = await fetch(
+          `http://localhost:8081/tasks/${resourceId}`
+        );
         const resourceData = await resourceResponse.json();
-        console.log(resourceData);
+
         setResource({
           ResourceID: resourceData.ResourceID,
           UserID: resourceData.UserID,
@@ -48,7 +51,9 @@ const ManageTasksPage = () => {
 
         // Check if UserID exists before fetching user data
         if (resourceData.UserID) {
-          const userResponse = await fetch(`http://localhost:8081/user/${resourceData.UserID}`);
+          const userResponse = await fetch(
+            `http://localhost:8081/user/${resourceData.UserID}`
+          );
           const user = await userResponse.json();
           setUserName(user.UserName || "Unknown User");
         } else {
@@ -60,7 +65,12 @@ const ManageTasksPage = () => {
             `http://localhost:8081/project/${resourceData.ProjectID}`
           );
           const project = await projectResponse.json();
+          console.log(project);
+
           setProjectCode(project.ProjectCode || "Unknown Project Code");
+          setProjectStartDate(project.StartDate || "Unknown Project Code");
+          setProjectEndDate(project.EndDate || "Unknown Project Code");
+          console.log("Filtered startdate:", project.StartDate);
         } else {
           setProjectCode("Unknown Project Code");
         }
@@ -86,13 +96,12 @@ const ManageTasksPage = () => {
     fetchData();
   }, [resourceId]);
 
-  
   const handleTaskChange = (taskId, field, value) => {
     setTasks((prevTasks) => {
       const updatedTasks = prevTasks.map((task) => {
         if (task.TaskID === taskId) {
           let updatedTask = { ...task, [field]: value };
-  
+
           // Validate Hours
           if (field === "Hours") {
             const hoursValue = Number(value);
@@ -123,7 +132,7 @@ const ManageTasksPage = () => {
               updatedTask.Hours = hoursValue; // Update Hours if valid
             }
           }
-  
+
           // Validate Due Date
           if (field === "DueDate") {
             const dueDate = new Date(value);
@@ -143,18 +152,16 @@ const ManageTasksPage = () => {
               updatedTask.DueDate = value; // Update DueDate if valid
             }
           }
-  
+
           return updatedTask;
         }
         return task;
       });
-  
+
       return updatedTasks;
     });
   };
-  
 
-  
   const handleCheckboxChange = (task) => {
     setTaskToComplete(task);
     setIsModalOpen(true); // Open the modal on checkbox click
@@ -175,11 +182,14 @@ const ManageTasksPage = () => {
       });
 
       // Call the API to update the task's completion status
-      await fetch(`http://localhost:8081/tasks/completed/${taskToComplete.TaskID}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed: true }),
-      });
+      await fetch(
+        `http://localhost:8081/tasks/completed/${taskToComplete.TaskID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed: true }),
+        }
+      );
 
       // Update task completion status in the state
       setTasks((prevTasks) =>
@@ -199,16 +209,15 @@ const ManageTasksPage = () => {
         `http://localhost:8081/skillset/${resource.UserID}`
       );
       const skillsets = await skillsetsResponse.json();
-      console.log("User SKILLS: ",skillsets);
+      console.log("User SKILLS: ", skillsets);
       console.log("System Required: ", taskToComplete.SystemRequired);
 
       // Find the specific skillset related to this task (by SkillsetRequired)
-     // Find the specific skillset related to this task (by SkillsetRequired)
-     const skillsetToUpdate = skillsets.find(
-      (s) => s.skillset === taskToComplete.SystemRequired
-    );
+      const skillsetToUpdate = skillsets.find(
+        (s) => s.skillset === taskToComplete.SystemRequired
+      );
 
-      console.log("Skill to update: ", skillsetToUpdate );
+      console.log("Skill to update: ", skillsetToUpdate);
       if (skillsetToUpdate) {
         const newSkillsetWorkedHours =
           parseFloat(skillsetToUpdate.workedHours) +
@@ -216,14 +225,17 @@ const ManageTasksPage = () => {
         console.log("Updated Worked Hours:", newSkillsetWorkedHours);
 
         // Update the workedHours on the skillset
-        await fetch(`http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            workedHours: newSkillsetWorkedHours,
-            proficiency: skillsetToUpdate.proficiency,
-          }),
-        });
+        await fetch(
+          `http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              workedHours: newSkillsetWorkedHours,
+              proficiency: skillsetToUpdate.proficiency,
+            }),
+          }
+        );
 
         // Determine if proficiency needs to be updated
         let newProficiency = skillsetToUpdate.proficiency;
@@ -275,14 +287,17 @@ const ManageTasksPage = () => {
   const handleConfirmProficiencyIncrease = async () => {
     try {
       // Update the proficiency for the skillset
-      await fetch(`http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workedHours: skillsetToUpdate.newSkillsetWorkedHours,
-          proficiency: skillsetToUpdate.newProficiency,
-        }),
-      });
+      await fetch(
+        `http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            workedHours: skillsetToUpdate.newSkillsetWorkedHours,
+            proficiency: skillsetToUpdate.newProficiency,
+          }),
+        }
+      );
 
       // Close the proficiency modal
       setIsProficiencyModalOpen(false);
@@ -440,11 +455,17 @@ const ManageTasksPage = () => {
       ? tasks
       : tasks.filter((task) => task.Status === selectedTaskStatus);
 
+  const projectDateRange = {
+    start: projectStartDate,
+    end: projectEndDate,
+  };
+
   //BACK BUTTON
   const navigate = useNavigate();
 
   const handleGoBack = () => {
     navigate(-1); // Goes back to the previous page
+    console.log("Filtered range:", projectDateRange);
   };
 
   return (
@@ -511,132 +532,144 @@ const ManageTasksPage = () => {
                 ? "border-red-500"
                 : "border-red-500"; // Default color for "To-Do"
 
-                return (
-                  <div
-                    key={task.TaskID}
-                    className={`mb-10 border-2 ${borderColor} rounded-xl shadow-lg p-5`}
+              return (
+                <div
+                  key={task.TaskID}
+                  className={`mb-10 border-2 ${borderColor} rounded-xl p-5 shadow-md transition-transform transform hover:scale-105 hover:shadow-lg relative `}
+                >
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={task.completed || false}
+                      onChange={() => handleCheckboxChange(task)}
+                    />
+                    Completed
+                  </label>
+                  <label className="block mb-1 font-semibold">
+                    Task Description
+                  </label>
+                  <input
+                    type="text"
+                    value={task.Description || ""}
+                    onChange={(e) =>
+                      handleTaskChange(
+                        task.TaskID,
+                        "Description",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Task Description"
+                    className="border rounded w-full py-2 px-3 mb-2"
+                  />
+                  <label className="block mb-1 font-semibold">
+                    System to be worked on
+                  </label>
+                  <select
+                    value={task.SystemRequired || ""}
+                    onChange={(e) =>
+                      handleTaskChange(
+                        task.TaskID,
+                        "SystemRequired",
+                        e.target.value
+                      )
+                    }
+                    className="border rounded w-full py-2 px-3 mb-2"
                   >
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={task.completed || false}
-                        onChange={() => handleCheckboxChange(task)}
-                      />
-                      Completed
-                    </label>
-                    <label className="block mb-1 font-semibold">
-                      Task Description
-                    </label>
-                    <input
-                      type="text"
-                      value={task.Description || ""}
-                      onChange={(e) =>
-                        handleTaskChange(task.TaskID, "Description", e.target.value)
-                      }
-                      placeholder="Task Description"
-                      className="border rounded w-full py-2 px-3 mb-2"
-                    />
-                    <label className="block mb-1 font-semibold">
-                      System to be worked on
-                    </label>
-                    <select
-                      value={task.SystemRequired || ""}
-                      onChange={(e) =>
-                        handleTaskChange(task.TaskID, "SystemRequired", e.target.value)
-                      }
-                      className="border rounded w-full py-2 px-3 mb-2"
-                    >
-                      <option value="SAP">SAP</option>
-                      <option value="JDE">JDE</option>
-                      <option value="Oracle">Oracle</option>
-                      <option value="Genric Application">Genric Application</option>
-                      <option value="Microsoft SQL">Microsoft SQL</option>
-                      <option value="Oracle DB">Oracle DB</option>
-                      <option value="Linux">Linux</option>
-                      <option value="Microsoft OS">Microsoft OS</option>
-                      <option value="Active Directory">Active Directory</option>
-                      <option value="Cyber memo">Cyber memo</option>
-                      <option value="CTRA">CTRA</option>
-                      <option value="DCNO">DCNO</option>
-                      <option value="SAP-AUTO">SAP-AUTO</option>
-                      <option value="AUTO">AUTO</option>
-                      <option value="REVIEW">REVIEW</option>
-                      <option value="Project Management">Project Management</option>
-                    </select>
-                
-                    <label className="block mb-1 font-semibold">Status</label>
-                    <select
-                      value={task.Status || ""}
-                      onChange={(e) =>
-                        handleTaskChange(task.TaskID, "Status", e.target.value)
-                      }
-                      className="border rounded w-full py-2 px-3 mb-2"
-                    >
-                      <option value="To-Do">To-Do</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                
-                    <label className="block mb-1 font-semibold">Priority</label>
-                    <select
-                      value={task.Priority || " "}
-                      onChange={(e) =>
-                        handleTaskChange(task.TaskID, "Priority", e.target.value)
-                      }
-                      className="border rounded w-full py-2 px-3 mb-2"
-                    >
-                      <option value="High">High</option>
-                      <option value="Mid">Mid</option>
-                      <option value="Low">Low</option>
-                    </select>
-                    
-                    <label className="block mb-1 font-semibold">Hours</label>
-                    <input
-                      type="text"
-                      value={task.Hours || ""}
-                      onChange={(e) =>
-                        handleTaskChange(task.TaskID, "Hours", e.target.value)
-                      }
-                      placeholder="Task Hours"
-                      className="border rounded w-full py-2 px-3 mb-2"
-                    />
-                    {errors[task.TaskID]?.Hours && (
-                      <span className="text-red-500">
-                        {errors[task.TaskID].Hours}
-                      </span>
-                    )}
-                    {/* Warning for total hours exceeding 8 */}
-                    {warnings[task.TaskID] && (
-                      <span className="text-yellow-500">
-                        {warnings[task.TaskID]}
-                      </span>
-                    )}
-                
-                    <label className="block mb-1 font-semibold">Due Date</label>
-                    <DatePicker
-                      selected={task.DueDate ? new Date(task.DueDate) : null}
-                      onChange={(date) =>
-                        handleTaskChange(task.TaskID, "DueDate", date)
-                      }
-                      placeholderText="Select Due Date"
-                      className="border rounded w-full py-2 px-3 mb-2"
-                      dateFormat="yyyy-MM-dd"
-                    />
-                    {errors[task.TaskID]?.DueDate && (
-                      <span className="text-red-500">
-                        {errors[task.TaskID].DueDate}
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      className="bg-red-500 ml-5 text-white rounded px-2 py-1"
-                      onClick={() => removeTask(task.TaskID)}
-                    >
-                      Remove Task
-                    </button>
-                  </div>
-                );
-                
+                    <option value="SAP">SAP</option>
+                    <option value="JDE">JDE</option>
+                    <option value="Oracle">Oracle</option>
+                    <option value="Genric Application">
+                      Genric Application
+                    </option>
+                    <option value="Microsoft SQL">Microsoft SQL</option>
+                    <option value="Oracle DB">Oracle DB</option>
+                    <option value="Linux">Linux</option>
+                    <option value="Microsoft OS">Microsoft OS</option>
+                    <option value="Active Directory">Active Directory</option>
+                    <option value="Cyber memo">Cyber memo</option>
+                    <option value="CTRA">CTRA</option>
+                    <option value="DCNO">DCNO</option>
+                    <option value="SAP-AUTO">SAP-AUTO</option>
+                    <option value="AUTO">AUTO</option>
+                    <option value="REVIEW">REVIEW</option>
+                    <option value="Project Management">
+                      Project Management
+                    </option>
+                  </select>
+
+                  <label className="block mb-1 font-semibold">Status</label>
+                  <select
+                    value={task.Status || ""}
+                    onChange={(e) =>
+                      handleTaskChange(task.TaskID, "Status", e.target.value)
+                    }
+                    className="border rounded w-full py-2 px-3 mb-2"
+                  >
+                    <option value="To-Do">To-Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+
+                  <label className="block mb-1 font-semibold">Priority</label>
+                  <select
+                    value={task.Priority || " "}
+                    onChange={(e) =>
+                      handleTaskChange(task.TaskID, "Priority", e.target.value)
+                    }
+                    className="border rounded w-full py-2 px-3 mb-2"
+                  >
+                    <option value="High">High</option>
+                    <option value="Mid">Mid</option>
+                    <option value="Low">Low</option>
+                  </select>
+
+                  <label className="block mb-1 font-semibold">Hours</label>
+                  <input
+                    type="text"
+                    value={task.Hours || ""}
+                    onChange={(e) =>
+                      handleTaskChange(task.TaskID, "Hours", e.target.value)
+                    }
+                    placeholder="Task Hours"
+                    className="border rounded w-full py-2 px-3 mb-2"
+                  />
+                  {errors[task.TaskID]?.Hours && (
+                    <span className="text-red-500 ">
+                      {errors[task.TaskID].Hours}
+                    </span>
+                  )}
+                  {/* Warning for total hours exceeding 8 */}
+                  {warnings[task.TaskID] && (
+                    <span className="text-yellow-500">
+                      {warnings[task.TaskID]}
+                    </span>
+                  )}
+
+                  <label className="block mb-1 font-semibold">Due Date</label>
+                  <DatePicker
+                    selected={task.DueDate ? new Date(task.DueDate) : null}
+                    onChange={(date) =>
+                      handleTaskChange(task.TaskID, "DueDate", date)
+                    }
+                    placeholderText="Select Due Date"
+                    className="border rounded w-full py-2 px-3 mb-2"
+                    dateFormat="yyyy-MM-dd"
+                  />
+                  {errors[task.TaskID]?.DueDate && (
+                    <span className="text-red-500">
+                      {errors[task.TaskID].DueDate}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="bg-red-500 ml-5 text-white rounded px-2 py-1  hover:bg-red-600 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
+                    onClick={() => removeTask(task.TaskID)}
+                  >
+                    Remove Task
+                  </button>
+                </div>
+              );
             })
           ) : (
             <p>No tasks available.</p>
@@ -669,12 +702,26 @@ const ManageTasksPage = () => {
             isOpen={isProficiencyModalOpen}
             onClose={handleCloseProficiencyModal}
           >
-            <h2>Proficiency Update</h2>
-            <p>
+            <h2 className="text-2xl font-bold mb-4">Proficiency Update !!!</h2>
+
+            {/* Added margin between header and body */}
+            <p className="mb-2">
+              The User has worked for {skillsetToUpdate?.newSkillsetWorkedHours}{" "}
+              hours on the skill "{skillsetToUpdate?.skillset}".
+            </p>
+
+            <p className="mb-2">
               The proficiency for the skill "{skillsetToUpdate?.skillset}" has
               increased.
             </p>
-            <p>New Proficiency: {skillsetToUpdate?.newProficiency}%</p>
+
+            {/* New proficiency styled: only the value is dark green */}
+            <p className="mt-4 font-bold">
+              New Proficiency:{" "}
+              <span className="text-green-800">
+                {skillsetToUpdate?.newProficiency}%
+              </span>
+            </p>
             <div className="flex justify-end mt-4">
               <button
                 onClick={handleCloseProficiencyModal}
@@ -693,14 +740,18 @@ const ManageTasksPage = () => {
 
           <button
             type="button"
-            className="bg-blue-500 text-white rounded px-4 py-2 mt-4"
+            className="bg-blue-500 text-white rounded px-4 py-2 mt-4 
+             hover:bg-blue-700 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
             onClick={addTask}
           >
             Add Task
           </button>
+
           <button
             type="button"
-            className="bg-green-500 text-white rounded px-4 py-2 mt-4 ml-4"
+            className="bg-lime-500 text-white rounded px-4 py-2 mt-4 ml-4  hover:bg-lime-600 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
             onClick={() => {
               saveTasks();
               sendNotification();
@@ -709,8 +760,9 @@ const ManageTasksPage = () => {
             Save Tasks
           </button>
         </div>
-        <div className="container rounded-xl shadow-lg pl-20 justify-left h-screen">
-          <Calendar tasks={datetasks} />
+        <div className="container rounded-xl shadow-lg pl-20 justify-left h-screen border-2 hover:shadow-lg 
+             transform hover:scale-105 transition-all">
+          <Calendar tasks={datetasks} projectDateRange={projectDateRange} />
         </div>
       </div>
     </div>

@@ -15,6 +15,14 @@ const AvailableResources = ({ resources, project }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState("Director"); // Default to Director
 
+
+  const projectStartDate = project.StartDate; 
+  const projectEndDate = project.EndDate; 
+
+  const projectDateRange = {
+    start: projectStartDate,
+    end: projectEndDate,
+  };
   const roles = [
     "Director",
     "Snr Associate Director",
@@ -51,7 +59,7 @@ const AvailableResources = ({ resources, project }) => {
   const handleCalendarClick = (resource) => {
     setSelectedUser(resource);
     setIsCalendarModalOpen(true); // Open the calendar modal
-    fetchUserTasks(user.UserID);
+    fetchUserTasks(resource.UserID);
   };
 
   // Fetch user tasks
@@ -185,7 +193,7 @@ const AvailableResources = ({ resources, project }) => {
         <h3 className="text-xl font-bold text-center mb-4">
           Calendar for {selectedUser?.UserName}
         </h3>
-        {isLoading ? <Spinner /> : <Calendar tasks={dateTasks} />}
+        {isLoading ? <Spinner /> : <Calendar tasks={dateTasks}  projectDateRange={projectDateRange}/>}
       </Modal>
 
       {/* Modal for Add to Project Confirmation */}

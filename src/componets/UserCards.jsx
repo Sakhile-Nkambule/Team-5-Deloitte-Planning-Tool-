@@ -14,7 +14,8 @@ const UserCards = () => {
             </p>
             <Link
               to="/projects"
-              className="inline-block bg-lime-500 text-white rounded-lg px-4 py-2 hover:bg-gray-700"
+              className="inline-block bg-lime-500 text-white rounded-lg px-4 py-2  hover:bg-lime-600 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
             >
              Browse Your Projects
             </Link>
@@ -27,7 +28,8 @@ const UserCards = () => {
             </p>
             <Link
               to="/userProfile"
-              className="inline-block bg-lime-500 text-white rounded-lg px-4 py-2 hover:bg-gray-700"
+              className="inline-block bg-lime-500 text-white rounded-lg px-4 py-2  hover:bg-lime-600 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
             >
               Go To Profile
             </Link>

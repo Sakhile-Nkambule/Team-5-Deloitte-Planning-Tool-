@@ -24,6 +24,7 @@ import CreateUserAccount from "./pages/CreateUserAccount";
 import UserProfile from "./pages/UserProfilePage";
 import ProfilePage from "./pages/ProfilePage";
 import AllUsersPage from "./pages/AllUsersPage";
+import MyCalendar from "./pages/MyCalendar";
 const App = () => {
 
 
@@ -93,6 +94,7 @@ const deleteProject = async (id) => {
           <Route path="/Userhomepage" element={<UserHomepage />} />
           <Route path="/projects" element={<Projectspage />} />
           <Route path="/user-projects/:id" element={<Projectspage />} />
+          <Route path="/myCalendar/:id" element={<MyCalendar />} />
           <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
           <Route path="/userProfile" element={<UserProfile/>}/>
           <Route path="/Profile/:id" element={<ProfilePage />} />

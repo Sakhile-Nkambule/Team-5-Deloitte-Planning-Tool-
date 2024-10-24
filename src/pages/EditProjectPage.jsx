@@ -600,7 +600,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                           </h4>
                           <button
                             type="button"
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-800"
                             onClick={() => removeResource(resource.ResourceID)}
                           >
                             Remove Resource
@@ -636,7 +636,8 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                           />
                           <button
                             type="button"
-                            className="bg-blue-600 text-white rounded px-2 py-1"
+                            className="bg-blue-600 text-white rounded px-2 py-1  hover:bg-blue-700 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
                             onClick={() => addTask(resourceIndex)}
                           >
                             Manage Tasks
@@ -649,32 +650,18 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                     <div className="mb-4">
                       <Link
                         to={`/dashboard/${project.ProjectID}`}
-                        className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                        className="bg-lime-500  hover:bg-lime-700 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                       >
                         Add More Resources
                       </Link>
 
-                      {/* <label htmlFor="UserID" className="block font-bold mb-2">
-                      Add Resource
-                    </label>
-                    <select
-                      id="UserID"
-                      name="UserID"
-                      className="border rounded w-full py-2 px-3 mb-2"
-                      onChange={handleSelectChange}
-                    >
-                      <option value="">Select a Resource</option>
-                      {unassignedUsers.map((user) => (
-                        <option key={user.UserID} value={user.UserID}>
-                          {user.UserName} ({user.Role})
-                        </option>
-                      ))}
-                    </select> */}
-                    </div>
+                            </div>
                   </div>
                   <button
                     type="submit"
-                    className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded"
+                    className="bg-lime-500 hover:bg-lime-700 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white font-bold py-2 px-4 rounded"
                   >
                     Update Project
                   </button>
