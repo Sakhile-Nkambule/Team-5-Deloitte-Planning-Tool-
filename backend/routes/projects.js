@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
+const { parseISO, format } = require("date-fns");
 
 //GET
 
@@ -244,7 +245,7 @@ router.put("/projects/:id", async (req, res) => {
         `,
         [
           projectId, // 1. ProjectID
-          financials.Budget, // 2. GrossRevenue (you may want to use exhaustedBudget instead)
+          financials.Budget, // 2. GrossRevenue 
           financials.netRevenue, // 3. NetRevenue
           financials.recoveryRate, // 4. RecoveryRate
           financials.profitMargin, // 5. ProfitMargin

@@ -165,14 +165,16 @@ const ProjectPage = ({ deleteProject }) => {
                   ) ? (
                     <Link
                       to={`/dashboard/${project.ProjectID}`}
-                      className="bg-black hover:bg-lime-500 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                      className="bg-black  hover:bg-lime-500 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                     >
                       View Project Dashboard
                     </Link>
                   ) : (
                     <Link
                       to={`/taskboard/${resourceId}`}
-                      className="bg-black hover:bg-lime-500 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                      className="bg-black  hover:bg-lime-500 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                     >
                       View Taskboard
                     </Link>
@@ -209,13 +211,15 @@ const ProjectPage = ({ deleteProject }) => {
                     <h3 className="text-xl font-bold mb-6">Manage Project</h3>
                     <Link
                       to={`/edit-project/${project.ProjectID}`}
-                      className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                      className="bg-lime-500  hover:bg-lime-700 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                     >
                       Edit Project
                     </Link>
                     <button
                       onClick={() => onDeleteClick(project.ProjectID)}
-                      className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+                      className="bg-red-600 hover:bg-red-800 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
                     >
                       Delete Project
                     </button>

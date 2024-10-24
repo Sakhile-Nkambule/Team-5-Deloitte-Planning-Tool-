@@ -16,15 +16,11 @@ const AddProjectPage = () => {
   const [complexity, setComplexity] = useState("High");
   const [checkedItems, setCheckedItems] = useState({});
   const [NetRevenue, setNetRevenue] = useState("");
-  const [startDate, setStartDate] = useState(null
-  );
-  const [endDate, setEndDate] = useState(
-    null
-  );
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [errors, setErrors] = useState({});
 
-  const Status = 'pending';
-  
+  const Status = "pending";
 
   const items = [
     "SAP",
@@ -53,23 +49,23 @@ const AddProjectPage = () => {
     }));
   };
 
-   // DATE (Start and End)
-   const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
+  // DATE (Start and End)
+  const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
 
-   // Handle Start Date Change
-   const handleStartDateChange = (date) => {
+  // Handle Start Date Change
+  const handleStartDateChange = (date) => {
     // Get today's date at midnight
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0); // Set to midnight
-  
+
     // Optionally log the modified currentDate
     console.log("TODAY IS: ", currentDate);
-  
+
     if (isValidDate(date)) {
       // Set the selected date to midnight as well
       const selectedDate = new Date(date);
       selectedDate.setHours(0, 0, 0, 0); // Set to midnight
-  
+
       if (selectedDate < currentDate) {
         // Start date is in the past
         setErrors((prevErrors) => ({
@@ -94,13 +90,10 @@ const AddProjectPage = () => {
       setStartDate(null); // Reset if invalid
     }
   };
-  
 
-   // Handle End Date Change
+  // Handle End Date Change
   const handleEndDateChange = (date) => {
     const currentDate = new Date(); // Today's date
-
-    
 
     if (isValidDate(date)) {
       if (date < currentDate) {
@@ -132,7 +125,6 @@ const AddProjectPage = () => {
 
   const navigate = useNavigate();
 
-
   const validateForm = () => {
     let formErrors = {};
 
@@ -155,11 +147,11 @@ const AddProjectPage = () => {
     if (!/\S+@\S+\.\S+/.test(ContactEmail)) {
       formErrors.ContactEmail = "*Please enter a valid email.";
     }
-
+    //Contact Phone validation
     if (!/^\+?[0-9\s\-()]{7,15}$/.test(ContactPhone)) {
       formErrors.ContactPhone = "*Please enter a valid phone number.";
     }
-
+    //Required System (Ensure that atleast one is selected)
     const selectedItems = Object.keys(checkedItems).filter(
       (key) => checkedItems[key] === true
     );
@@ -168,32 +160,21 @@ const AddProjectPage = () => {
       formErrors.selectedApplications = "*Select at least one application.";
     }
 
-
-
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
-
-
-
-
-
-
-
-
 
   const submitForm = (e) => {
     e.preventDefault();
 
     if (validateForm()) {
       // Proceed with form submission (e.g., API call)
-       // Get the names of only the checked checkboxes
+      // Get the names of only the checked checkboxes
       const selectedItems = Object.keys(checkedItems).filter(
         (key) => checkedItems[key] === true
       );
 
       const newProject = {
-
         Title,
         ProjectCode,
         Status,
@@ -204,24 +185,17 @@ const AddProjectPage = () => {
         EndDate: endDate ? endDate.toISOString() : null,
         complexity,
         selectedApplications: selectedItems, // Pass the names of checked checkboxes
-    Client: {
+        Client: {
           CompanyName,
           CompanyDescription,
           ContactEmail,
           ContactPhone,
-          CompanyLocation,},
-  
-      
+          CompanyLocation,
+        },
       };
       console.log("Form submitted successfully!");
       navigate("/proposed-resources", { state: { newProject } });
-
-
-      
     }
-
-   
-    
   };
 
   return (
@@ -231,11 +205,16 @@ const AddProjectPage = () => {
           <h2 className="text-black text-3xl justify-center text-center font-semibold mb-2">
             Add Project
           </h2>
-          <form onSubmit={submitForm} className="md:grid md:grid-cols-3 md:gap-4 ">
+          <form
+            onSubmit={submitForm}
+            className="md:grid md:grid-cols-3 md:gap-4 "
+          >
             <div className="pr-4 border-r-2 col-span-1">
               <div className="mb-4">
                 <h3 className="text-lime-500 text-2xl mb-5">Project Info</h3>
-                <label className="block text-gray-700 font-bold mb-2">Project Code</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Project Code
+                </label>
                 <input
                   type="text"
                   id="ProjectCode"
@@ -247,7 +226,9 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Project Name</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Project Name
+                </label>
                 <input
                   type="text"
                   id="Title"
@@ -260,7 +241,9 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Description</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Description
+                </label>
                 <textarea
                   id="Description"
                   name="Description"
@@ -271,52 +254,54 @@ const AddProjectPage = () => {
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
-               {/* Start & End Date */}
-               <div className="flex space-x-4 mb-4">
-                    <div className="w-1/2">
-                      <label
-                        htmlFor="startDate"
-                        className="block text-gray-700 font-bold mb-2"
-                      >
-                        Start Date
-                      </label>
-                      <DatePicker
-                        selected={isValidDate(startDate) ? startDate : null}
-                        onChange={handleStartDateChange}
-                        dateFormat="yyyy/MM/dd"
-                        className="border rounded w-full py-2 px-3"
-                        placeholderText="Select Project Start Date"
-                      />
-                      {errors.startDate && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.startDate}
-                        </p>
-                      )}
-                    </div>
+              {/* Start & End Date */}
+              <div className="flex space-x-4 mb-4">
+                <div className="w-1/2">
+                  <label
+                    htmlFor="startDate"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    Start Date
+                  </label>
+                  <DatePicker
+                    selected={isValidDate(startDate) ? startDate : null}
+                    onChange={handleStartDateChange}
+                    dateFormat="yyyy/MM/dd"
+                    className="border rounded w-full py-2 px-3"
+                    placeholderText="Select Project Start Date"
+                  />
+                  {errors.startDate && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.startDate}
+                    </p>
+                  )}
+                </div>
 
-                    <div className="w-1/2">
-                      <label
-                        htmlFor="endDate"
-                        className="block text-gray-700 font-bold mb-2"
-                      >
-                        End Date
-                      </label>
-                      <DatePicker
-                        selected={isValidDate(endDate) ? endDate : null}
-                        onChange={handleEndDateChange}
-                        dateFormat="yyyy/MM/dd"
-                        className="border rounded w-full py-2 px-3"
-                        placeholderText="Select Project End Date"
-                      />
-                      {errors.endDate && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {errors.endDate}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Net Revenue</label>
+                <div className="w-1/2">
+                  <label
+                    htmlFor="endDate"
+                    className="block text-gray-700 font-bold mb-2"
+                  >
+                    End Date
+                  </label>
+                  <DatePicker
+                    selected={isValidDate(endDate) ? endDate : null}
+                    onChange={handleEndDateChange}
+                    dateFormat="yyyy/MM/dd"
+                    className="border rounded w-full py-2 px-3"
+                    placeholderText="Select Project End Date"
+                  />
+                  {errors.endDate && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.endDate}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-bold mb-2">
+                  Net Revenue
+                </label>
                 <input
                   type="text"
                   id="NetRevenue"
@@ -327,10 +312,16 @@ const AddProjectPage = () => {
                   value={NetRevenue}
                   onChange={(e) => setNetRevenue(e.target.value)}
                 />
-                {errors.NetRevenue && <p className="text-red-500 text-xs mt-1">{errors.NetRevenue}</p>}
+                {errors.NetRevenue && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.NetRevenue}
+                  </p>
+                )}
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Project Budget</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Project Budget
+                </label>
                 <input
                   type="text"
                   id="Budget"
@@ -341,10 +332,14 @@ const AddProjectPage = () => {
                   value={Budget}
                   onChange={(e) => setBudget(e.target.value)}
                 />
-                {errors.Budget && <p className="text-red-500 text-xs mt-1">{errors.Budget}</p>}
+                {errors.Budget && (
+                  <p className="text-red-500 text-xs mt-1">{errors.Budget}</p>
+                )}
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Project Complexity</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Project Complexity
+                </label>
                 <select
                   value={complexity}
                   onChange={(e) => setComplexity(e.target.value)}
@@ -360,7 +355,9 @@ const AddProjectPage = () => {
             <div className="col-span-1 border-r-2 pr-4">
               <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Company Name</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Company Name
+                </label>
                 <input
                   type="text"
                   id="CompanyName"
@@ -373,7 +370,9 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Company Description</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Company Description
+                </label>
                 <textarea
                   id="CompanyDescription"
                   name="CompanyDescription"
@@ -385,7 +384,9 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Location</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Location
+                </label>
                 <input
                   type="text"
                   id="location"
@@ -398,7 +399,9 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Contact Email</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Contact Email
+                </label>
                 <input
                   type="email"
                   id="contact_email"
@@ -411,7 +414,9 @@ const AddProjectPage = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">Contact Phone</label>
+                <label className="block text-gray-700 font-bold mb-2">
+                  Contact Phone
+                </label>
                 <input
                   type="tel"
                   id="contact_phone"
@@ -420,9 +425,12 @@ const AddProjectPage = () => {
                   placeholder="Optional phone for client"
                   value={ContactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  
                 />
-                {errors.ContactPhone && <p className="text-red-500 text-xs mt-1">{errors.ContactPhone}</p>}
+                {errors.ContactPhone && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.ContactPhone}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -430,7 +438,10 @@ const AddProjectPage = () => {
               <h3 className="text-lime-500 text-2xl mb-5">Required Systems</h3>
               <div className="space-y-2 ">
                 {items.map((item, index) => (
-                  <label key={index} className="flex justify-items-end space-x-2">
+                  <label
+                    key={index}
+                    className="flex justify-items-end space-x-2"
+                  >
                     <input
                       type="checkbox"
                       name={item}
@@ -440,22 +451,27 @@ const AddProjectPage = () => {
                     />
                     <span
                       className={`${
-                        checkedItems[item] ? "text-lime-500 font-bold" : "text-gray-900"
+                        checkedItems[item]
+                          ? "text-lime-500 font-bold"
+                          : "text-gray-900"
                       }`}
                     >
                       {item}
                     </span>
-                    
                   </label>
-                  
                 ))}
               </div>
-              {errors.selectedApplications && <p className="text-red-500 text-md mt-1">{errors.selectedApplications}</p>}
+              {errors.selectedApplications && (
+                <p className="text-red-500 text-md mt-1">
+                  {errors.selectedApplications}
+                </p>
+              )}
             </div>
 
             <div className="col-span-3">
               <button
-                className="bg-lime-500 hover:bg-lime-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
+                className="bg-lime-500  hover:bg-lime-700 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
                 type="submit"
               >
                 Add Project

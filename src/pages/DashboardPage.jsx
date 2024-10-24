@@ -12,7 +12,7 @@ const DashboardPage = () => {
   return (
     <div>
       <DashboardHearder resources={resources} project ={project} /> {/* Pass resources to DashboardHeader */}
-      <div className="flex bg-gray-100 shadow-xl p-4 grid grid-cols-3 gap-4">
+      <div className=" bg-gray-100 shadow-xl p-4 grid grid-cols-3 gap-4">
         <div className="col-span-2 bg-white rounded-xl p-4">
           <AvailableResources  resources={resources} project ={project}  />
         </div>

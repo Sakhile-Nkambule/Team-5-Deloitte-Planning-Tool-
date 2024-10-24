@@ -31,13 +31,11 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
   const [selectedRole, setSelectedRole] = useState("Suggested Resources");
   const [users, setUsers] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([]);
-  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState("");
   const [permissionreason, setpermissionreason] = useState(null);
-  
-
 
   useEffect(() => {
-  //Fetching all users from the backend
+    //Fetching all users from the backend
     const fetchUsers = async () => {
       setLoading(true);
       try {
@@ -59,7 +57,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
                 ? await skillsResponse.json()
                 : {};
 
-              // Fetch tasks
+              // Fetch tasks--CALENDER
               const tasksResponse = await fetch(
                 `http://localhost:8081/tasks/user/${user.UserID}`
               );
@@ -113,8 +111,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     );
     setUsers(filteredUsers);
 
-    console.log("CHECKKK :", availableUsers);
-      //Creating ML payload
+    //Creating ML payload
     if (availableUsers.length > 0) {
       const mlPayload = {
         ProjectComplexity: newProject.complexity,
@@ -123,7 +120,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           UserID: user.UserID,
           UserRole: user.Role,
           UserSkillsProficiency: user.SkillsProficiency,
-          TaskCount: user.TaskCount, // Pass task count to ML model if needed
+          TaskCount: user.TaskCount,
         })),
       };
 
@@ -145,6 +142,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             throw new Error("Failed to fetch predictions from the ML API");
           }
 
+          //Results from ML Model
           const predictionResult = await response.json();
           console.log("ML Predictions:", predictionResult);
 
@@ -211,7 +209,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
               Role: user.Role,
               UserName: user.UserName,
               HourlyRate: user.HourlyRate,
-              TaskCount: user.TaskCount, 
+              TaskCount: user.TaskCount,
             }));
           setSuggestedUsers(unselectedResources);
 
@@ -245,7 +243,8 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
         ((newProject.NetRevenue - totalCost) / newProject.NetRevenue) * 100;
       setProfitMargin(calculatedProfitMargin.toFixed(2));
 
-      const calculatedRecoveryRate = (newProject.NetRevenue / newProject.Budget)* 100; // Assuming recovery rate = profit margin
+      const calculatedRecoveryRate =
+        (newProject.NetRevenue / newProject.Budget) * 100; // Assuming recovery rate = profit margin
       setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
 
@@ -278,7 +277,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
       );
     }
   };
-//Handle Add to project click event
+  //Handle Add to project click event
   const handleAddToProjectClick = (user) => {
     addNewResource(user.UserID);
     console.log("Final Check: ", resources);
@@ -297,70 +296,76 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     setSuggestedUsers((prevUnselected) => [...prevUnselected, removedResource]);
   };
 
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
   
-
-
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  // If conditions for showing the modal are met
-  if (profitMargin < 57 || recoveryRate < 50) {
-    if (profitMargin < 57) {
-      setpermissionreason("*Profit margin is below 57%");
+    // Check if there is at least one of the required roles in the resources
+    const hasRequiredRole = resources.some(resource => 
+      resource.Role === "Director" || 
+      resource.Role === "Snr Associate Director" || 
+      resource.Role === "Associate Director"
+    );
+  
+    if (!hasRequiredRole) {
+      toast.error("A project must contain at least 1 Director/Senior Associate Director/Associate Director.");
+      return; // Stop further submission until the user handles this
     }
-    if (recoveryRate < 50) {
-      setpermissionreason("*Recovery rate is below 50%");
+  
+    // Check profit margin and recovery rate conditions
+    if (profitMargin < 57 || recoveryRate < 50) {
+      if (profitMargin < 57) {
+        setpermissionreason("*Profit margin is below 57%");
+      }
+      if (recoveryRate < 50) {
+        setpermissionreason("*Recovery rate is below 50%");
+      }
+      setNotificationModalOpen(true);
+      return; // Stop further submission until notification is handled
     }
-    setNotificationModalOpen(true);
-    return; // Stop further submission until notification is handled
-  }
-
-  // If no permission is required, proceed with form submission
-  await submitProject();
-};
-
-const handleNotificationSubmit = async () => {
-  if (!notificationMessage.trim()) {
-    toast.error("Notification message cannot be empty.");
-    return;
-  }
-
-  // Send the notification
-  await sendNotification(notificationMessage);
-
-  // Close the notification modal
-  setNotificationModalOpen(false);
-
-  // Proceed with form submission after notification is sent
-  await submitProject();
-};
-
-const submitProject = async () => {
-  const projectWithResources = {
-    ...newProject,
-    resources,
-    financials: {
-      Budget,
-      exhaustedBudget,
-      profitMargin,
-      netRevenue,
-      recoveryRate,
-    },
+  
+    // If no permission is required, proceed with form submission
+    await submitProject();
   };
 
-  console.log("Project with Resources Payload:", projectWithResources); // Debugging
-  await addProjectSubmit(projectWithResources);
-  toast.success("Project Added Successfully");
-  navigate("/projects");
-};
+  const handleNotificationSubmit = async () => {
+    if (!notificationMessage.trim()) {
+      toast.error("Notification message cannot be empty.");
+      return;
+    }
 
+    // Send the notification
+    await sendNotification(notificationMessage);
 
+    // Close the notification modal
+    setNotificationModalOpen(false);
+
+    // Proceed with form submission after notification is sent
+    await submitProject();
+  };
+
+  const submitProject = async () => {
+    const projectWithResources = {
+      ...newProject,
+      resources,
+      financials: {
+        Budget,
+        exhaustedBudget,
+        profitMargin,
+        netRevenue,
+        recoveryRate,
+      },
+    };
+
+    console.log("Project with Resources Payload:", projectWithResources); // Debugging
+    await addProjectSubmit(projectWithResources);
+    toast.success("Project Added Successfully");
+    navigate("/projects");
+  };
 
   // Function to send a notification to the Associate Director
-  const sendNotification = async (message) => { // Accept the message as a parameter
-    console.log("Sending notification with message:", message); 
+  const sendNotification = async (message) => {
+    // Accept the message as a parameter
+    console.log("Sending notification with message:", message);
     const associateDirector = resources.find(
       (resource) => resource.Role === "Director"
     );
@@ -372,7 +377,7 @@ const submitProject = async () => {
           Type: "In-App",
           Priority: "High",
         };
-  
+
         const response = await fetch("http://localhost:8081/notifications", {
           method: "POST",
           headers: {
@@ -380,7 +385,7 @@ const submitProject = async () => {
           },
           body: JSON.stringify(notificationData),
         });
-  
+
         if (response.ok) {
           toast.success("Permission request sent successfully");
         } else {
@@ -394,15 +399,16 @@ const submitProject = async () => {
       toast.error("No Director found in the resources");
     }
   };
-  
-  
-//Fetching all user tasks
+
+  //Fetching all user tasks
   const fetchUserTasks = async (userId) => {
-    setIsLoading(true);//Spinner
+    setIsLoading(true); //Spinner
     try {
-      const response = await fetch(`http://localhost:8081/tasks/user/${userId}`);
+      const response = await fetch(
+        `http://localhost:8081/tasks/user/${userId}`
+      );
       const data = await response.json();
-      setDateTasks(data);//Set dateTasks to feed into calender component
+      setDateTasks(data); //Set dateTasks to feed into calender component
       setIsLoading(false);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
@@ -415,14 +421,15 @@ const submitProject = async () => {
     setIsCalendarModalOpen(true); // Open the calendar modal
     fetchUserTasks(resource.UserID);
   };
-//preparing date range to pass into calender
-  const projectStartDate = newProject.StartDate; 
-  const projectEndDate = newProject.EndDate; 
+  //preparing date range to pass into calender
+  const projectStartDate = newProject.StartDate;
+  const projectEndDate = newProject.EndDate;
 
   const projectDateRange = {
     start: projectStartDate,
     end: projectEndDate,
   };
+  console.log("###: ", projectDateRange);
 
   //Function for filter roles
   const roles = [
@@ -492,18 +499,19 @@ const submitProject = async () => {
                 {resources.map((resource, index) => (
                   <div
                     key={index}
-                    className="relative mb-4 shadow-lg p-4 border rounded-md"
+                    className="relative mb-4 p-4 border rounded-md shadow-md transition-transform transform hover:scale-105 hover:shadow-xl"
                   >
                     <FontAwesomeIcon
                       icon={faTimes}
-                      className="cursor-pointer text-gray-500 absolute top-2 right-2"
+                      className="cursor-pointer text-gray-500 absolute top-2 right-2 "
                       onClick={() => removeResource(index)}
                     />
 
                     {/* Calendar Icon */}
                     <FontAwesomeIcon
                       icon={faCalendarAlt}
-                      className="cursor-pointer text-gray-500 absolute top-2 left-10"
+                      className="cursor-pointer text-gray-500 absolute top-2 left-10  hover:text-gray-900 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
                       onClick={() => handleCalendarClick(resource)}
                     />
                     {/* Add Task Count */}
@@ -558,16 +566,11 @@ const submitProject = async () => {
           <div className="flex justify-between mt-6">
             <button
               onClick={handleSubmit}
-              className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+              className="bg-lime-500  hover:bg-lime-700 hover:shadow-lg 
+             transform hover:scale-105 transition-all text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
             >
               Accept Resources
             </button>
-            {/* <button
-              onClick={sendNotification}
-              className="bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-            >
-              Request Permission
-            </button> */}
           </div>
 
           <div className="container mx-auto p-4">
@@ -653,36 +656,36 @@ const submitProject = async () => {
 
       {/* Modal for Notification */}
       <Modal
-  isOpen={isNotificationModalOpen}
-  onClose={() => setNotificationModalOpen(false)}
- 
->
-  <h3 className="text-xl font-bold text-center mb-4">Permission Request</h3>
-  <div className="mb-4">
-    <p className="text-center text-red-500 ">
-      {`${permissionreason} . The project's financials are not within the acceptable range.`}
-    </p>
-    <label className="block text-gray-700 font-bold mb-2">
-      Permission Message
-    </label>
-    <textarea
-      id="NotificationMessage"
-      name="NotificationMessage"
-      className="border rounded w-full py-2 px-3"
-      rows="4"
-      placeholder="What is the reason for this permission request?"
-      value={notificationMessage}
-      onChange={(e) => setNotificationMessage(e.target.value)}
-    />
-    <button
-      onClick={handleNotificationSubmit}
-      className="bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-    >
-      Request Permission
-    </button>
-  </div>
-</Modal>
-
+        isOpen={isNotificationModalOpen}
+        onClose={() => setNotificationModalOpen(false)}
+      >
+        <h3 className="text-xl font-bold text-center mb-4">
+          Permission Request
+        </h3>
+        <div className="mb-4">
+          <p className="text-center text-red-500 ">
+            {`${permissionreason} . The project's financials are not within the acceptable range.`}
+          </p>
+          <label className="block text-gray-700 font-bold mb-2">
+            Permission Message
+          </label>
+          <textarea
+            id="NotificationMessage"
+            name="NotificationMessage"
+            className="border rounded w-full py-2 px-3"
+            rows="4"
+            placeholder="What is the reason for this permission request?"
+            value={notificationMessage}
+            onChange={(e) => setNotificationMessage(e.target.value)}
+          />
+          <button
+            onClick={handleNotificationSubmit}
+            className="bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+          >
+            Request Permission
+          </button>
+        </div>
+      </Modal>
     </section>
   );
 };

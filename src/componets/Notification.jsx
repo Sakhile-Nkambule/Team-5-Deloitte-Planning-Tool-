@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
-import { faBell, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faTimes, faCheckCircle, faCircle  } from '@fortawesome/free-solid-svg-icons';
+
 
 function Notification({ NotificationID, message, description, color, createdAt, Read_, onDelete }) {
     let bgColor = "";
@@ -46,6 +47,16 @@ function Notification({ NotificationID, message, description, color, createdAt, 
               onClick={() => onDelete(NotificationID)}
             />
           </div>
+
+           {/* Conditionally render green tick for read or red dot for unread */}
+           <div className="absolute top-2 right-2">
+            {Read_ ? (
+              <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" size="lg" /> // Green tick for read
+            ) : (
+              <FontAwesomeIcon icon={faCircle} className="text-red-500" size="lg" /> // Red dot for unread
+            )}
+          </div>
+        
         </div>
         <div className={`${unreadContainerStyles} w-5/6 rounded-b-lg shadow-2xl p-2 mb-10`}>
           <div className="text-sm text-gray-600">Created At: {formattedDate}</div>
