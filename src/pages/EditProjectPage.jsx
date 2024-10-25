@@ -53,7 +53,6 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     // Fetch user data when the component mounts (run only once)
     const fetchUserData = async () => {
       try {
-      
         const response = await fetch("http://localhost:8081/users");
         if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
@@ -302,389 +301,377 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   };
 
   return (
-    <>
-      <section>
-        <div className="container m-auto py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
-          <button onClick={handleGoBack}>
-            {" "}
-            <FaArrowLeft className="mr-1" /> Back
-          </button>
-        </div>
-      </section>
+    <div>
+      <div className="m-auto bg-lime-500 py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
+        <button onClick={handleGoBack} className="flex items-center text-lime-500 rounded-md bg-white px-2 ">
+          <FaArrowLeft className="mr-1" /> Back
+        </button>
+      </div>
 
-      <section className="bg-lime-100">
-        <div className="container m-auto py-24 relative">
-          <div className="bg-white px-6 py-8 mb-10 shadow-md rounded-md border m-2 md:m-0">
-            <h2 className="text-black text-3xl text-center font-semibold mb-6">
-              Edit Project
-            </h2>
+      <div className="bg-lime-500 px-5 pt-5">
+        <div className="bg-white px-6 py-8 mb-10 shadow-md rounded-md border m-2 md:m-0">
+          <h2 className="text-black text-3xl text-center font-semibold mb-6">
+            Edit Project
+          </h2>
 
-            {/* Budget summary in the top right corner */}
+          {/* Budget summary in the top right corner */}
 
-            <h2 className="text-2xl font-semibold mb-4 text-center">
-              Budget Summary
-            </h2>
+          <h2 className="text-2xl font-semibold mb-4 text-center">
+            Budget Summary
+          </h2>
 
-            <div className="flex justify-center items-center space-x-40 bg-white h-100 p-8 shadow-md rounded-full  w-100 ">
-              <div className="mb-2">
-                <p className="text-gray-700 font-semibold">Gross Revenue:</p>
-                <p className="text-green-500 font-semibold">{`R${project.Budget}`}</p>
-              </div>
-
-              <div className="mb-2">
-                <p className="text-gray-700 font-semibold">Total Costs:</p>
-                <p className="text-red-500 font-semibold">{`R${exhaustedBudget}`}</p>
-              </div>
-              <div className="mt-4">
-                <p className="text-gray-700 font-semibold">Net Revenue:</p>
-                <p className="font-semibold">{`R${netRevenue}`}</p>
-              </div>
-              <div className="mt-4">
-                <p className="text-gray-700 font-semibold">Profit Margin:</p>
-                <p className="font-semibold">{`${profitMargin}%`}</p>
-              </div>
-              <div className="mb-2">
-                <p className="text-gray-700 font-semibold">Recovery Rate:</p>
-                <p className="text-red-500 font-semibold">{`${recoveryRate}%`}</p>
-              </div>
+          <div className="flex justify-center items-center space-x-40 bg-white h-100 p-8 shadow-md rounded-full  w-100 ">
+            <div className="mb-2">
+              <p className="text-gray-700 font-semibold">Gross Revenue:</p>
+              <p className="text-green-500 font-semibold">{`R${project.Budget}`}</p>
             </div>
 
-            <form onSubmit={submitForm}>
-              {loading ? (
-                <Spinner loading={ loading} />
-              ) : (
-                <div className="grid grid-cols-2 gap-2 col-span-1 py-4 ">
-                  {/* Project details section */}
-                  <div className="pr-6 border-r-1">
-                    <div className="mb-4">
+            <div className="mb-2">
+              <p className="text-gray-700 font-semibold">Total Costs:</p>
+              <p className="text-red-500 font-semibold">{`R${exhaustedBudget}`}</p>
+            </div>
+            <div className="mt-4">
+              <p className="text-gray-700 font-semibold">Net Revenue:</p>
+              <p className="font-semibold">{`R${netRevenue}`}</p>
+            </div>
+            <div className="mt-4">
+              <p className="text-gray-700 font-semibold">Profit Margin:</p>
+              <p className="font-semibold">{`${profitMargin}%`}</p>
+            </div>
+            <div className="mb-2">
+              <p className="text-gray-700 font-semibold">Recovery Rate:</p>
+              <p className="text-red-500 font-semibold">{`${recoveryRate}%`}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-5 bg-white mt-5 px-5 rounded-md">
+          <form onSubmit={submitForm}>
+            {loading ? (
+              <Spinner loading={loading} />
+            ) : (
+              <div className="grid grid-cols-2 gap-6 py-4">
+                {/* Project info section */}
+                <div className="pr-6 border-r-2">
+                  <h3 className="text-lime-500 text-2xl mb-5">Project Info</h3>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="type"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Project
+                    </label>
+                    <input
+                      type="text"
+                      id="type"
+                      name="type"
+                      className="border rounded w-full py-2 px-3"
+                      readOnly
+                      value={ProjectCode}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-gray-700 font-bold mb-2">
+                      Project Name
+                    </label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      className="border rounded w-full py-2 px-3 mb-2"
+                      placeholder="eg. Planning Tool"
+                      required
+                      value={Title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="description"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Description
+                    </label>
+                    <textarea
+                      id="Description"
+                      name="Description"
+                      className="border rounded w-full py-2 px-3"
+                      rows="4"
+                      placeholder="Add any Project expectations, requirements, etc"
+                      value={Description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="budget"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Budget
+                    </label>
+                    <textarea
+                      id="budget"
+                      name="budget"
+                      className="border rounded w-full py-2 px-3"
+                      required
+                      value={Budget}
+                      onChange={(e) => handleBudgetChange(e)}
+                    ></textarea>
+                    {errors.budget && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.budget}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Start & End Date */}
+                  <div className="flex space-x-4 mb-4">
+                    <div className="w-1/2">
                       <label
-                        htmlFor="type"
+                        htmlFor="startDate"
                         className="block text-gray-700 font-bold mb-2"
                       >
-                        Project
+                        Start Date
                       </label>
-                      <input
-                        type="text"
-                        id="type"
-                        name="type"
+                      <DatePicker
+                        selected={isValidDate(startDate) ? startDate : null}
+                        onChange={handleStartDateChange}
+                        dateFormat="yyyy/MM/dd"
                         className="border rounded w-full py-2 px-3"
-                        readOnly
-                        value={ProjectCode}
+                        placeholderText="Select Project Start Date"
                       />
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-gray-700 font-bold mb-2">
-                        Project Name
-                      </label>
-                      <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        className="border rounded w-full py-2 px-3 mb-2"
-                        placeholder="eg. Planning Tool"
-                        required
-                        value={Title}
-                        onChange={(e) => setTitle(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label
-                        htmlFor="description"
-                        className="block text-gray-700 font-bold mb-2"
-                      >
-                        Description
-                      </label>
-                      <textarea
-                        id="Description"
-                        name="Description"
-                        className="border rounded w-full py-2 px-3"
-                        rows="4"
-                        placeholder="Add any Project expectations, requirements, etc"
-                        value={Description}
-                        onChange={(e) => setDescription(e.target.value)}
-                      ></textarea>
-                    </div>
-
-                    <div className="mb-4">
-                      <label
-                        htmlFor="budget"
-                        className="block text-gray-700 font-bold mb-2"
-                      >
-                        Budget
-                      </label>
-                      <textarea
-                        id="budget"
-                        name="budget"
-                        className="border rounded w-full py-2 px-3"
-                        required
-                        value={Budget}
-                        onChange={(e) => handleBudgetChange(e)}
-                      ></textarea>
-                      {errors.budget && (
+                      {errors.startDate && (
                         <p className="text-red-500 text-xs mt-1">
-                          {errors.budget}
+                          {errors.startDate}
                         </p>
                       )}
                     </div>
 
-                    {/* Start & End Date */}
-                    <div className="flex space-x-4 mb-4">
-                      <div className="w-1/2">
-                        <label
-                          htmlFor="startDate"
-                          className="block text-gray-700 font-bold mb-2"
-                        >
-                          Start Date
-                        </label>
-                        <DatePicker
-                          selected={isValidDate(startDate) ? startDate : null}
-                          onChange={handleStartDateChange}
-                          dateFormat="yyyy/MM/dd"
-                          className="border rounded w-full py-2 px-3"
-                          placeholderText="Select Project Start Date"
-                        />
-                        {errors.startDate && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {errors.startDate}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="w-1/2">
-                        <label
-                          htmlFor="endDate"
-                          className="block text-gray-700 font-bold mb-2"
-                        >
-                          End Date
-                        </label>
-                        <DatePicker
-                          selected={isValidDate(endDate) ? endDate : null}
-                          onChange={handleEndDateChange}
-                          dateFormat="yyyy/MM/dd"
-                          className="border rounded w-full py-2 px-3"
-                          placeholderText="Select Project End Date"
-                        />
-                        {errors.endDate && (
-                          <p className="text-red-500 text-xs mt-1">
-                            {errors.endDate}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
+                    <div className="w-1/2">
                       <label
-                        htmlFor="status"
+                        htmlFor="endDate"
                         className="block text-gray-700 font-bold mb-2"
                       >
-                        Project Status
+                        End Date
                       </label>
-                      <select
-                        id="status"
-                        name="status"
+                      <DatePicker
+                        selected={isValidDate(endDate) ? endDate : null}
+                        onChange={handleEndDateChange}
+                        dateFormat="yyyy/MM/dd"
                         className="border rounded w-full py-2 px-3"
-                        value={Status}
-                        onChange={(e) => setStatus(e.target.value)}
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Complete">Complete</option>
-                      </select>
-                    </div>
-
-                    <h3 className="text-lime-500 text-2xl mb-5">
-                      Company Info
-                    </h3>
-
-                    <div className="mb-4">
-                      <label
-                        htmlFor="company"
-                        className="block text-gray-700 font-bold mb-2"
-                      >
-                        Company Name
-                      </label>
-                      <input
-                        type="text"
-                        id="company"
-                        name="company"
-                        className="border rounded w-full py-2 px-3"
-                        placeholder="Company Name"
-                        value={CompanyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholderText="Select Project End Date"
                       />
-                    </div>
-
-                    <div className="mb-4">
-                      <label
-                        htmlFor="company_description"
-                        className="block text-gray-700 font-bold mb-2"
-                      >
-                        Company Description
-                      </label>
-                      <textarea
-                        id="company_description"
-                        name="company_description"
-                        className="border rounded w-full py-2 px-3"
-                        rows="4"
-                        placeholder="What does the company do?"
-                        value={CompanyDescription}
-                        onChange={(e) => setCompanyDescription(e.target.value)}
-                      ></textarea>
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-gray-700 font-bold mb-2">
-                        Location
-                      </label>
-                      <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        className="border rounded w-full py-2 px-3 mb-2"
-                        placeholder="Company Location"
-                        required
-                        value={CompanyLocation}
-                        onChange={(e) => setCompanyLocation(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label
-                        htmlFor="contact_email"
-                        className="block text-gray-700 font-bold mb-2"
-                      >
-                        Contact Email
-                      </label>
-                      <input
-                        type="email"
-                        id="contact_email"
-                        name="contact_email"
-                        className="border rounded w-full py-2 px-3"
-                        placeholder="Email address for applicants"
-                        required
-                        value={ContactEmail}
-                        onChange={(e) => setContactEmail(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="mb-4">
-                      <label
-                        htmlFor="contact_phone"
-                        className="block font-bold mb-2"
-                      >
-                        Contact Phone
-                      </label>
-                      <input
-                        type="tel"
-                        id="contact_phone"
-                        name="contact_phone"
-                        className="border rounded w-full py-2 px-3"
-                        placeholder="Optional phone for applicants"
-                        value={ContactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
-                      />
+                      {errors.endDate && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.endDate}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Project Resources Section */}
-                  <div className="border-l-10 pl-2">
-                    <h3 className="text-lime-500 text-2xl mb-5">
-                      Allocated Resources
-                    </h3>
-                    {projectResources.map((resource, resourceIndex) => (
-                      <div key={resourceIndex} className="mb-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="text-lime-500 font-bold">
-                            Resource #{resourceIndex + 1}
-                          </h4>
-                          <button
-                            type="button"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => removeResource(resource.ResourceID)}
-                          >
-                            Remove Resource
-                          </button>
-                        </div>
-                        <div className="flex mb-2 items-center">
-                          <input
-                            type="text"
-                            name="Role"
-                            className="border rounded py-2 px-3 w-1/4 mr-2"
-                            value={resource.Role}
-                            readOnly
-                          />
-                          <input
-                            type="text"
-                            name="name"
-                            className="border rounded py-2 px-3 w-1/4 mr-2"
-                            value={resource.name}
-                            readOnly
-                          />
-                          <input
-                            type="number"
-                            name="Planned Hours"
-                            className="border rounded py-2 px-3 w-1/4 mr-2"
-                            value={resource.PlannedHours}
-                            onChange={(e) =>
-                              handleResourceChange(
-                                resourceIndex,
-                                "PlannedHours",
-                                e.target.value
-                              )
-                            }
-                          />
-                          <button
-                            type="button"
-                            className="bg-blue-600 text-white rounded px-2 py-1"
-                            onClick={() => addTask(resourceIndex)}
-                          >
-                            Manage Tasks
-                          </button>
-                        </div>
-                        {/* {DELETED} */}
-                      </div>
-                    ))}
-
-                    <div className="mb-4">
-                      <Link
-                        to={`/dashboard/${project.ProjectID}`}
-                        className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
-                      >
-                        Add More Resources
-                      </Link>
-
-                      {/* <label htmlFor="UserID" className="block font-bold mb-2">
-                      Add Resource
+                  <div className="mb-4">
+                    <label
+                      htmlFor="status"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Project Status
                     </label>
                     <select
-                      id="UserID"
-                      name="UserID"
-                      className="border rounded w-full py-2 px-3 mb-2"
-                      onChange={handleSelectChange}
+                      id="status"
+                      name="status"
+                      className="border rounded w-full py-2 px-3"
+                      value={Status}
+                      onChange={(e) => setStatus(e.target.value)}
                     >
-                      <option value="">Select a Resource</option>
-                      {unassignedUsers.map((user) => (
-                        <option key={user.UserID} value={user.UserID}>
-                          {user.UserName} ({user.Role})
-                        </option>
-                      ))}
-                    </select> */}
-                    </div>
+                      <option value="Pending">Pending</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Complete">Complete</option>
+                    </select>
                   </div>
+                </div>
+
+                {/* Company info section */}
+                <div className="pl-6">
+                  <h3 className="text-lime-500 text-2xl mb-5">Company Info</h3>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="company"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Company Name
+                    </label>
+                    <input
+                      type="text"
+                      id="company"
+                      name="company"
+                      className="border rounded w-full py-2 px-3"
+                      placeholder="Company Name"
+                      value={CompanyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="company_description"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Company Description
+                    </label>
+                    <textarea
+                      id="company_description"
+                      name="company_description"
+                      className="border rounded w-full py-2 px-3"
+                      rows="4"
+                      placeholder="What does the company do?"
+                      value={CompanyDescription}
+                      onChange={(e) => setCompanyDescription(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-gray-700 font-bold mb-2">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      id="location"
+                      name="location"
+                      className="border rounded w-full py-2 px-3 mb-2"
+                      placeholder="Company Location"
+                      required
+                      value={CompanyLocation}
+                      onChange={(e) => setCompanyLocation(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="contact_email"
+                      className="block text-gray-700 font-bold mb-2"
+                    >
+                      Contact Email
+                    </label>
+                    <input
+                      type="email"
+                      id="contact_email"
+                      name="contact_email"
+                      className="border rounded w-full py-2 px-3"
+                      placeholder="Email address for applicants"
+                      required
+                      value={ContactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="contact_phone"
+                      className="block font-bold mb-2"
+                    >
+                      Contact Phone
+                    </label>
+                    <input
+                      type="tel"
+                      id="contact_phone"
+                      name="contact_phone"
+                      className="border rounded w-full py-2 px-3"
+                      placeholder="Optional phone for applicants"
+                      value={ContactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Update Project button */}
+                <div className="col-span-2">
                   <button
                     type="submit"
-                    className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded"
+                    className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded mt-4"
                   >
                     Update Project
                   </button>
                 </div>
-              )}
-            </form>
+              </div>
+            )}
+          </form>
+        </div>
+
+        <div className="mt-5 bg-white px-5 pt-5 rounded-md pb-5 mb-5">
+          <div className="border-l-10 pl-2">
+            <h3 className="text-lime-500 text-2xl mb-5">Allocated Resources</h3>
+            {projectResources.map((resource, resourceIndex) => (
+              <div key={resourceIndex} className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-lime-500 font-bold">
+                    Resource {resourceIndex + 1}
+                  </h4>
+                </div>
+                <div className="flex mb-2 items-center">
+                  <input
+                    type="text"
+                    name="Role"
+                    className="border rounded py-2 px-3 w-1/4 mr-2"
+                    value={resource.Role}
+                    readOnly
+                  />
+                  <input
+                    type="text"
+                    name="name"
+                    className="border rounded py-2 px-3 w-1/4 mr-2"
+                    value={resource.name}
+                    readOnly
+                  />
+                  <input
+                    type="number"
+                    name="Planned Hours"
+                    className="border rounded py-2 px-3 w-1/4 mr-2"
+                    value={resource.PlannedHours}
+                    onChange={(e) =>
+                      handleResourceChange(
+                        resourceIndex,
+                        "PlannedHours",
+                        e.target.value
+                      )
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="bg-blue-600 text-white rounded px-2 py-1"
+                    onClick={() => addTask(resourceIndex)}
+                  >
+                    Manage Tasks
+                  </button>
+                  <button
+                    type="button"
+                    className=" ml-4 py-1 rounded-md text-white bg-red-600 px-2 hover:bg-red-700"
+                    onClick={() => removeResource(resource.ResourceID)}
+                  >
+                    Remove Resource
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <div className="mb-4">
+              <Link
+                to={`/dashboard/${project.ProjectID}`}
+                className="bg-lime-500 hover:bg-lime-700 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
+              >
+                Add More Resources
+              </Link>
+            </div>
           </div>
         </div>
-      </section>
-    </>
+        <div>
+          <>.</>
+        </div>
+      </div>
+    </div>
   );
 };
 
