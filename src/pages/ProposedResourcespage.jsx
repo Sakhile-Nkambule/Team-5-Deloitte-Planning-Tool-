@@ -130,7 +130,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
       const fetchMLPredictions = async () => {
         try {
-          const response = await fetch("http://localhost:5051/predict", {
+          const response = await fetch("http://3.80.71.14:5051/predict", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
