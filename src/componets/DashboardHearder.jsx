@@ -34,7 +34,7 @@ const DashboardHeader = ({ resources, project }) => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await fetch(`http://localhost:8081/tasks/project/${project.ProjectID}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/project/${project.ProjectID}`);
         const data = await response.json();
         setTasksData(data);
 
@@ -59,14 +59,14 @@ const DashboardHeader = ({ resources, project }) => {
     const fetchFinancialsAndUsers = async () => {
       try {
         const financialResponse = await fetch(
-          `http://localhost:8081/financials/${project.ProjectID}`
+          `${import.meta.env.VITE_API_URL}/financials/${project.ProjectID}`
         );
         const financialData = await financialResponse.json();
         const netRevenue = financialData.NetRevenue || 0;
         const projectedProfitMargin = financialData.ProfitMargin || 0;
         setProjectedProfitMargin(projectedProfitMargin);
 
-        const usersResponse = await fetch("http://localhost:8081/users");
+        const usersResponse = await fetch(`${import.meta.env.VITE_API_URL}/users`);
         const usersData = await usersResponse.json();
         setUsers(usersData); // Save the users data
 

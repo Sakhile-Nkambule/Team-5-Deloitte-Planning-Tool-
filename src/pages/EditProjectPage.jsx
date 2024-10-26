@@ -53,7 +53,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
     // Fetch user data when the component mounts (run only once)
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:8081/users");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users`);
         if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
 
@@ -145,7 +145,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
         )
       ) {
         // Send a DELETE request to the server to remove the resource
-        await fetch(`http://localhost:8081/resources/${resourceId}`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/resources/${resourceId}`, {
           method: "DELETE",
         });
       }
@@ -650,7 +650,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   </button>
                   <button
                     type="button"
-                    className=" ml-4 py-1 bg-red-600 text-white rounded px-2 py-1  hover:bg-red-700 hover:shadow-lg 
+                    className=" ml-4 bg-red-600 text-white rounded px-2 py-1  hover:bg-red-700 hover:shadow-lg 
              transform hover:scale-105 transition-all"
                     onClick={() => removeResource(resource.ResourceID)}
                   >

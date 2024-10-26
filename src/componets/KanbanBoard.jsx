@@ -18,7 +18,7 @@ export default function Board() {
   useEffect(() => {
     if (resourceId) {
       console.log(`Fetching tasks for resourceId: ${resourceId}`);
-      fetch(`http://localhost:8081/tasks/${resourceId}`)
+      fetch(`${import.meta.env.VITE_API_URL}/tasks/${resourceId}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -117,7 +117,7 @@ export default function Board() {
 
     if (ToDo.length > 0) {
       promises.push(
-        fetch(`http://localhost:8081/tasks/${resourceId}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(ToDo),
@@ -127,7 +127,7 @@ export default function Board() {
 
     if (inReview.length > 0) {
       promises.push(
-        fetch(`http://localhost:8081/tasks/${resourceId}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(inReview),
@@ -137,7 +137,7 @@ export default function Board() {
 
     if (completed.length > 0) {
       promises.push(
-        fetch(`http://localhost:8081/tasks/${resourceId}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(completed),
@@ -151,7 +151,7 @@ export default function Board() {
 
       if (allSuccessful) {
         toast.success("Tasks saved successfully");
-        const response = await fetch(`http://localhost:8081/tasks/${resourceId}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${resourceId}`);
         const json = await response.json();
         const completedTasks = json.Tasks.filter(
           (task) => task.Status === "Completed"

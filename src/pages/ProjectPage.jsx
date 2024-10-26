@@ -21,7 +21,7 @@ const ProjectPage = ({ deleteProject }) => {
       // Check if the user has an allowed role
       const allowedRoles = ['consultant', 'Jnr Consultant', 'Snr Consultant'];
       if (allowedRoles.includes(userRole)) { 
-        fetch(`http://localhost:8081/resource-id/${user.id}/${projectId}`)
+        fetch(`${import.meta.env.VITE_API_URL}/resource-id/${user.id}/${projectId}`)
           .then(async (response) => {
             if (!response.ok) {
               // If response status is not OK, handle it without throwing an error
@@ -55,7 +55,7 @@ const ProjectPage = ({ deleteProject }) => {
    
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:8081/users");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users`);
         if (!response.ok) throw new Error("Failed to fetch user data");
         const usersData = await response.json();
         const userMapping = usersData.reduce((acc, user) => {
@@ -235,21 +235,21 @@ const ProjectPage = ({ deleteProject }) => {
 };
 
 const projectLoader = async ({ params }) => {
-  const projectRes = await fetch(`http://localhost:8081/project/${params.id}`);
+  const projectRes = await fetch(`${import.meta.env.VITE_API_URL}/project/${params.id}`);
   const projectData = await projectRes.json();
 
-  const clientRes = await fetch(`http://localhost:8081/company/${params.id}`);
+  const clientRes = await fetch(`${import.meta.env.VITE_API_URL}/company/${params.id}`);
   const clientData = await clientRes.json();
 
-  const financialsRes = await fetch(`http://localhost:8081/financials/${params.id}`);
+  const financialsRes = await fetch(`${import.meta.env.VITE_API_URL}/financials/${params.id}`);
   const financialsData = await financialsRes.json();
 
-  const resourcesRes = await fetch(`http://localhost:8081/resources/${params.id}`);
+  const resourcesRes = await fetch(`${import.meta.env.VITE_API_URL}/resources/${params.id}`);
   const resourcesData = await resourcesRes.json();
 
   // Fetch user details for each resource
   const userPromises = resourcesData.map(async (resource) => {
-    const userRes = await fetch(`http://localhost:8081/user/${resource.UserID}`);
+    const userRes = await fetch(`${import.meta.env.VITE_API_URL}/user/${resource.UserID}`);
     const userData = await userRes.json();
     return { ...resource, UserName: userData.name };
   });

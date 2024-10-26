@@ -64,7 +64,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (id) {
       // Fetch user information using userId
-      fetch(`http://localhost:8081/user/${id}`)
+      fetch(`${import.meta.env.VITE_API_URL}/user/${id}`)
         .then(response => response.json())
         .then(data => {
           setName(data.UserName || '');
@@ -74,15 +74,12 @@ const ProfilePage = () => {
           setUser(data);   
         })
         .catch(error => console.error('Error fetching user info:', error));
+ 
+     
 
-        
-
-
-        
-    
       
             // Fetch user skills from the API
-            fetch(`http://localhost:8081/SkillSets/${id}`)
+            fetch(`${import.meta.env.VITE_API_URL}/SkillSets/${id}`)
               .then(response => {
                 if (response.status === 204) {
                   // No content, return an empty object
@@ -96,10 +93,7 @@ const ProfilePage = () => {
                 setSkills(updatedSkills);
               })
               .catch(error => console.error('Error fetching skills:', error));
-          }
-
-
-         
+          }     
     
   }, [id]);
 
@@ -119,7 +113,7 @@ const ProfilePage = () => {
     console.log('USER: ', user);
      console.log(skills);
     // Send updated skills to the API
-    fetch(`http://localhost:8081/allskillsets/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/allskillsets/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

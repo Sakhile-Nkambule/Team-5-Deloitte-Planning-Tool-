@@ -39,7 +39,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:8081/users");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users`);
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -51,7 +51,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             try {
               // Fetch skills
               const skillsResponse = await fetch(
-                `http://localhost:8081/skillsets/${user.UserID}`
+                `${import.meta.env.VITE_API_URL}/skillsets/${user.UserID}`
               );
               const skillsProficiency = skillsResponse.ok
                 ? await skillsResponse.json()
@@ -59,7 +59,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
               // Fetch tasks--CALENDER
               const tasksResponse = await fetch(
-                `http://localhost:8081/tasks/user/${user.UserID}`
+                `${import.meta.env.VITE_API_URL}/tasks/user/${user.UserID}`
               );
               const tasks = tasksResponse.ok ? await tasksResponse.json() : [];
 
@@ -130,7 +130,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
       const fetchMLPredictions = async () => {
         try {
-          const response = await fetch("http://localhost:5051/predict", {
+          const response = await fetch("http://3.80.71.14:5051/predict", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -378,7 +378,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           Priority: "High",
         };
 
-        const response = await fetch("http://localhost:8081/notifications", {
+        const response = await fetch("${import.meta.env.VITE_API_URL}/notifications", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -405,7 +405,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     setIsLoading(true); //Spinner
     try {
       const response = await fetch(
-        `http://localhost:8081/tasks/user/${userId}`
+        `${import.meta.env.VITE_API_URL}/tasks/user/${userId}`
       );
       const data = await response.json();
       setDateTasks(data); //Set dateTasks to feed into calender component

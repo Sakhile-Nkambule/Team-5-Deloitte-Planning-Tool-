@@ -35,7 +35,7 @@ const ManageTasksPage = () => {
       try {
         // Fetch resource details and tasks
         const resourceResponse = await fetch(
-          `http://localhost:8081/tasks/${resourceId}`
+          `${import.meta.env.VITE_API_URL}/tasks/${resourceId}`
         );
         const resourceData = await resourceResponse.json();
 
@@ -52,7 +52,7 @@ const ManageTasksPage = () => {
         // Check if UserID exists before fetching user data
         if (resourceData.UserID) {
           const userResponse = await fetch(
-            `http://localhost:8081/user/${resourceData.UserID}`
+            `${import.meta.env.VITE_API_URL}/user/${resourceData.UserID}`
           );
           const user = await userResponse.json();
           setUserName(user.UserName || "Unknown User");
@@ -62,7 +62,7 @@ const ManageTasksPage = () => {
 
         if (resourceData.ProjectID) {
           const projectResponse = await fetch(
-            `http://localhost:8081/project/${resourceData.ProjectID}`
+            `${import.meta.env.VITE_API_URL}/project/${resourceData.ProjectID}`
           );
           const project = await projectResponse.json();
           console.log(project);
@@ -78,7 +78,7 @@ const ManageTasksPage = () => {
         //fetch all tasks based on userid only to get all tasks associeted to that user
         if (resourceData.UserID) {
           const taskdates = await fetch(
-            `http://localhost:8081/tasks/user/${resourceData.UserID}`
+            `${import.meta.env.VITE_API_URL}/tasks/user/${resourceData.UserID}`
           );
           const data = await taskdates.json();
           setdatetasks(data);
@@ -175,7 +175,7 @@ const ManageTasksPage = () => {
 
     try {
       // Call the API to update resource's WorkedHours
-      await fetch(`http://localhost:8081/resources/${resource.ResourceID}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/resources/${resource.ResourceID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ WorkedHours: updatedWorkedHours }),
@@ -183,7 +183,7 @@ const ManageTasksPage = () => {
 
       // Call the API to update the task's completion status
       await fetch(
-        `http://localhost:8081/tasks/completed/${taskToComplete.TaskID}`,
+        `${import.meta.env.VITE_API_URL}/tasks/completed/${taskToComplete.TaskID}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -206,7 +206,7 @@ const ManageTasksPage = () => {
 
       // Fetch the user's skillsets to update the workedHours
       const skillsetsResponse = await fetch(
-        `http://localhost:8081/skillset/${resource.UserID}`
+        `${import.meta.env.VITE_API_URL}/skillset/${resource.UserID}`
       );
       const skillsets = await skillsetsResponse.json();
       console.log("User SKILLS: ", skillsets);
@@ -226,7 +226,7 @@ const ManageTasksPage = () => {
 
         // Update the workedHours on the skillset
         await fetch(
-          `http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`,
+          `${import.meta.env.VITE_API_URL}/skillsets/${skillsetToUpdate.SkillID}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -288,7 +288,7 @@ const ManageTasksPage = () => {
     try {
       // Update the proficiency for the skillset
       await fetch(
-        `http://localhost:8081/skillsets/${skillsetToUpdate.SkillID}`,
+        `${import.meta.env.VITE_API_URL}/skillsets/${skillsetToUpdate.SkillID}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -344,7 +344,7 @@ const ManageTasksPage = () => {
       if (window.confirm("Are you sure you want to delete this Task?")) {
         if (taskId) {
           // If the task exists in the database (has a TaskID), make the DELETE request
-          await fetch(`http://localhost:8081/task/${taskId}`, {
+          await fetch(`${import.meta.env.VITE_API_URL}/task/${taskId}`, {
             method: "DELETE",
           });
         }
@@ -379,7 +379,7 @@ const ManageTasksPage = () => {
       }));
 
       if (sanitizedUpdatedTasks.length > 0) {
-        await fetch(`http://localhost:8081/tasks/${resourceId}`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/tasks/${resourceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(sanitizedUpdatedTasks),
@@ -401,7 +401,7 @@ const ManageTasksPage = () => {
           UserID: task.UserID,
         }));
 
-        await fetch(`http://localhost:8081/tasks`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(sanitizedNewTasks),
@@ -424,7 +424,7 @@ const ManageTasksPage = () => {
           Priority: "High",
         };
 
-        const response = await fetch("http://localhost:8081/notifications", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/notifications`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

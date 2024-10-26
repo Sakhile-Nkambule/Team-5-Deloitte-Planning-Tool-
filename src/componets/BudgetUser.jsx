@@ -17,7 +17,7 @@ const BudgetUser = () => {
     useEffect(() => {
         const fetchResources = async () => {
             try {
-                const response = await fetch(`/api/resources/${project.ProjectID}`); // Adjust the endpoint accordingly
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/resources/${project.ProjectID}`); // Adjust the endpoint accordingly
                 const data = await response.json();
                 setResources(data);
             } catch (error) {
@@ -32,12 +32,12 @@ const BudgetUser = () => {
         const fetchFinancialsAndCalculateCosts = async () => {
             try {
                 // Fetch project financials
-                const financialResponse = await fetch(`http://localhost:8081/financials/${project.ProjectID}`);
+                const financialResponse = await fetch(`${import.meta.env.VITE_API_URL}/financials/${project.ProjectID}`);
                 const financialData = await financialResponse.json();
                 const netRevenue = financialData.NetRevenue || 0; // Get Net Revenue
 
                 // Fetch users to get their hourly rates
-                const usersResponse = await fetch('http://localhost:8081/users');
+                const usersResponse = await fetch(`${import.meta.env.VITE_API_URL}/users`);
                 const usersData = await usersResponse.json();
 
                 // Create a map for hourly rates by UserID
