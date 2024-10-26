@@ -36,7 +36,7 @@ export function SignIn() {
         setError('Invalid email or password');
       }
     } catch (err) {
-      setError('Failed to login');
+      setError('Failed to Login');
     }
   };
 
