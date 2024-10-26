@@ -663,7 +663,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
             <div className="mb-4">
               <Link
                 to={`/dashboard/${project.ProjectID}`}
-                className="bg-lime-500  hover:bg-lime-600 hover:shadow-lg 
+                className="bg-lime-500  hover:bg-lime-700 hover:shadow-lg 
              transform  transition-all text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
               >
                 Add More Resources
