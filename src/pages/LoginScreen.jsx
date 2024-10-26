@@ -14,7 +14,7 @@ export function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://http://3.80.71.14:8081/login', {
+      const res = await fetch('http://3.80.71.14:8081/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export function SignIn() {
         setError('Invalid email or password');
       }
     } catch (err) {
-      setError('Failed to login');
+      setError('Failed to Login');
     }
   };
 
