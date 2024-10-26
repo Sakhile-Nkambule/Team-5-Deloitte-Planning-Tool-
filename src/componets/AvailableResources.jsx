@@ -39,7 +39,7 @@ const AvailableResources = ({ resources, project }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:8081/users");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users`);
         const usersData = await response.json();
 
         const filteredUsers = usersData.filter(
@@ -67,7 +67,7 @@ const AvailableResources = ({ resources, project }) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8081/tasks/user/${userId}`
+        `${import.meta.env.VITE_API_URL}/tasks/user/${userId}`
       );
       const data = await response.json();
       setDateTasks(data);
@@ -89,7 +89,7 @@ const AvailableResources = ({ resources, project }) => {
     if (selectedUser) {
       try {
         const response = await fetch(
-          "http://localhost:8081/projects/addResource",
+          `${import.meta.env.VITE_API_URL}/projects/addResource`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

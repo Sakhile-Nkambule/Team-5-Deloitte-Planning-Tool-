@@ -63,7 +63,7 @@ const UserProfilePage = () => {
       setHourlyRate(user.rate);
 
       // Fetch user skills from the API
-      fetch(`http://localhost:8081/SkillSets/${user.id}`)
+      fetch(`${import.meta.env.VITE_API_URL}/SkillSets/${user.id}`)
       .then(response => {
         if (response.status === 204) {
           // No content, so return an empty object
@@ -92,7 +92,7 @@ const UserProfilePage = () => {
     toast.success("Profile updated Successfully");
     
     // Send updated skills to the API
-    fetch(`http://localhost:8081/Skillsets/${user.id}`, {
+    fetch(`/api/Skillsets/${user.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

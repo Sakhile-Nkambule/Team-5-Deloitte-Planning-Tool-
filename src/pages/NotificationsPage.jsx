@@ -19,7 +19,7 @@ function NotificationsPage() {
             }));
 
             try {
-                const response = await fetch(`http://localhost:8081/notifications/markAsRead`, {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/notifications/markAsRead`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ function NotificationsPage() {
     useEffect(() => {
         if (user) {
             console.log(`Fetching notifications for user: ${user.id}`);
-            fetch(`http://localhost:8081/notifications/${user.id}`)
+            fetch(`${import.meta.env.VITE_API_URL}/notifications/${user.id}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');

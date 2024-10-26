@@ -11,7 +11,7 @@ const MyCalendar = () => {
   const fetchUserTasks = async (id) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:8081/tasks/user/${id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/user/${id}`);
       const data = await response.json();
       console.log(data);
       setDateTasks(data);

@@ -30,7 +30,7 @@ const AllUsers = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('http://localhost:8081/users');
+        const response = await fetch('${import.meta.env.VITE_API_URL}/users');
         const usersData = await response.json();
         setUsers(usersData);
       } catch (error) {
@@ -57,7 +57,7 @@ const AllUsers = () => {
     try {
       // Confirm with the user before removing the user
       if (window.confirm("Are you sure you want to delete this User from the planning Tool?")) {
-        const response = await fetch(`http://localhost:8081/user/${user.UserID}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/user/${user.UserID}`, {
           method: "DELETE",
         });
   

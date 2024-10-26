@@ -10,10 +10,11 @@ const ProjectListings = ({ isHome = false }) => {
   useEffect(() => {
     const fetchProjects = async () => {
       const apiUrl = isHome 
-      ? 'http://localhost:8081/projects?_limit=3' 
-      : 'http://localhost:8081/projects';
+      
+      ? `${import.meta.env.VITE_API_URL}/projects?_limit=3`
+      : `${import.meta.env.VITE_API_URL}/projects`;
       try {
-        const res = await axios.get(apiUrl);
+        const res = await axios.get(apiUrl);  
         setProjects(res.data);
       } catch (error) {
         console.log('Error fetching data', error);
@@ -35,7 +36,7 @@ const ProjectListings = ({ isHome = false }) => {
           <Spinner loading={loading} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {projects.map((project) => (
+             {projects.map((project) => (
               <ProjectListing key={project.ProjectID} project={project} />
             ))}
           </div>

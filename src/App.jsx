@@ -32,7 +32,7 @@ const App = () => {
     const [projects, setProjects] = useState([]);
 //Create A new Project
   const addNewProject = async (projectWithResources) => {
-    const res = await fetch("http://localhost:8081/newprojects", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/newprojects`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,7 +50,7 @@ const App = () => {
 //Delete a project
 const deleteProject = async (id) => {
   try {
-    const response = await fetch(`http://localhost:8081/projects/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/${id}`, {
       method: "DELETE",
     });
     if (response.ok) {
@@ -66,7 +66,7 @@ const deleteProject = async (id) => {
 
   //Update a project
   const updateProject = async (updatedProject) => {
-    const res = await fetch(`http://localhost:8081/projects/${updatedProject.id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/projects/${updatedProject.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
