@@ -1,5 +1,5 @@
 import { useParams, useLoaderData } from "react-router-dom";
-import { FaArrowLeft, FaMapMarker } from "react-icons/fa";
+import { FaArrowLeft, FaChartLine, FaMapMarker } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useUser } from "../componets/UserContext"; 
@@ -92,12 +92,12 @@ const ProjectPage = ({ deleteProject }) => {
   return (
     <>
       <section>
-        <div className="container m-auto py-6 px-6">
+        <div className=" bg-lime-100 m-auto py-6 px-6">
           <Link
             to="/projects"
-            className="text-lime-500 hover:text-lime-700 flex items-center"
+            className="  underline text-lime-500  hover:text-lime-700 flex items-center"
           >
-            <FaArrowLeft className="mr-1" /> Back to projects
+            <FaArrowLeft className=" mr-1 " /> Back to projects
           </Link>
         </div>
       </section>
@@ -121,7 +121,7 @@ const ProjectPage = ({ deleteProject }) => {
                     <p className="text-orange-700">{`End Date: ${formattedEndDate}`}</p>
                   </div>
                   <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
-                    <FaMapMarker className="text-orange-700 mr-2" />
+                    <FaChartLine className=" mt-1 text-orange-700 mr-2" />
                     <p className="text-orange-700">{project.Status}</p>
                   </div>
                 </div>
@@ -135,25 +135,27 @@ const ProjectPage = ({ deleteProject }) => {
                   <h3 className="text-lime-500 text-lg font-bold mb-2">
                     Project Budget
                   </h3>
-                  <p className="mb-4">{project.Budget}</p>
+                  <p className="mb-4">
+                  {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(project.Budget)}`}
+                    </p>
                 </div>
 
                 {/* Company Info */}
                 <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left mt-6">
-                  <h3 className="text-lime-500 text-lg font-bold mb-2">
+                  <h3 className="  text-lime-500 text-lg font-bold mb-2">
                     Company Info
                   </h3>
                   <div className="text-gray-700 mb-4">{client.CompanyName}</div>
                   <p className="mb-4">{client.CompanyDescription}</p>
-                  <p className="my-2 bg-indigo-100 p-2 font-bold">
+                  <p className="my-2 bg-gray-200 p-2 font-bold">
                     {client.CompanyLocation}
                   </p>
                   <h3 className="text-gray-700 mb-4">Contact Email:</h3>
-                  <p className="my-2 bg-indigo-100 p-2 font-bold">
+                  <p className="my-2 bg-gray-200 p-2 font-bold">
                     {client.ContactEmail}
                   </p>
                   <h3 className="text-gray-700 mb-4">Contact Phone:</h3>
-                  <p className="my-2 bg-indigo-100 p-2 font-bold">
+                  <p className="my-2 bg-gray-200 p-2 font-bold">
                     {client.ContactPhone}
                   </p>
                 </div>
