@@ -302,8 +302,8 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
 
   return (
     <div>
-      <div className="m-auto bg-lime-200 py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
-        <button onClick={handleGoBack} className="flex items-center text-lime-500 rounded-md bg-white px-2 ">
+      <div className="m-auto bg-lime-200 py-2 px-2  flex items-center">
+        <button onClick={handleGoBack} className="flex items-center text-lime-500 t hover:text-white rounded-md bg-white hover:bg-lime-600 px-2 ">
           <FaArrowLeft className="mr-1" /> Back
         </button>
       </div>

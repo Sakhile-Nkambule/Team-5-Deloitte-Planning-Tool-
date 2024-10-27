@@ -119,7 +119,7 @@ router.post("/register", async (req, res) => {
       HourlyRate = 100;
       break;
     default:
-      HourlyRate = 0; // Default rate if role is not recognized
+      HourlyRate = 0; 
   }
 
   // Insert the user data including the hourly rate
@@ -139,6 +139,31 @@ router.post("/register", async (req, res) => {
   );
   console.log(HourlyRate);
 });
+
+
+//UPDATE 
+// Endpoint to update a user
+router.put("/user/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { name, email, role, hourlyRate } = req.body;
+
+    // Update the user in the database
+    const [result] = await pool.query(
+      "UPDATE users SET UserName = ?, Email = ?, Role = ?, HourlyRate = ? WHERE UserID = ?",
+      [name, email, role, hourlyRate, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json("User not found");
+    }
+
+    res.json({ message: "User updated successfully" });
+  } catch (err) {
+    res.status(500).json("Error executing query: " + err);
+  }
+});
+
 
 //DELETE
 

@@ -34,13 +34,13 @@ const CompetencyKey = () => (
     SAP: 0,
     JDE: 0,
     Oracle: 0,
-    "Generic Application": 0,
+    "Genric Application": 0,
     "Microsoft SQL": 0,
     "Oracle DB": 0,
     Linux: 0,
     "Microsoft OS": 0,
     "Active Directory": 0,
-    "Cyber Memo": 0,
+    "Cyber memo": 0,
     CTRA: 0,
     DCNO: 0,
     "SAP-AUTO": 0,
@@ -105,13 +105,28 @@ const ProfilePage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+  
     // Update user profile
     console.log('User profile updated:', { name, email, role, hourlyRate, skills });
     toast.success("Profile updated Successfully");
-
-    console.log('USER: ', user);
-     console.log(skills);
+  
+    // Send updated user details to the API
+    fetch(`${import.meta.env.VITE_API_URL}/user/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, role, hourlyRate }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to update user');
+        }
+        return response.json();
+      })
+      .then(data => console.log('User updated:', data))
+      .catch(error => console.error('Error updating user:', error));
+  
     // Send updated skills to the API
     fetch(`${import.meta.env.VITE_API_URL}/allskillsets/${id}`, {
       method: 'PUT',
@@ -123,9 +138,10 @@ const ProfilePage = () => {
       .then(response => response.json())
       .then(data => console.log('Skills updated:', data))
       .catch(error => console.error('Error updating skills:', error));
-
-      navigate("/all-Users");
+  
+    navigate("/all-Users");
   };
+  
 
   const renderSkillBar = (skill) => {
     const proficiency = skills[skill] || 0;
@@ -238,7 +254,7 @@ const ProfilePage = () => {
             <CompetencyKey />
 
             <div className="mb-6">
-              <h4 className="text-black text-lg font-semibold mb-2">Skillsets</h4>
+              <h4 className="text-black text-lg font-semibold mb-2">Skill sets & Proficiencies</h4>
               {Object.keys(skills).map((skill) => renderSkillBar(skill))}
             </div>
 

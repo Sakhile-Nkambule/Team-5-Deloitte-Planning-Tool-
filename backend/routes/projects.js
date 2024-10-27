@@ -106,7 +106,7 @@ router.post("/newprojects", async (req, res) => {
           ProjectCode,
           Title,
           Description,
-          Budget,
+          financials.netRevenue,
           clientId,
           Status,
           StartDate,
