@@ -20,7 +20,7 @@ const AddProjectPage = () => {
   const [endDate, setEndDate] = useState(null);
   const [errors, setErrors] = useState({});
 
-  const Status = "pending";
+  const Status = "Pending";
 
   const items = [
     "SAP",
@@ -121,7 +121,7 @@ const AddProjectPage = () => {
     }
   };
 
-  const status = "pending";
+  
 
   const navigate = useNavigate();
 
@@ -138,7 +138,7 @@ const AddProjectPage = () => {
       formErrors.NetRevenue = "*Net Revenue must be a valid number.";
     }
 
-    // Budget validation (must be a number)
+    // Budget validation (must be a number) 
     if (!/^\d+(\.\d{1,2})?$/.test(Budget)) {
       formErrors.Budget = "*Budget must be a valid number.";
     }
@@ -320,7 +320,7 @@ const AddProjectPage = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 font-bold mb-2">
-                  Project Budget
+                  Gross Revenue
                 </label>
                 <input
                   type="text"
@@ -435,7 +435,7 @@ const AddProjectPage = () => {
             </div>
 
             <div className="col-span-1 ">
-              <h3 className="text-lime-500 text-2xl mb-5">Required Systems</h3>
+              <h3 className="text-lime-500 text-2xl mb-5">Required Skill sets</h3>
               <div className="space-y-2 ">
                 {items.map((item, index) => (
                   <label

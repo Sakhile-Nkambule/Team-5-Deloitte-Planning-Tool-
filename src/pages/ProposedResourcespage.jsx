@@ -130,7 +130,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
       const fetchMLPredictions = async () => {
         try {
-          const response = await fetch("http://3.80.71.14:5051/predict", {
+          const response = await fetch("http://localhost:5051/predict", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -298,19 +298,22 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Check if there is at least one of the required roles in the resources
-    const hasRequiredRole = resources.some(resource => 
-      resource.Role === "Director" || 
-      resource.Role === "Snr Associate Director" || 
-      resource.Role === "Associate Director"
+    const hasRequiredRole = resources.some(
+      (resource) =>
+        resource.Role === "Director" ||
+        resource.Role === "Snr Associate Director" ||
+        resource.Role === "Associate Director"
     );
-  
+
     if (!hasRequiredRole) {
-      toast.error("A project must contain at least 1 Director/Senior Associate Director/Associate Director.");
+      toast.error(
+        "A project must contain at least 1 Director/Senior Associate Director/Associate Director."
+      );
       return; // Stop further submission until the user handles this
     }
-  
+
     // Check profit margin and recovery rate conditions
     if (profitMargin < 57 || recoveryRate < 50) {
       if (profitMargin < 57) {
@@ -322,7 +325,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
       setNotificationModalOpen(true);
       return; // Stop further submission until notification is handled
     }
-  
+
     // If no permission is required, proceed with form submission
     await submitProject();
   };
@@ -378,13 +381,16 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           Priority: "High",
         };
 
-        const response = await fetch("${import.meta.env.VITE_API_URL}/notifications", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(notificationData),
-        });
+        const response = await fetch(
+          "${import.meta.env.VITE_API_URL}/notifications",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(notificationData),
+          }
+        );
 
         if (response.ok) {
           toast.success("Permission request sent successfully");
@@ -586,11 +592,10 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             )}
           </div>
 
-          <div className="flex justify-between mt-6">
+          <div className="flex justify-center">
             <button
               onClick={handleSubmit}
-              className="bg-lime-500  hover:bg-lime-700 hover:shadow-lg 
-             transform hover:scale-105 transition-all text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
+              className="bg-lime-500 hover:bg-lime-700 hover:shadow-lg transform hover:scale-105 transition-all text-white font-bold py-2 px-8 w-56 rounded-full focus:outline-none focus:shadow-outline"
             >
               Accept Resources
             </button>

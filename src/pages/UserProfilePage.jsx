@@ -86,13 +86,30 @@ const UserProfilePage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+  
     // Update user profile
     console.log('User profile updated:', { name, email, role, hourlyRate, skills });
     toast.success("Profile updated Successfully");
-    
+  
+    // Send updated user details to the API
+    fetch(`${import.meta.env.VITE_API_URL}/user/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, role, hourlyRate }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to update user');
+        }
+        return response.json();
+      })
+      .then(data => console.log('User updated:', data))
+      .catch(error => console.error('Error updating user:', error));
+  
     // Send updated skills to the API
-    fetch(`/api/Skillsets/${user.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/allskillsets/${user.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -102,8 +119,9 @@ const UserProfilePage = () => {
       .then(response => response.json())
       .then(data => console.log('Skills updated:', data))
       .catch(error => console.error('Error updating skills:', error));
+  
+  
   };
- 
 
   const renderSkillBar = (skill) => {
     const proficiency = skills[skill] || 0;
@@ -120,7 +138,18 @@ const UserProfilePage = () => {
                   proficiency >= percent ? 'bg-opacity-100' : 'bg-opacity-5'
                 }`}
                 onClick={() => {
-                  if (role === "Manager" || role === "Director") {
+                  // List of roles that are allowed to edit skills
+                  const allowedRoles = [
+                    "Manager",
+                    "Director",
+                    "Associate Director",
+                    "Snr Associate Director",
+                    "Senior Manager",
+                    "Assistant Manager"
+                  ];
+                
+                  // Check if the current role is in the list of allowed roles
+                  if (allowedRoles.includes(role)) {
                     handleSkillChange(skill, percent);
                   } else {
                     toast.error("Only Managers or Directors can edit skills.");
@@ -148,7 +177,7 @@ const UserProfilePage = () => {
             {" "}
             <FaArrowLeft className="mr-1" /> Back
           </button>
-        </div>
+        </div>  
 
       <div className="container m-auto max-w-2xl py-24">
         <div className="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
@@ -224,7 +253,7 @@ const UserProfilePage = () => {
             <CompetencyKey />
             <div className="mt-6">
               <h3 className="text-black text-xl font-semibold mb-4">
-                Skillsets & Proficiency
+                Skill sets & Proficiencies
               </h3>
               {Object.keys(skills).map((skill) => renderSkillBar(skill))}
             </div>

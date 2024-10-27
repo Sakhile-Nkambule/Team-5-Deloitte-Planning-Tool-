@@ -30,7 +30,7 @@ const AllUsers = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('${import.meta.env.VITE_API_URL}/users');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users`);
         const usersData = await response.json();
         setUsers(usersData);
       } catch (error) {

@@ -76,7 +76,7 @@ router.put("/skillsets/:skillsetId", async (req, res) => {
   console.log("SkillID is: ", SkillID);
   console.log("worked hours is: ", workedHours);
   console.log("Request Body:", req.body); // Log the request body
-  console.log("Skillset ID from URL:", req.params.skillsetId); // Log the Skillset ID from URL
+  
 
   try {
     await pool.query(
@@ -99,44 +99,48 @@ router.put("/skillsets/:skillsetId", async (req, res) => {
 
 router.put("/allskillsets/:userId", async (req, res) => {
   const userId = req.params.userId;
-  const { skills } = req.body; // Expecting skills to be an object with skill names and worked hours values
+  const { skills } = req.body; // Expecting skills to be an object with skill names and proficiency values
 
   try {
     await pool.query("START TRANSACTION"); // Begin transaction
 
     const skillEntries = Object.entries(skills);
 
-    for (const [skill, workedHours] of skillEntries) {
-      // Calculate the new proficiency based on the worked hours
-      let newProficiency = 0;
+    for (const [skill, proficiency] of skillEntries) {
+      // Calculate worked hours based on proficiency
+      let workedHours = 0;
 
-      if (workedHours >= 80 && workedHours < 160) newProficiency = 10;
-      else if (workedHours >= 160 && workedHours < 240) newProficiency = 20;
-      else if (workedHours >= 240 && workedHours < 320) newProficiency = 30;
-      else if (workedHours >= 320 && workedHours < 400) newProficiency = 40;
-      else if (workedHours >= 400 && workedHours < 480) newProficiency = 50;
-      else if (workedHours >= 480 && workedHours < 560) newProficiency = 60;
-      else if (workedHours >= 560 && workedHours < 640) newProficiency = 70;
-      else if (workedHours >= 640 && workedHours < 720) newProficiency = 80;
-      else if (workedHours >= 720 && workedHours < 800) newProficiency = 90;
-      else if (workedHours >= 800) newProficiency = 100;
+      if (proficiency >= 10 && proficiency < 20) workedHours = 80;
+      else if (proficiency >= 20 && proficiency < 30) workedHours = 160;
+      else if (proficiency >= 30 && proficiency < 40) workedHours = 240;
+      else if (proficiency >= 40 && proficiency < 50) workedHours = 320;
+      else if (proficiency >= 50 && proficiency < 60) workedHours = 400;
+      else if (proficiency >= 60 && proficiency < 70) workedHours = 480;
+      else if (proficiency >= 70 && proficiency < 80) workedHours = 560;
+      else if (proficiency >= 80 && proficiency < 90) workedHours = 640;
+      else if (proficiency >= 90 && proficiency < 100) workedHours = 720;
+      else if (proficiency >= 100) workedHours = 800;
 
-      // Update existing skillset or insert new one if it doesn't exist, including worked hours and proficiency
-      await pool.query(
+      // Update existing skillset
+      const [updateResult] = await pool.query(
         `
-        INSERT INTO Skillsets (UserID, Skillset, WorkedHours, Proficiency)
-        VALUES (?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE workedHours = ?, Proficiency = ?
+        UPDATE Skillsets 
+        SET WorkedHours = ?, Proficiency = ? 
+        WHERE UserID = ? AND Skillset = ?
         `,
-        [
-          userId,
-          skill,
-          workedHours,
-          newProficiency,
-          workedHours,
-          newProficiency,
-        ]
+        [workedHours, proficiency, userId, skill]
       );
+
+      // If no rows were affected by the update, insert a new skillset
+      if (updateResult.affectedRows === 0) {
+        await pool.query(
+          `
+          INSERT INTO Skillsets (UserID, Skillset, WorkedHours, Proficiency)
+          VALUES (?, ?, ?, ?)
+          `,
+          [userId, skill, workedHours, proficiency]
+        );
+      }
     }
 
     await pool.query("COMMIT"); // Commit transaction
@@ -148,5 +152,6 @@ router.put("/allskillsets/:userId", async (req, res) => {
     res.status(500).json("Error executing query: " + err);
   }
 });
+
 
 module.exports = router;
