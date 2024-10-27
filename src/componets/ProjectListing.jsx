@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FaMapMarker, FaAngleDown } from 'react-icons/fa'; // Import dropdown arrow icon
+import { FaMapMarker, FaAngleDown, FaCog, FaCogs, FaCubes, FaServer, FaChartLine } from 'react-icons/fa'; // Import dropdown arrow icon
+import { FaSignal } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 
 const ProjectListing = ({ project }) => {
@@ -32,13 +33,17 @@ const ProjectListing = ({ project }) => {
           <FaAngleDown className={`transition-transform ${showFullDescription ? 'rotate-180' : ''}`} />
         </button>
 
-        <h3 className="text-lime-500 mb-2">{project.Budget}</h3>
+        <h3 className="text-lime-500 mb-2">
+        {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(project.Budget)}`}
+          </h3>
+
+        
 
         <div className="border border-gray-100 mb-5"></div>
 
         <div className="flex flex-col lg:flex-row justify-between mb-4">
           <div className="text-orange-700 mb-3">
-            <FaMapMarker className="inline text-lg mb-1 mr-1" />
+            <FaChartLine className="inline text-lg mb-1 mr-1" />
             {project.Status}
           </div>
           <Link
