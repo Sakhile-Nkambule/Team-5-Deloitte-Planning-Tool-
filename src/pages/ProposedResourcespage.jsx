@@ -468,26 +468,49 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
           </h2>
 
           <div className="flex justify-center items-center space-x-40 bg-white h-120 p-6 shadow-md rounded-full  w-100">
-            <div className="mb-2 ">
+            <div className="">
               <p className="text-gray-700 font-semibold">Gross Revenue:</p>
-              <p className="text-green-500 font-semibold">{`R${newProject.Budget}`}</p>
+              <p className="text-green-500 font-semibold">
+              {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(newProject.Budget)}`}
+                </p>
             </div>
 
-            <div className="mb-2 ">
+            <div className="">
               <p className="text-gray-700 font-semibold">Total Costs:</p>
-              <p className="text-red-500 font-semibold">{`R${exhaustedBudget}`}</p>
+              <p className="text-red-500 font-semibold">
+              {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(exhaustedBudget)}`}
+                </p>
             </div>
-            <div className="mb-2 ">
+            <div className="">
               <p className="text-gray-700 font-semibold">Net Revenue:</p>
-              <p className="font-semibold">{`R${newProject.NetRevenue}`}</p>
+              <p className="font-semibold">
+              {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(netRevenue)}`}
+                </p>
             </div>
-            <div className="mb-2 ">
+            <div className="">
               <p className="text-gray-700 font-semibold">Profit Margin:</p>
-              <p className="font-semibold">{`${profitMargin}%`}</p>
+              <p
+                className={`font-semibold ${
+                  profitMargin > 50 ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {`${new Intl.NumberFormat("en-ZA", {
+                  style: "percent",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(profitMargin / 100)}`}
+              </p>
             </div>
-            <div className="mb-2">
+
+            <div className="">
               <p className="text-gray-700 font-semibold">Recovery Rate:</p>
-              <p className="text-red-500 font-semibold">{`${recoveryRate}%`}</p>
+              <p
+                className={`font-semibold ${
+                  recoveryRate > 57 ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {`${recoveryRate}%`}
+              </p>
             </div>
           </div>
 

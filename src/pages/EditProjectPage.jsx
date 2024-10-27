@@ -303,44 +303,82 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   return (
     <div>
       <div className="m-auto bg-lime-200 py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
-        <button onClick={handleGoBack} className="flex items-center text-lime-500 rounded-md bg-white px-2 ">
+        <button
+          onClick={handleGoBack}
+          className=" underline flex items-center text-lime-500 rounded-md  px-2 "
+        >
           <FaArrowLeft className="mr-1" /> Back
         </button>
       </div>
 
       <div className="bg-lime-200 px-5 pt-5">
-        <div className="bg-white px-6 py-8 mb-10 shadow-md rounded-md border m-2 md:m-0">
+        <div className="bg-white px-6 py-8  shadow-md rounded-md border m-2 md:m-0">
           <h2 className="text-black text-3xl text-center font-semibold mb-6">
             Edit Project
           </h2>
 
           {/* Budget summary in the top right corner */}
 
-          <h2 className="text-2xl font-semibold mb-4 text-center">
+          <h2 className="text-2xl font-semibold  text-center">
             Budget Summary
           </h2>
 
           <div className="flex justify-center items-center space-x-40 bg-white h-100 p-8 shadow-md rounded-full  w-100 ">
-            <div className="mb-2">
+            <div className="">
               <p className="text-gray-700 font-semibold">Gross Revenue:</p>
-              <p className="text-green-500 font-semibold">{`R${project.Budget}`}</p>
+              <p className="text-green-500 font-semibold">
+                {`R${new Intl.NumberFormat("en-ZA", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(project.Budget)}`}
+              </p>
             </div>
 
-            <div className="mb-2">
+            <div className="">
               <p className="text-gray-700 font-semibold">Total Costs:</p>
-              <p className="text-red-500 font-semibold">{`R${exhaustedBudget}`}</p>
+              <p className="text-red-500 font-semibold">
+                {`R${new Intl.NumberFormat("en-ZA", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(exhaustedBudget)}`}
+              </p>
             </div>
-            <div className="mt-4">
+            <div className="">
               <p className="text-gray-700 font-semibold">Net Revenue:</p>
-              <p className="font-semibold">{`R${netRevenue}`}</p>
+              <p className="font-semibold">
+                {`R${new Intl.NumberFormat("en-ZA", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(netRevenue)}`}
+              </p>
             </div>
-            <div className="mt-4">
+            <div className="">
               <p className="text-gray-700 font-semibold">Profit Margin:</p>
-              <p className="font-semibold">{`${profitMargin}%`}</p>
+              <p
+                className={`font-semibold ${
+                  profitMargin > 50 ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {`${new Intl.NumberFormat("en-ZA", {
+                  style: "percent",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(profitMargin / 100)}`}
+              </p>
             </div>
-            <div className="mb-2">
+
+            <div className="">
               <p className="text-gray-700 font-semibold">Recovery Rate:</p>
-              <p className="text-red-500 font-semibold">{`${recoveryRate}%`}</p>
+              <p
+                className={`font-semibold ${
+                  recoveryRate > 57 ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {`${recoveryRate}%`}
+              </p>
             </div>
           </div>
         </div>
@@ -680,4 +718,3 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
 };
 
 export default EditProjectPage;
-
