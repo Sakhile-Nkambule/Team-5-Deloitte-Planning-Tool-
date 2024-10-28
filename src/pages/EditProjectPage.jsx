@@ -39,6 +39,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
   );
   const [profitMargin, setProfitMargin] = useState(0);
   const [netRevenue, setNetRevenue] = useState(financials.netRevenue);
+  const [grossRevenue, setGrossRevenue] = useState(financials.GrossRevenue);
   const [recoveryRate, setRecoveryRate] = useState(financials.recoveryRate);
 
   const [projectResources, setProjectResources] = useState(resources || []);
@@ -114,12 +115,13 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
       setExhaustedBudget(totalCost); // Set the total cost instead of using a fixed rate
 
       setNetRevenue(financials.NetRevenue);
+      setGrossRevenue(financials.GrossRevenue)
 
       const calculatedProfitMargin =
         ((financials.NetRevenue - totalCost) / financials.NetRevenue) * 100;
       setProfitMargin(calculatedProfitMargin.toFixed(2));
 
-      const calculatedRecoveryRate = (financials.NetRevenue / Budget) * 100; // Assuming recovery rate = profit margin
+      const calculatedRecoveryRate = (financials.NetRevenue / financials.GrossRevenue) * 100; // Assuming recovery rate = profit margin
       setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
 
@@ -330,7 +332,7 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
                   style: "decimal",
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(project.Budget)}`}
+                }).format(grossRevenue)}`}
               </p>
             </div>
 

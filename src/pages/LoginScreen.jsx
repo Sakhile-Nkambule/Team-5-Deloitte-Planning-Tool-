@@ -73,7 +73,7 @@ export function SignIn() {
               />
             </label>
           </div>
-          <button type="submit" className="mt-6 w-full py-2 bg-lime-500 text-white rounded-lg">
+          <button type="submit" className="mt-6 w-full py-2 bg-lime-500 hover:bg-lime-600 text-white rounded-lg">
             Sign In
           </button>
 
