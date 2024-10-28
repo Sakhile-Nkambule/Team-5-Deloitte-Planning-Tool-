@@ -282,6 +282,37 @@ const ManageTasksPage = () => {
       console.error("Failed to update WorkedHours or task completion", error);
     }
   };
+  const proficiencyNotification= async () => {
+    if (resourceId) {
+      try {
+        const notificationData = {
+          UserID: resource.UserID,
+          Message: `Your proficiency on ${skillsetToUpdate?.skillset} has increased. Check your profile. `,
+          Type: "In-App",
+          Priority: "Low",
+        };
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/notifications`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(notificationData),
+        });
+
+        if (response.ok) {
+          toast.success(`Proficiency Notification sent to ${userName} successfully`);
+        } else {
+          toast.error("Failed to send Proficiency Notification");
+        }
+      } catch (error) {
+        console.error("Error sending notification:", error);
+        toast.error("An error occurred while sending the ");
+      }
+    } else {
+      toast.error("No Partner/Director found in the resources");
+    }
+  };
 
   // Function to handle proficiency confirmation
   const handleConfirmProficiencyIncrease = async () => {
@@ -301,6 +332,7 @@ const ManageTasksPage = () => {
 
       // Close the proficiency modal
       setIsProficiencyModalOpen(false);
+      
       toast.success(`Proficiency updated successfully!`);
     } catch (error) {
       console.error("Failed to update proficiency", error);
@@ -413,7 +445,6 @@ const ManageTasksPage = () => {
       console.error("Failed to save tasks", error);
     }
   };
-
   const sendNotification = async () => {
     if (resourceId) {
       try {
@@ -445,6 +476,8 @@ const ManageTasksPage = () => {
       toast.error("No Partner/Director found in the resources");
     }
   };
+
+
 
   //FILTER
   const tasksStatus = ["All", "Completed", "In Progress", "To-Do"];
@@ -562,7 +595,7 @@ const ManageTasksPage = () => {
                     className="border rounded w-full py-2 px-3 mb-2"
                   />
                   <label className="block mb-1 font-semibold">
-                    System to be worked on
+                    Required skill set
                   </label>
                   <select
                     value={task.SystemRequired || ""}
@@ -730,7 +763,11 @@ const ManageTasksPage = () => {
                 Cancel
               </button>
               <button
-                onClick={handleConfirmProficiencyIncrease}
+               onClick={() => {
+                handleConfirmProficiencyIncrease();
+                proficiencyNotification();
+              }}
+                
                 className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
               >
                 Confirm

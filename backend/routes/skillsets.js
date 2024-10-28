@@ -62,6 +62,7 @@ router.get("/skillset/:userId", async (req, res) => {
     );
 
     res.json(skills);
+    
   } catch (err) {
     res.status(500).json("Error executing query: " + err);
   }
@@ -121,11 +122,13 @@ router.put("/allskillsets/:userId", async (req, res) => {
       else if (proficiency >= 90 && proficiency < 100) workedHours = 720;
       else if (proficiency >= 100) workedHours = 800;
 
-      // Update existing skillset
+      // Update existing skillset conditionally based on workedHours
       const [updateResult] = await pool.query(
         `
         UPDATE Skillsets 
-        SET WorkedHours = ?, Proficiency = ? 
+        SET 
+          WorkedHours = CASE WHEN WorkedHours = 0 THEN ? ELSE WorkedHours END, 
+          Proficiency = ? 
         WHERE UserID = ? AND Skillset = ?
         `,
         [workedHours, proficiency, userId, skill]

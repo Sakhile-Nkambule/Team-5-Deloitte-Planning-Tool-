@@ -382,7 +382,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
         };
 
         const response = await fetch(
-          "${import.meta.env.VITE_API_URL}/notifications",
+          `${import.meta.env.VITE_API_URL}/notifications`,
           {
             method: "POST",
             headers: {
@@ -435,7 +435,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     start: projectStartDate,
     end: projectEndDate,
   };
-  console.log("###: ", projectDateRange);
+ 
 
   //Function for filter roles
   const roles = [
