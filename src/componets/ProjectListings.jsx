@@ -24,7 +24,7 @@ const ProjectListings = ({ isHome = false }) => {
 
     fetchProjects();
   }, [isHome]);
-
+console.log(projects);n
   return (
     <section className="bg-lime-100 px-4 py-10">
       <div className="container-xl lg:container m-auto">
