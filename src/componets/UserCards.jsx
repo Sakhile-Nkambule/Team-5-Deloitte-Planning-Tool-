@@ -1,4 +1,3 @@
-
 import Card from "./Card";
 import { Link } from "react-router-dom";
 
@@ -10,21 +9,23 @@ const UserCards = () => {
           <Card>
             <h2 className="text-2xl font-bold">Your Projects</h2>
             <p className="mt-2 mb-4">
-            Browse through the projects you are assigned to for monitoring and updating.
+              Browse through the projects you are assigned to for monitoring and
+              updating.
             </p>
             <Link
               to="/projects"
               className="inline-block bg-lime-500 text-white rounded-lg px-4 py-2  hover:bg-lime-600 hover:shadow-lg 
              transform hover:scale-105 transition-all"
             >
-             Browse Your Projects
+              Browse Your Projects
             </Link>
           </Card>
 
           <Card>
             <h2 className="text-2xl font-bold">User Profile</h2>
             <p className="mt-2 mb-4">
-            View and update your profile information. You can also update your proficiencies in each of the available skillsets.
+              View and update your profile information. You can also update your
+              proficiencies in each of the available skillsets.
             </p>
             <Link
               to="/userProfile"

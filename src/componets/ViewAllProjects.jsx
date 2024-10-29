@@ -1,6 +1,6 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from './UserContext'; // Adjust the import path according to your file structure
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "./UserContext";
 
 const ViewAllProjects = () => {
   const navigate = useNavigate();
@@ -10,23 +10,23 @@ const ViewAllProjects = () => {
   const handleClick = () => {
     // Define roles that should be directed to /projects
     const allowedRoles = [
-      'Planning Team',
-      'Director',
-      'Senior Manager',
-      'Associate Director',
-      'Snr Associate Director',
-      'Manager',
-      'Assistant Manager'
+      "Planning Team",
+      "Director",
+      "Senior Manager",
+      "Associate Director",
+      "Snr Associate Director",
+      "Manager",
+      "Assistant Manager",
     ];
 
     // Navigate based on user role
     if (userRole && allowedRoles.includes(userRole)) {
-      navigate('/projects');
+      navigate("/projects");
     } else {
       navigate(`/user-projects/${user?.id}`); // Ensure user?.id is available
     }
   };
-  
+
   return (
     <section className="m-auto max-w-xl my-10 px-6">
       <button

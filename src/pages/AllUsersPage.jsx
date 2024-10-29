@@ -1,14 +1,10 @@
-import React from 'react';
-import AllUsers from '../componets/AllUsers';
-
+import React from "react";
+import AllUsers from "../componets/AllUsers";
 
 const AllUsersPage = () => {
- 
-
   return (
     <>
-     <AllUsers/>
-       
+      <AllUsers />
     </>
   );
 };

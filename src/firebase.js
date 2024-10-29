@@ -14,7 +14,7 @@ const firebaseConfig = {
   storageBucket: "planning-tool-c1843.appspot.com",
   messagingSenderId: "58299939109",
   appId: "1:58299939109:web:dc6a42aaaa3c8f160942cc",
-  measurementId: "G-81GVG9ZC5G"
+  measurementId: "G-81GVG9ZC5G",
 };
 
 // Initialize Firebase

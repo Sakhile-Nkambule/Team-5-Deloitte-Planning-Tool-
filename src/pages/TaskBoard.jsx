@@ -1,10 +1,8 @@
-import React from 'react'
-import KanbanBoard from '../componets/KanbanBoard'
-import Task from '../componets/Task'
+import React from "react";
+import KanbanBoard from "../componets/KanbanBoard";
+import Task from "../componets/Task";
 function TaskBoard() {
-  return (
-    <KanbanBoard/>
-  )
+  return <KanbanBoard />;
 }
 
-export default TaskBoard
+export default TaskBoard;

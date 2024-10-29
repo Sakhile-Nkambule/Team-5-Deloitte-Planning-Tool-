@@ -15,9 +15,9 @@ import ProposedResourcespage from "./pages/ProposedResourcespage";
 import DashboardPage from "./pages/DashboardPage";
 import { useState } from "react";
 import LoginScreen from "./pages/LoginScreen";
-import ManageTasksPage from './pages/ManageTasksPage';
+import ManageTasksPage from "./pages/ManageTasksPage";
 import UserHomepage from "./pages/UserHomePage";
-import { UserProvider } from './componets/UserContext';
+import { UserProvider } from "./componets/UserContext";
 import TaskBoard from "./pages/TaskBoard";
 import NotificationsPage from "./pages/NotificationsPage";
 import CreateUserAccount from "./pages/CreateUserAccount";
@@ -26,11 +26,8 @@ import ProfilePage from "./pages/ProfilePage";
 import AllUsersPage from "./pages/AllUsersPage";
 import MyCalendar from "./pages/MyCalendar";
 const App = () => {
-
-
-
-    const [projects, setProjects] = useState([]);
-//Create A new Project
+  const [projects, setProjects] = useState([]);
+  //Create A new Project
   const addNewProject = async (projectWithResources) => {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/newprojects`, {
       method: "POST",
@@ -47,32 +44,37 @@ const App = () => {
       ]);
     }
   };
-//Delete a project
-const deleteProject = async (id) => {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/${id}`, {
-      method: "DELETE",
-    });
-    if (response.ok) {
-      setProjects(projects.filter((project) => project.ProjectID !== id));
-    } else {
-      console.error("Failed to delete the project");
+  //Delete a project
+  const deleteProject = async (id) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/projects/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        setProjects(projects.filter((project) => project.ProjectID !== id));
+      } else {
+        console.error("Failed to delete the project");
+      }
+    } catch (error) {
+      console.error("Error deleting the project:", error);
     }
-  } catch (error) {
-    console.error("Error deleting the project:", error);
-  }
-};
-
+  };
 
   //Update a project
   const updateProject = async (updatedProject) => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/projects/${updatedProject.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedProject),
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/projects/${updatedProject.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedProject),
+      }
+    );
     if (res.ok) {
       setProjects(
         projects.map((project) =>
@@ -86,8 +88,7 @@ const deleteProject = async (id) => {
     createRoutesFromElements(
       <>
         <Route path="/" element={<LoginScreen />} />
-        {/* <Route path="/verify-email" element={<VerifyEmail />} /> */}
-        
+
         <Route path="/auth/sign-up" element={<CreateUserAccount />} />
         <Route element={<MainLayout />}>
           <Route path="/homepage" element={<Homepage />} />
@@ -95,40 +96,37 @@ const deleteProject = async (id) => {
           <Route path="/projects" element={<Projectspage />} />
           <Route path="/user-projects/:id" element={<Projectspage />} />
           <Route path="/myCalendar/:id" element={<MyCalendar />} />
-          <Route path="/taskboard/:resourceId" element={<TaskBoard/>}/>
-          <Route path="/userProfile" element={<UserProfile/>}/>
+          <Route path="/taskboard/:resourceId" element={<TaskBoard />} />
+          <Route path="/userProfile" element={<UserProfile />} />
           <Route path="/Profile/:id" element={<ProfilePage />} />
           <Route path="/all-Users" element={<AllUsersPage />} />
-          <Route path="/notifications" element={<NotificationsPage/>}/>
-          <Route
-            path="/add-project"
-            element={<AddProjectPage /*planA={addNew}*/ />}
-          />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/add-project" element={<AddProjectPage />} />
           <Route
             path="/proposed-resources"
-            element={
-              <ProposedResourcespage addProjectSubmit={addNewProject} />
-            }
+            element={<ProposedResourcespage addProjectSubmit={addNewProject} />}
           />
           <Route
             path="/edit-project/:id"
             element={<EditProjectPage updateProjectSubmit={updateProject} />}
             loader={projectLoader}
           />
-          <Route path="/manage-tasks/:resourceId" element={<ManageTasksPage />} />
+          <Route
+            path="/manage-tasks/:resourceId"
+            element={<ManageTasksPage />}
+          />
           <Route
             path="/project/:id"
             element={<ProjectPage deleteProject={deleteProject} />}
             loader={projectLoader}
           />
-          <Route 
-          path="/dashboard/:id" 
-          element={<DashboardPage />} 
-          loader={projectLoader}
+          <Route
+            path="/dashboard/:id"
+            element={<DashboardPage />}
+            loader={projectLoader}
           />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
-        
       </>
     )
   );

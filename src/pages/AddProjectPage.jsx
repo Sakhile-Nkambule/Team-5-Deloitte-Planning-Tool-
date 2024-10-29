@@ -121,8 +121,6 @@ const AddProjectPage = () => {
     }
   };
 
-  
-
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -138,7 +136,7 @@ const AddProjectPage = () => {
       formErrors.NetRevenue = "*Net Revenue must be a valid number.";
     }
 
-    // Budget validation (must be a number) 
+    // Budget validation (must be a number)
     if (!/^\d+(\.\d{1,2})?$/.test(Budget)) {
       formErrors.Budget = "*Budget must be a valid number.";
     }
@@ -435,7 +433,9 @@ const AddProjectPage = () => {
             </div>
 
             <div className="col-span-1 ">
-              <h3 className="text-lime-500 text-2xl mb-5">Required Skill sets</h3>
+              <h3 className="text-lime-500 text-2xl mb-5">
+                Required Skill sets
+              </h3>
               <div className="space-y-2 ">
                 {items.map((item, index) => (
                   <label

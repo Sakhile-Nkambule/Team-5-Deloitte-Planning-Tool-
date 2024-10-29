@@ -34,7 +34,9 @@ const DashboardHeader = ({ resources, project }) => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/project/${project.ProjectID}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/tasks/project/${project.ProjectID}`
+        );
         const data = await response.json();
         setTasksData(data);
 
@@ -66,7 +68,9 @@ const DashboardHeader = ({ resources, project }) => {
         const projectedProfitMargin = financialData.ProfitMargin || 0;
         setProjectedProfitMargin(projectedProfitMargin);
 
-        const usersResponse = await fetch(`${import.meta.env.VITE_API_URL}/users`);
+        const usersResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/users`
+        );
         const usersData = await usersResponse.json();
         setUsers(usersData); // Save the users data
 

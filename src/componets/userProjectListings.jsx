@@ -1,8 +1,7 @@
-
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Spinner from './Spinner';
-import ProjectListing from './ProjectListing';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Spinner from "./Spinner";
+import ProjectListing from "./ProjectListing";
 
 const UserProjectListings = ({ userId, isUserHome = false }) => {
   const [projects, setProjects] = useState([]);
@@ -10,13 +9,15 @@ const UserProjectListings = ({ userId, isUserHome = false }) => {
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const apiUrl = isUserHome ? `${import.meta.env.VITE_API_URL}/user-projects/${userId}?_limit=3` : `${import.meta.env.VITE_API_URL}/user-projects/${userId}`;
+      const apiUrl = isUserHome
+        ? `${import.meta.env.VITE_API_URL}/user-projects/${userId}?_limit=3`
+        : `${import.meta.env.VITE_API_URL}/user-projects/${userId}`;
       try {
         const res = await axios.get(apiUrl);
-        console.log('API response:', res.data); // Debugging line
+        console.log("API response:", res.data); // Debugging line
         setProjects(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
-        console.log('Error fetching data', error);
+        console.log("Error fetching data", error);
         setProjects([]); // Handle error by setting an empty array
       } finally {
         setLoading(false);
@@ -30,7 +31,7 @@ const UserProjectListings = ({ userId, isUserHome = false }) => {
     <section className="bg-lime-100 px-4 py-10">
       <div className="container-xl lg:container m-auto">
         <h2 className="text-3xl font-bold text-black mb-6 text-center">
-          {isUserHome ? 'Recent Projects' : 'Browse Projects'}
+          {isUserHome ? "Recent Projects" : "Browse Projects"}
         </h2>
         {loading ? (
           <Spinner loading={loading} />
