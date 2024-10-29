@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require("../db");
 
 // Endpoint to get notifications for a given resourceId
-router.get("/notifications/:userID", async (req, res) => {
+router.get("/api/notifications/:userID", async (req, res) => {
   const UserID = req.params.userID;
   try {
     const [rows] = await pool.query(
@@ -21,7 +21,7 @@ router.get("/notifications/:userID", async (req, res) => {
 });
 
 //Endpoint to create a new notification
-router.post("/notifications", async (req, res) => {
+router.post("/api/notifications", async (req, res) => {
   const { UserID, Message, Type, Priority } = req.body;
 
   try {
@@ -41,7 +41,7 @@ router.post("/notifications", async (req, res) => {
 });
 //
 // Endpoint to mark notifications as read
-router.post("/notifications/markAsRead", async (req, res) => {
+router.post("/api/notifications/markAsRead", async (req, res) => {
   const { notifications } = req.body;
 
   try {
@@ -66,7 +66,7 @@ router.post("/notifications/markAsRead", async (req, res) => {
 });
 
 //end point to delete a notification
-router.delete("/notifications/:id", async (req, res) => {
+router.delete("/api/notifications/:id", async (req, res) => {
   const NotificationID = req.params.id;
 
   try {

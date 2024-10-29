@@ -6,7 +6,7 @@ const { parseISO, format } = require("date-fns");
 //GET
 
 // GET: Endpoint to Get tasks for a resource (user assigned to a certain project)
-router.get("/tasks/:resourceId", async (req, res) => {
+router.get("/api/tasks/:resourceId", async (req, res) => {
   try {
     const resourceId = req.params.resourceId;
     const [rows] = await pool.query(
@@ -56,7 +56,7 @@ router.get("/tasks/:resourceId", async (req, res) => {
 });
 
 // GET: Endpoint to Get all tasks for a project
-router.get("/tasks/project/:projectId", async (req, res) => {
+router.get("/api/tasks/project/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
     const [rows] = await pool.query(
@@ -77,7 +77,7 @@ router.get("/tasks/project/:projectId", async (req, res) => {
 });
 
 // GET: Endpoint to Get all tasks for a user
-router.get("/tasks/user/:userId", async (req, res) => {
+router.get("/api/tasks/user/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
     const [rows] = await pool.query(
@@ -100,7 +100,7 @@ router.get("/tasks/user/:userId", async (req, res) => {
 //POST
 
 // POST: Endpoint to Add tasks
-router.post("/tasks", async (req, res) => {
+router.post("/api/tasks", async (req, res) => {
   const newTasks = req.body;
 
   // Modify the DueDate to ensure the correct local date is stored
@@ -155,7 +155,7 @@ router.post("/tasks", async (req, res) => {
 //UPDATE
 
 // PUT: Endpoint to Update tasks
-router.put("/tasks/:resourceId", async (req, res) => {
+router.put("/api/tasks/:resourceId", async (req, res) => {
   const resourceId = req.params.resourceId;
   const tasks = req.body; // Assuming body is an array of tasks
 
@@ -264,7 +264,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
 });
 
 // PUT: Endpoint to update the completion status of a task
-router.put("/tasks/completed/:taskId", async (req, res) => {
+router.put("/api/tasks/completed/:taskId", async (req, res) => {
   const taskId = req.params.taskId;
   const { completed } = req.body;
 
@@ -308,7 +308,7 @@ router.put("/tasks/completed/:taskId", async (req, res) => {
 //DELETE
 
 // DELETE: Endpoint to Delete a Task
-router.delete("/task/:taskId", async (req, res) => {
+router.delete("/api/task/:taskId", async (req, res) => {
   const taskId = req.params.taskId;
 
   try {

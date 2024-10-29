@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require("../db");
 
 // Endpoint to get the company associated with a project
-router.get("/company/:projectId", async (req, res) => {
+router.get("/api/company/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
     const [rows] = await pool.query(

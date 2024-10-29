@@ -25,7 +25,7 @@ import UserProfile from "./pages/UserProfilePage";
 import ProfilePage from "./pages/ProfilePage";
 import AllUsersPage from "./pages/AllUsersPage";
 import MyCalendar from "./pages/MyCalendar";
-import ProtectedRoute from "./componets/ProtectnRoutes";
+import ProtectedRoute from "./componets/ProtectRoutes";
 
 const App = () => {
   const [projects, setProjects] = useState([]);

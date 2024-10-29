@@ -5,7 +5,7 @@ const pool = require("../db");
 //GET
 
 // Endpoint to get all users
-router.get("/users", async (req, res) => {
+router.get("/api/users", async (req, res) => {
   try {
     const limit = parseInt(req.query._limit) || 100;
     const [rows] = await pool.query("SELECT * FROM users LIMIT ?", [limit]);
@@ -16,7 +16,7 @@ router.get("/users", async (req, res) => {
 });
 
 // Endpoint to get a single user
-router.get("/user/:id", async (req, res) => {
+router.get("/api/user/:id", async (req, res) => {
   try {
     const userId = req.params.id;
     const [rows] = await pool.query("SELECT * FROM users WHERE UserID = ?", [
@@ -32,7 +32,7 @@ router.get("/user/:id", async (req, res) => {
 //POST
 
 // Endpoint for login
-router.post("/login", async (req, res) => {
+router.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Registration
-router.post("/register", async (req, res) => {
+router.post("/api/register", async (req, res) => {
   const { username, email, role, password } = req.body;
 
   if (!username || !email || !role || !password) {
@@ -142,7 +142,7 @@ router.post("/register", async (req, res) => {
 
 //UPDATE
 // Endpoint to update a user
-router.put("/user/:id", async (req, res) => {
+router.put("/api/user/:id", async (req, res) => {
   try {
     const userId = req.params.id;
     const { name, email, role, hourlyRate } = req.body;
@@ -167,7 +167,7 @@ router.put("/user/:id", async (req, res) => {
 
 // DELETE user by ID
 // Delete a user and related entries from projects, resources, tasks, skillsets, and notifications
-router.delete("/user/:id", async (req, res) => {
+router.delete("/api/user/:id", async (req, res) => {
   const userId = req.params.id;
 
   try {
