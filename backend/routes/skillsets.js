@@ -5,7 +5,6 @@ const pool = require("../db");
 //GET
 
 // Endpoint to get user skills
-// Endpoint to get user skills
 router.get("/skillsets/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
@@ -62,14 +61,12 @@ router.get("/skillset/:userId", async (req, res) => {
     );
 
     res.json(skills);
-    
   } catch (err) {
     res.status(500).json("Error executing query: " + err);
   }
 });
 
 //UPDATE
-// Endpoint to update user skills
 // UPDATE workedHours and proficiency for a user's skillset
 router.put("/skillsets/:skillsetId", async (req, res) => {
   const SkillID = req.params.skillsetId;
@@ -77,7 +74,6 @@ router.put("/skillsets/:skillsetId", async (req, res) => {
   console.log("SkillID is: ", SkillID);
   console.log("worked hours is: ", workedHours);
   console.log("Request Body:", req.body); // Log the request body
-  
 
   try {
     await pool.query(
@@ -155,6 +151,5 @@ router.put("/allskillsets/:userId", async (req, res) => {
     res.status(500).json("Error executing query: " + err);
   }
 });
-
 
 module.exports = router;

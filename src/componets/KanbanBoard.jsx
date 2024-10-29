@@ -151,7 +151,9 @@ export default function Board() {
 
       if (allSuccessful) {
         toast.success("Tasks saved successfully");
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${resourceId}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/tasks/${resourceId}`
+        );
         const json = await response.json();
         const completedTasks = json.Tasks.filter(
           (task) => task.Status === "Completed"
@@ -159,9 +161,7 @@ export default function Board() {
         const inProgressTasks = json.Tasks.filter(
           (task) => task.Status === "In Progress"
         );
-        const ToDoTasks = json.Tasks.filter(
-          (task) => task.Status === "To-Do"
-        );
+        const ToDoTasks = json.Tasks.filter((task) => task.Status === "To-Do");
 
         setCompleted(completedTasks);
         setToDo(ToDoTasks);

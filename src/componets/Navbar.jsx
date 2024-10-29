@@ -10,8 +10,7 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useUser();
-  
-  // Optional: Check user state on component mount
+
   useEffect(() => {
     if (!user) {
       navigate("/"); // Redirect if user is not logged in
@@ -81,7 +80,14 @@ const Navbar = () => {
               <NavLink to={projectsLink} className={linkClass}>
                 Projects
               </NavLink>
-              {["Associate Director", "Director", "Snr Associate Director", "Senior Manager", "Assistant Manager", "Manager"].includes(userRole) && (
+              {[
+                "Associate Director",
+                "Director",
+                "Snr Associate Director",
+                "Senior Manager",
+                "Assistant Manager",
+                "Manager",
+              ].includes(userRole) && (
                 <NavLink to="/add-project" className={linkClass}>
                   Add Project
                 </NavLink>
@@ -138,7 +144,14 @@ const Navbar = () => {
                       My Calendar
                     </button>
 
-                    {["Associate Director", "Director", "Snr Associate Director", "Senior Manager", "Assistant Manager", "Manager"].includes(userRole) && (
+                    {[
+                      "Associate Director",
+                      "Director",
+                      "Snr Associate Director",
+                      "Senior Manager",
+                      "Assistant Manager",
+                      "Manager",
+                    ].includes(userRole) && (
                       <button
                         onClick={handleAllUsers}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

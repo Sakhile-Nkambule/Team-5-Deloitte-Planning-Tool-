@@ -39,7 +39,7 @@ router.post("/notifications", async (req, res) => {
     res.status(500).send({ message: "Server error occurred" });
   }
 });
-//endpoint to update notification
+//
 // Endpoint to mark notifications as read
 router.post("/notifications/markAsRead", async (req, res) => {
   const { notifications } = req.body;

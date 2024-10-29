@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
+//GET
 // Endpoint to get project resources
 router.get("/resources/:projectId", async (req, res) => {
   try {
@@ -60,7 +61,7 @@ router.post("/projects/addResource", async (req, res) => {
   }
 });
 
-//Update
+//UPDATE
 
 // Endpoint to update worked hours
 router.put("/resources/:resourceId", async (req, res) => {

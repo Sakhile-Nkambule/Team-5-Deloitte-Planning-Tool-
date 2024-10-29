@@ -205,7 +205,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
                 task.Description,
                 task.Status,
                 task.Hours,
-                task.DueDate, // Local date is now correctly formatted
+                task.DueDate, 
                 task.SystemRequired,
                 task.StartDate,
                 task.UserID,
@@ -216,7 +216,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
               ]
             );
 
-            // If the task status was changed to "Completed", handle hours update here if needed
+            
           } else {
             // If TaskID is provided but doesn't match an existing task, return an error
             return res.status(400).json({
@@ -235,7 +235,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
               task.Description,
               task.Status,
               task.Hours,
-              task.DueDate, // Local date is now correctly formatted
+              task.DueDate,
               task.SystemRequirement,
               task.StartDate,
               task.UserID,
@@ -244,7 +244,7 @@ router.put("/tasks/:resourceId", async (req, res) => {
             ]
           );
 
-          // Handle hours for "Completed" tasks if needed
+          
         }
       }
 

@@ -130,13 +130,16 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
 
       const fetchMLPredictions = async () => {
         try {
-          const response = await fetch("http://localhost:5051/predict", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(mlPayload),
-          });
+          const response = await fetch(
+            `${import.meta.env.VITE_ML_API_URL}/predict`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(mlPayload),
+            }
+          );
 
           if (!response.ok) {
             throw new Error("Failed to fetch predictions from the ML API");
@@ -244,7 +247,7 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
       setProfitMargin(calculatedProfitMargin.toFixed(2));
 
       const calculatedRecoveryRate =
-        (newProject.NetRevenue / newProject.Budget) * 100; // Assuming recovery rate = profit margin
+        (newProject.NetRevenue / newProject.Budget) * 100;
       setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
 
@@ -435,7 +438,6 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
     start: projectStartDate,
     end: projectEndDate,
   };
- 
 
   //Function for filter roles
   const roles = [
@@ -477,21 +479,33 @@ const ProposedResourcesPage = ({ addProjectSubmit }) => {
             <div className="">
               <p className="text-gray-700 font-semibold">Gross Revenue:</p>
               <p className="text-green-500 font-semibold">
-              {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(newProject.Budget)}`}
-                </p>
+                {`R${new Intl.NumberFormat("en-ZA", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(newProject.Budget)}`}
+              </p>
             </div>
 
             <div className="">
               <p className="text-gray-700 font-semibold">Total Costs:</p>
               <p className="text-red-500 font-semibold">
-              {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(exhaustedBudget)}`}
-                </p>
+                {`R${new Intl.NumberFormat("en-ZA", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(exhaustedBudget)}`}
+              </p>
             </div>
             <div className="">
               <p className="text-gray-700 font-semibold">Net Revenue:</p>
               <p className="font-semibold">
-              {`R${new Intl.NumberFormat('en-ZA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(netRevenue)}`}
-                </p>
+                {`R${new Intl.NumberFormat("en-ZA", {
+                  style: "decimal",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(netRevenue)}`}
+              </p>
             </div>
             <div className="">
               <p className="text-gray-700 font-semibold">Profit Margin:</p>

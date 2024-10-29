@@ -115,13 +115,14 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
       setExhaustedBudget(totalCost); // Set the total cost instead of using a fixed rate
 
       setNetRevenue(financials.NetRevenue);
-      setGrossRevenue(financials.GrossRevenue)
+      setGrossRevenue(financials.GrossRevenue);
 
       const calculatedProfitMargin =
         ((financials.NetRevenue - totalCost) / financials.NetRevenue) * 100;
       setProfitMargin(calculatedProfitMargin.toFixed(2));
 
-      const calculatedRecoveryRate = (financials.NetRevenue / financials.GrossRevenue) * 100; // Assuming recovery rate = profit margin
+      const calculatedRecoveryRate =
+        (financials.NetRevenue / financials.GrossRevenue) * 100;
       setRecoveryRate(calculatedRecoveryRate.toFixed(2));
     };
 
@@ -304,10 +305,11 @@ const EditProjectPage = ({ updateProjectSubmit }) => {
 
   return (
     <div>
-
       <div className="m-auto bg-lime-200 py-2 px-2  flex items-center">
-        <button onClick={handleGoBack} className="flex items-center text-lime-500 t hover:text-white rounded-md bg-white hover:bg-lime-600 px-2 ">
-
+        <button
+          onClick={handleGoBack}
+          className="flex items-center text-lime-500 t hover:text-white rounded-md bg-white hover:bg-lime-600 px-2 "
+        >
           <FaArrowLeft className="mr-1" /> Back
         </button>
       </div>

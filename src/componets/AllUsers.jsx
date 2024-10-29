@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom'; 
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Calendar from './Calendar'; 
-import Modal from './modal';
-import Spinner from './Spinner';
+import Calendar from "./Calendar";
+import Modal from "./modal";
+import Spinner from "./Spinner";
 
-const AllUsers = () => { 
+const AllUsers = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedRole, setSelectedRole] = useState('All'); // Default to Director
+  const [selectedRole, setSelectedRole] = useState("All"); // Default to Director
   const navigate = useNavigate(); // Initialize the navigate function
 
   const roles = [
-    'Director',
-    'Snr Associate Director',
-    'Associate Director',
-    'Senior Manager',
-    'Manager',
-    'Assistant Manager',  
-    'Snr Consultant',
-    'Consultant',
-    'Jnr Consultant',
+    "Director",
+    "Snr Associate Director",
+    "Associate Director",
+    "Senior Manager",
+    "Manager",
+    "Assistant Manager",
+    "Snr Consultant",
+    "Consultant",
+    "Jnr Consultant",
   ];
 
   // Fetch users on component mount
@@ -34,7 +34,7 @@ const AllUsers = () => {
         const usersData = await response.json();
         setUsers(usersData);
       } catch (error) {
-        console.error('Failed to fetch user data', error);
+        console.error("Failed to fetch user data", error);
       } finally {
         setLoading(false);
       }
@@ -44,9 +44,10 @@ const AllUsers = () => {
   }, []);
 
   // Filter users by selected role
-  const filteredUsers = selectedRole === 'All' 
-    ? users 
-    : users.filter(user => user.Role === selectedRole);
+  const filteredUsers =
+    selectedRole === "All"
+      ? users
+      : users.filter((user) => user.Role === selectedRole);
 
   // Handle profile button click
   const handleProfileClick = (user) => {
@@ -56,11 +57,18 @@ const AllUsers = () => {
   const handleRemoveClick = async (user) => {
     try {
       // Confirm with the user before removing the user
-      if (window.confirm("Are you sure you want to delete this User from the planning Tool?")) {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/user/${user.UserID}`, {
-          method: "DELETE",
-        });
-  
+      if (
+        window.confirm(
+          "Are you sure you want to delete this User from the planning Tool?"
+        )
+      ) {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/user/${user.UserID}`,
+          {
+            method: "DELETE",
+          }
+        );
+
         if (response.ok) {
           // Remove the user from the state if the request was successful
           setUsers(users.filter((u) => u.UserID !== user.UserID));
@@ -74,11 +82,12 @@ const AllUsers = () => {
       toast.error("An error occurred while removing the user.");
     }
   };
-  
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold text-center mb-6 text-black">ALL USERS</h2>
+      <h2 className="text-2xl font-bold text-center mb-6 text-black">
+        ALL USERS
+      </h2>
       {loading ? (
         <Spinner loading={loading} />
       ) : (
@@ -86,9 +95,9 @@ const AllUsers = () => {
           {/* Role Filtering */}
           <div className="mb-4">
             <label className="mr-2">Filter by Role:</label>
-            <select 
+            <select
               value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)} 
+              onChange={(e) => setSelectedRole(e.target.value)}
               className="border rounded p-2"
             >
               {roles.map((role) => (
@@ -113,8 +122,12 @@ const AllUsers = () => {
                     </span>
                   </div>
                   <div>
-                    <span className="block font-bold text-sm">{user.UserName}</span>
-                    <span className="block text-xs text-gray-500">{user.Role}</span>
+                    <span className="block font-bold text-sm">
+                      {user.UserName}
+                    </span>
+                    <span className="block text-xs text-gray-500">
+                      {user.Role}
+                    </span>
                   </div>
                 </div>
 
@@ -133,9 +146,7 @@ const AllUsers = () => {
                   >
                     Remove
                   </button>
-                   </div>
-
-                   
+                </div>
               </li>
             ))}
           </ul>

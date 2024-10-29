@@ -78,8 +78,8 @@ const ProjectPage = ({ deleteProject }) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       deleteProject(projectId);
       toast.success("Project Deleted Successfully");
+      }
       navigate("/projects");
-    }
   };
 
   const formattedStartDate = project.StartDate

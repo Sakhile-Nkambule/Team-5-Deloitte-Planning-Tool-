@@ -139,7 +139,7 @@ router.post("/newprojects", async (req, res) => {
 
         await connection.query(insertFinancialsQuery, [
           projectId,
-          financials.Budget, //financials.exhaustedBudget, // Assuming exhaustedBudget as GrossRevenue (based on naming context)
+          financials.Budget, //GrossRevenue
           financials.netRevenue,
           financials.recoveryRate,
           financials.profitMargin,
@@ -244,13 +244,13 @@ router.put("/projects/:id", async (req, res) => {
             FinancialID = ? AND ProjectID = ?
         `,
         [
-          projectId, // 1. ProjectID
-          financials.Budget, // 2. GrossRevenue 
-          financials.netRevenue, // 3. NetRevenue
-          financials.recoveryRate, // 4. RecoveryRate
-          financials.profitMargin, // 5. ProfitMargin
-          financials.FinancialID, // 6. FinancialID
-          projectId, // 7. ProjectID for the WHERE clause
+          projectId,
+          financials.Budget,
+          financials.netRevenue,
+          financials.recoveryRate,
+          financials.profitMargin,
+          financials.FinancialID,
+          projectId,
         ]
       );
 

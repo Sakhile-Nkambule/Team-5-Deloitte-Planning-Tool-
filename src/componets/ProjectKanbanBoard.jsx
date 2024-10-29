@@ -40,7 +40,7 @@ const getUser = (userID) => users.find(user => user.UserID === userID);
             key={task.TaskID}
             task={task}
             resource={getUser(task.UserID)}
-            priorityIcon={<span role="img" aria-label="priority">⚠️</span>} // Example priority icon
+            priorityIcon={<span role="img" aria-label="priority">⚠️</span>} 
             isCompleted={false}
           />
         ))}
@@ -54,7 +54,7 @@ const getUser = (userID) => users.find(user => user.UserID === userID);
             key={task.TaskID}
             task={task}
             resource={getUser(task.UserID)}
-            priorityIcon={<span role="img" aria-label="priority">✅</span>} // Example priority icon
+            priorityIcon={<span role="img" aria-label="priority">✅</span>} 
             isCompleted={true}
           />
         ))}

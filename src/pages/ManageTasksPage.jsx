@@ -175,15 +175,20 @@ const ManageTasksPage = () => {
 
     try {
       // Call the API to update resource's WorkedHours
-      await fetch(`${import.meta.env.VITE_API_URL}/resources/${resource.ResourceID}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ WorkedHours: updatedWorkedHours }),
-      });
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/resources/${resource.ResourceID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ WorkedHours: updatedWorkedHours }),
+        }
+      );
 
       // Call the API to update the task's completion status
       await fetch(
-        `${import.meta.env.VITE_API_URL}/tasks/completed/${taskToComplete.TaskID}`,
+        `${import.meta.env.VITE_API_URL}/tasks/completed/${
+          taskToComplete.TaskID
+        }`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -226,7 +231,9 @@ const ManageTasksPage = () => {
 
         // Update the workedHours on the skillset
         await fetch(
-          `${import.meta.env.VITE_API_URL}/skillsets/${skillsetToUpdate.SkillID}`,
+          `${import.meta.env.VITE_API_URL}/skillsets/${
+            skillsetToUpdate.SkillID
+          }`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -282,7 +289,7 @@ const ManageTasksPage = () => {
       console.error("Failed to update WorkedHours or task completion", error);
     }
   };
-  const proficiencyNotification= async () => {
+  const proficiencyNotification = async () => {
     if (resourceId) {
       try {
         const notificationData = {
@@ -292,16 +299,21 @@ const ManageTasksPage = () => {
           Priority: "Low",
         };
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/notifications`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(notificationData),
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/notifications`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(notificationData),
+          }
+        );
 
         if (response.ok) {
-          toast.success(`Proficiency Notification sent to ${userName} successfully`);
+          toast.success(
+            `Proficiency Notification sent to ${userName} successfully`
+          );
         } else {
           toast.error("Failed to send Proficiency Notification");
         }
@@ -332,7 +344,7 @@ const ManageTasksPage = () => {
 
       // Close the proficiency modal
       setIsProficiencyModalOpen(false);
-      
+
       toast.success(`Proficiency updated successfully!`);
     } catch (error) {
       console.error("Failed to update proficiency", error);
@@ -455,13 +467,16 @@ const ManageTasksPage = () => {
           Priority: "High",
         };
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/notifications`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(notificationData),
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/notifications`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(notificationData),
+          }
+        );
 
         if (response.ok) {
           toast.success(`Task Notification sent to ${userName} successfully`);
@@ -476,8 +491,6 @@ const ManageTasksPage = () => {
       toast.error("No Partner/Director found in the resources");
     }
   };
-
-
 
   //FILTER
   const tasksStatus = ["All", "Completed", "In Progress", "To-Do"];
@@ -504,7 +517,10 @@ const ManageTasksPage = () => {
   return (
     <div>
       <div className="m-auto  py-2 px-2 text-lime-500 hover:text-lime-700 flex items-center">
-        <button onClick={handleGoBack} className="underline flex   items-center text-lime-500 rounded-md bg-white px-2 ">
+        <button
+          onClick={handleGoBack}
+          className="underline flex   items-center text-lime-500 rounded-md bg-white px-2 "
+        >
           {" "}
           <FaArrowLeft className="mr-1" /> Back
         </button>
@@ -763,11 +779,10 @@ const ManageTasksPage = () => {
                 Cancel
               </button>
               <button
-               onClick={() => {
-                handleConfirmProficiencyIncrease();
-                proficiencyNotification();
-              }}
-                
+                onClick={() => {
+                  handleConfirmProficiencyIncrease();
+                  proficiencyNotification();
+                }}
                 className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
               >
                 Confirm
@@ -797,8 +812,10 @@ const ManageTasksPage = () => {
             Save Tasks
           </button>
         </div>
-        <div className="container rounded-xl shadow-lg pl-20 justify-left h-screen border-2 hover:shadow-lg 
-             transform hover:scale-105 transition-all">
+        <div
+          className="container rounded-xl shadow-lg pl-20 justify-left h-screen border-2 hover:shadow-lg 
+             transform hover:scale-105 transition-all"
+        >
           <Calendar tasks={datetasks} projectDateRange={projectDateRange} />
         </div>
       </div>

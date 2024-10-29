@@ -22,7 +22,9 @@ const HomeCards = () => {
           <Card>
             <h2 className="text-2xl font-bold">New Project?</h2>
             <p className="mt-2 mb-4">
-              Add a new project by entering project details including project code from SAP and the system will propose a combination of resources for the project
+              Add a new project by entering project details including project
+              code from SAP and the system will propose a combination of
+              resources for the project
             </p>
             <Link
               to="/add-project"

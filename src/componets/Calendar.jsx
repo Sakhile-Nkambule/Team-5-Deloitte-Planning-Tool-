@@ -165,18 +165,19 @@ export default function Calendar({ tasks, projectDateRange }) {
                 <div
                   key={index}
                   className="p-2 text-center h-14 grid place-content-center text-sm border-t relative border-2 rounded-xl shadow-lg hover:shadow-lg 
-             transform hover:scale-105 transition-all " 
+             transform hover:scale-105 transition-all "
                 >
                   {/* Blue line for project date range */}
                   {isDateInRange(date) && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 " ></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 "></div>
                   )}
                   <h1
                     className={cn(
                       currentMonth ? "" : "text-gray-400",
                       today ? "bg-lime-500 text-white font-bold" : "",
                       getAvailabilityColor(availableHours), // Apply red or pink color if tasks exist
-                      selectDate.toDate().toDateString() === date.toDate().toDateString()
+                      selectDate.toDate().toDateString() ===
+                        date.toDate().toDateString()
                         ? "text-black font-bold border border-gray-500" // Add border for selected date
                         : "",
                       "h-10 w-10 rounded-full grid place-content-center hover:bg-black hover:text-white transition-all cursor-pointer select-none relative z-10" // Added z-10 for stacking order
@@ -189,7 +190,6 @@ export default function Calendar({ tasks, projectDateRange }) {
                   </h1>
                 </div>
               );
-              
             }
           )}
         </div>
@@ -215,26 +215,26 @@ export default function Calendar({ tasks, projectDateRange }) {
           )}`}
         </p>
       </div>
-     {/* Key for colors at the bottom */}
-<div className="pl-5 flex flex-col">
-  <h2 className="font-semibold">Key:</h2>
-  <div className="flex items-center gap-2">
-    <div className="h-4 w-4 rounded-full border border-gray-400 bg-gray-50"></div>
-    <p>Fully Available</p>
-  </div>
-  <div className="flex items-center gap-2">
-    <div className="h-4 w-4 rounded-full bg-red-200"></div>
-    <p>Partially Available</p>
-  </div>
-  <div className="flex items-center gap-2">
-    <div className="h-4 w-4 rounded-full bg-red-500"></div>
-    <p>Unavailable</p>
-  </div>
-  <div className="flex items-center gap-2">
-    <div className="h-1 w-4 bg-blue-500"></div>
-    <p>Project Date Range</p>
-  </div>
-</div>
+      {/* Key for colors at the bottom */}
+      <div className="pl-5 flex flex-col">
+        <h2 className="font-semibold">Key:</h2>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 rounded-full border border-gray-400 bg-gray-50"></div>
+          <p>Fully Available</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 rounded-full bg-red-200"></div>
+          <p>Partially Available</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 rounded-full bg-red-500"></div>
+          <p>Unavailable</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-1 w-4 bg-blue-500"></div>
+          <p>Project Date Range</p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -119,7 +119,7 @@ router.post("/register", async (req, res) => {
       HourlyRate = 100;
       break;
     default:
-      HourlyRate = 0; 
+      HourlyRate = 0;
   }
 
   // Insert the user data including the hourly rate
@@ -140,8 +140,7 @@ router.post("/register", async (req, res) => {
   console.log(HourlyRate);
 });
 
-
-//UPDATE 
+//UPDATE
 // Endpoint to update a user
 router.put("/user/:id", async (req, res) => {
   try {
@@ -163,7 +162,6 @@ router.put("/user/:id", async (req, res) => {
     res.status(500).json("Error executing query: " + err);
   }
 });
-
 
 //DELETE
 
