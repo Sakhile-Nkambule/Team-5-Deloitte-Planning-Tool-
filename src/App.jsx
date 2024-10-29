@@ -25,6 +25,8 @@ import UserProfile from "./pages/UserProfilePage";
 import ProfilePage from "./pages/ProfilePage";
 import AllUsersPage from "./pages/AllUsersPage";
 import MyCalendar from "./pages/MyCalendar";
+import ProtectedRoute from "./componets/ProtectnRoutes";
+
 const App = () => {
   const [projects, setProjects] = useState([]);
   //Create A new Project
@@ -88,43 +90,24 @@ const App = () => {
     createRoutesFromElements(
       <>
         <Route path="/" element={<LoginScreen />} />
-
         <Route path="/auth/sign-up" element={<CreateUserAccount />} />
         <Route element={<MainLayout />}>
-          <Route path="/homepage" element={<Homepage />} />
-          <Route path="/Userhomepage" element={<UserHomepage />} />
-          <Route path="/projects" element={<Projectspage />} />
-          <Route path="/user-projects/:id" element={<Projectspage />} />
-          <Route path="/myCalendar/:id" element={<MyCalendar />} />
-          <Route path="/taskboard/:resourceId" element={<TaskBoard />} />
-          <Route path="/userProfile" element={<UserProfile />} />
-          <Route path="/Profile/:id" element={<ProfilePage />} />
-          <Route path="/all-Users" element={<AllUsersPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/add-project" element={<AddProjectPage />} />
-          <Route
-            path="/proposed-resources"
-            element={<ProposedResourcespage addProjectSubmit={addNewProject} />}
-          />
-          <Route
-            path="/edit-project/:id"
-            element={<EditProjectPage updateProjectSubmit={updateProject} />}
-            loader={projectLoader}
-          />
-          <Route
-            path="/manage-tasks/:resourceId"
-            element={<ManageTasksPage />}
-          />
-          <Route
-            path="/project/:id"
-            element={<ProjectPage deleteProject={deleteProject} />}
-            loader={projectLoader}
-          />
-          <Route
-            path="/dashboard/:id"
-            element={<DashboardPage />}
-            loader={projectLoader}
-          />
+          <Route path="/homepage" element={<ProtectedRoute><Homepage /></ProtectedRoute>} />
+          <Route path="/Userhomepage" element={<ProtectedRoute><UserHomepage /></ProtectedRoute>} />
+          <Route path="/projects" element={<ProtectedRoute><Projectspage /></ProtectedRoute>} />
+          <Route path="/user-projects/:id" element={<ProtectedRoute><Projectspage /></ProtectedRoute>} />
+          <Route path="/myCalendar/:id" element={<ProtectedRoute><MyCalendar /></ProtectedRoute>} />
+          <Route path="/taskboard/:resourceId" element={<ProtectedRoute><TaskBoard /></ProtectedRoute>} />
+          <Route path="/userProfile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+          <Route path="/Profile/:id" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/all-Users" element={<ProtectedRoute><AllUsersPage /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+          <Route path="/add-project" element={<ProtectedRoute><AddProjectPage /></ProtectedRoute>} />
+          <Route path="/proposed-resources" element={<ProtectedRoute><ProposedResourcespage addProjectSubmit={addNewProject} /></ProtectedRoute>} />
+          <Route path="/edit-project/:id" element={<ProtectedRoute><EditProjectPage updateProjectSubmit={updateProject} /></ProtectedRoute>} loader={projectLoader} />
+          <Route path="/manage-tasks/:resourceId" element={<ProtectedRoute><ManageTasksPage /></ProtectedRoute>} />
+          <Route path="/project/:id" element={<ProtectedRoute><ProjectPage deleteProject={deleteProject} /></ProtectedRoute>} loader={projectLoader} />
+          <Route path="/dashboard/:id" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} loader={projectLoader} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </>
@@ -137,5 +120,4 @@ const App = () => {
     </UserProvider>
   );
 };
-
 export default App;
