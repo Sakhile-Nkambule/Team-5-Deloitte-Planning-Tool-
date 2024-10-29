@@ -4,7 +4,7 @@ const pool = require("../db");
 
 //GET
 // Endpoint to get project resources
-router.get("/resources/:projectId", async (req, res) => {
+router.get("/api/resources/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
     const [rows] = await pool.query(
@@ -18,7 +18,7 @@ router.get("/resources/:projectId", async (req, res) => {
 });
 
 // Endpoint to get resourceId
-router.get("/resource-id/:userId/:projectId", async (req, res) => {
+router.get("/api/resource-id/:userId/:projectId", async (req, res) => {
   const userId = req.params.userId;
   const projectId = req.params.projectId;
 
@@ -44,7 +44,7 @@ router.get("/resource-id/:userId/:projectId", async (req, res) => {
 });
 //POST
 // POST: add resource to a project
-router.post("/projects/addResource", async (req, res) => {
+router.post("/api/projects/addResource", async (req, res) => {
   const { UserID, ProjectID, Role, PlannedHours, WorkedHours } = req.body;
 
   try {
@@ -64,7 +64,7 @@ router.post("/projects/addResource", async (req, res) => {
 //UPDATE
 
 // Endpoint to update worked hours
-router.put("/resources/:resourceId", async (req, res) => {
+router.put("/api/resources/:resourceId", async (req, res) => {
   const resourceId = req.params.resourceId;
   const { WorkedHours } = req.body;
 
@@ -95,7 +95,7 @@ router.put("/resources/:resourceId", async (req, res) => {
 
 //Endpoint to delete project resource
 
-router.delete("/resources/:resourceId", async (req, res) => {
+router.delete("/api/resources/:resourceId", async (req, res) => {
   const resourceId = req.params.resourceId;
 
   try {

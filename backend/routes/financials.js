@@ -5,7 +5,7 @@ const pool = require("../db");
 //GET
 
 // Endpoint to get project financials
-router.get("/financials/:projectId", async (req, res) => {
+router.get("/api/financials/:projectId", async (req, res) => {
   try {
     const projectId = req.params.projectId;
     const [rows] = await pool.query(

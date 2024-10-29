@@ -5,7 +5,7 @@ const pool = require("../db");
 //GET
 
 // Endpoint to get user skills
-router.get("/skillsets/:userId", async (req, res) => {
+router.get("/api/skillsets/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
     const [rows] = await pool.query(
@@ -33,7 +33,7 @@ router.get("/skillsets/:userId", async (req, res) => {
 });
 
 // GET skillset with workedHours for a user
-router.get("/skillset/:userId", async (req, res) => {
+router.get("/api/skillset/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
     const [rows] = await pool.query(
@@ -68,7 +68,7 @@ router.get("/skillset/:userId", async (req, res) => {
 
 //UPDATE
 // UPDATE workedHours and proficiency for a user's skillset
-router.put("/skillsets/:skillsetId", async (req, res) => {
+router.put("/api/skillsets/:skillsetId", async (req, res) => {
   const SkillID = req.params.skillsetId;
   const { workedHours, proficiency } = req.body;
   console.log("SkillID is: ", SkillID);
@@ -94,7 +94,7 @@ router.put("/skillsets/:skillsetId", async (req, res) => {
 
 //Endpoint to update all skillsets
 
-router.put("/allskillsets/:userId", async (req, res) => {
+router.put("/api/allskillsets/:userId", async (req, res) => {
   const userId = req.params.userId;
   const { skills } = req.body; // Expecting skills to be an object with skill names and proficiency values
 

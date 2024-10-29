@@ -6,7 +6,7 @@ const { parseISO, format } = require("date-fns");
 //GET
 
 // Endpoints to get all projects
-router.get("/projects", async (req, res) => {
+router.get("/api/projects", async (req, res) => {
   try {
     const limit = parseInt(req.query._limit) || 100;
     const [rows] = await pool.query(
@@ -20,7 +20,7 @@ router.get("/projects", async (req, res) => {
 });
 
 // Endpoint to get a single project
-router.get("/project/:id", async (req, res) => {
+router.get("/api/project/:id", async (req, res) => {
   try {
     const projectId = req.params.id;
     const [rows] = await pool.query(
@@ -36,7 +36,7 @@ router.get("/project/:id", async (req, res) => {
 
 //Endpoint to get all projects for a single user
 
-router.get("/user-projects/:userId", async (req, res) => {
+router.get("/api/user-projects/:userId", async (req, res) => {
   const userId = req.params.userId;
   const limit = parseInt(req.query._limit) || 100; // Set default limit to 100 if not specified
 
@@ -60,7 +60,7 @@ router.get("/user-projects/:userId", async (req, res) => {
 
 //POSTS
 // Endpoint to add a new project
-router.post("/newprojects", async (req, res) => {
+router.post("/api/newprojects", async (req, res) => {
   const {
     ProjectCode,
     Title,
@@ -166,7 +166,7 @@ router.post("/newprojects", async (req, res) => {
 //UPDATE
 
 // Endpoint to update a project
-router.put("/projects/:id", async (req, res) => {
+router.put("/api/projects/:id", async (req, res) => {
   const projectId = req.params.id;
   const {
     ProjectCode,
@@ -303,7 +303,7 @@ router.put("/projects/:id", async (req, res) => {
 //DELETE
 
 // Delete a project
-router.delete("/projects/:id", async (req, res) => {
+router.delete("/api/projects/:id", async (req, res) => {
   const projectId = req.params.id;
 
   try {
